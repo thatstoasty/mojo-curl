@@ -253,23 +253,23 @@ alias CURLINFO_APPCONNECT_TIME = 3145761
 alias CURLINFO_CERTINFO = 4194338
 
 # HTTP version options
-alias CURL_HTTP_VERSION_NONE = 0
-alias CURL_HTTP_VERSION_1_0 = 1
-alias CURL_HTTP_VERSION_1_1 = 2
-alias CURL_HTTP_VERSION_2_0 = 3
-alias CURL_HTTP_VERSION_2TLS = 4
-alias CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE = 5
-alias CURL_HTTP_VERSION_3 = 30
+alias CURL_HTTP_VERSION_NONE: c_long = 0
+alias CURL_HTTP_VERSION_1_0: c_long = 1
+alias CURL_HTTP_VERSION_1_1: c_long = 2
+alias CURL_HTTP_VERSION_2_0: c_long = 3
+alias CURL_HTTP_VERSION_2TLS: c_long = 4
+alias CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: c_long = 5
+alias CURL_HTTP_VERSION_3: c_long = 30
 
 # SSL version options
-alias CURL_SSLVERSION_DEFAULT = 0
-alias CURL_SSLVERSION_TLSv1 = 1
-alias CURL_SSLVERSION_SSLv2 = 2
-alias CURL_SSLVERSION_SSLv3 = 3
-alias CURL_SSLVERSION_TLSv1_0 = 4
-alias CURL_SSLVERSION_TLSv1_1 = 5
-alias CURL_SSLVERSION_TLSv1_2 = 6
-alias CURL_SSLVERSION_TLSv1_3 = 7
+alias CURL_SSLVERSION_DEFAULT: c_long = 0
+alias CURL_SSLVERSION_TLSv1: c_long = 1
+alias CURL_SSLVERSION_SSLv2: c_long = 2
+alias CURL_SSLVERSION_SSLv3: c_long = 3
+alias CURL_SSLVERSION_TLSv1_0: c_long = 4
+alias CURL_SSLVERSION_TLSv1_1: c_long = 5
+alias CURL_SSLVERSION_TLSv1_2: c_long = 6
+alias CURL_SSLVERSION_TLSv1_3: c_long = 7
 
 # Global initialization flags
 alias CURL_GLOBAL_SSL = 1
@@ -374,13 +374,21 @@ struct curl(Copyable, Movable):
             curl, option, parameter
         )
 
-    fn curl_easy_setopt_string(self, curl: CURL, option: CURLoption, parameter: UnsafePointer[c_char, mut=False]) -> CURLcode:
+    fn curl_easy_setopt_string(self, curl: CURL, option: CURLoption, mut parameter: String) -> CURLcode:
         """Set a string option for a curl easy handle."""
-        return self.curl_easy_setopt(curl, option, parameter.bitcast[NoneType]())
+        return self.lib.get_function[
+            fn (CURL, CURLoption, UnsafePointer[c_char, mut=False]) -> CURLcode
+        ]("curl_easy_setopt")(curl, option, parameter.unsafe_cstr_ptr())
 
     fn curl_easy_setopt_long(self, curl: CURL, option: CURLoption, parameter: c_long) -> CURLcode:
         """Set a long/integer option for a curl easy handle."""
         return self.lib.get_function[fn (CURL, CURLoption, c_long) -> CURLcode]("curl_easy_setopt")(
+            curl, option, parameter
+        )
+    
+    fn curl_easy_setopt_write_function(self, curl: CURL, option: CURLoption, parameter: curl_write_callback) -> CURLcode:
+        """Set options for a curl easy handle."""
+        return self.lib.get_function[fn (CURL, CURLoption, curl_write_callback) -> CURLcode]("curl_easy_setopt")(
             curl, option, parameter
         )
 

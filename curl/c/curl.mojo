@@ -266,6 +266,7 @@ struct CURLOPT(Movable, Copyable):
     alias CURLOPT_BUFFERSIZE: Self = 98
     alias CURLOPT_NOSIGNAL: Self = 99
     alias CURLOPT_SHARE: Self = 10100
+    alias CURLOPT_CA_CACHE_TIMEOUT: Self = 321
 
     @implicit
     fn __init__(out self, value: Int):
@@ -278,7 +279,7 @@ struct CURLOPT(Movable, Copyable):
 # CURLINFO options (commonly used ones)
 @fieldwise_init
 @register_passable("trivial")
-struct CURLINFO(Movable, ExplicitlyCopyable):
+struct CURLINFO(Movable, Copyable):
     var value: c_int
     alias CURLINFO_STRING: Self = 0x100000
     alias CURLINFO_LONG: Self = 0x200000
