@@ -324,6 +324,7 @@ struct CURLINFO(Movable, Copyable):
     alias CURLINFO_PRIMARY_IP: Self = 1048608
     alias CURLINFO_APPCONNECT_TIME: Self = 3145761
     alias CURLINFO_CERTINFO: Self = 4194338
+    alias CURLINFO_HTTP_VERSION: Self = 0x200000 + 46
 
     @implicit
     fn __init__(out self, value: Int):

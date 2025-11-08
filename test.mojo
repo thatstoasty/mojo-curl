@@ -1,6 +1,5 @@
-from curl.c.safe_bindings import SafeCurl
-from curl.c.curl import CURLOPT, CURLINFO
-from curl.c.bindings import CURL_GLOBAL_DEFAULT
+from curl.c.bindings import curl, CURL_HTTP_VERSION_NONE, CURL_HTTP_VERSION_2_0, CURL_HTTP_VERSION_3, CURL_HTTP_VERSION_1_1, CURL_GLOBAL_DEFAULT, curl_write_callback
+from curl.c.curl import CURLOPT, CURLINFO, c_long
 from sys import stdout
 from sys.ffi import c_char, c_size_t
 from memory import OpaquePointer
@@ -28,26 +27,69 @@ fn main():
         bindings.curl_global_cleanup()
         return
     
-    # Now test the safe URL setting
-    var url: String = "http://httpbin.org/get"
-    print("Setting URL:", url)
-    
-    # Use the safe string setopt method
+    var url: String = "https://example.com"
     result = bindings.curl_easy_setopt_string(curl, CURLOPT.CURLOPT_URL.value, url)
-    print("URL set result:", result)
+    print("URL set Result:", result)
+
+    # result = bindings.curl_easy_setopt_long(curl, CURLOPT.CURLOPT_HTTP_VERSION.value, CURL_HTTP_VERSION_NONE)
+    # if result != 0:
+    #     print("curl_easy_setopt_long() failed:", StringSlice(unsafe_from_utf8_ptr=bindings.curl_easy_strerror(result)))
+    #     bindings.curl_easy_cleanup(curl)
+    #     bindings.curl_global_cleanup()
+    #     return
+
+    # var version = c_long(0)
+    # getinfo_result = bindings.curl_easy_getinfo_long(curl, CURLINFO.CURLINFO_HTTP_VERSION.value, UnsafePointer(to=version))
+    # print("HTTP version:", version, getinfo_result)
+    # print("getinfo Result:", getinfo_result, getinfo_result == 0)
+    # if getinfo_result == 0:
+    #     print("HTTP version:", version)
+    # else:
+    #     print("Failed to get HTTP version:", getinfo_result)
+    #     bindings.curl_easy_cleanup(curl)
+    #     bindings.curl_global_cleanup()
+    #     return
     
-    if result != 0:
-        print("Failed to set URL:", result)
-        bindings.curl_easy_cleanup(curl)
-        bindings.curl_global_cleanup()
-        return
-    
-    # Set write callback
-    result = bindings.curl_easy_setopt_callback(curl, CURLOPT.CURLOPT_WRITEFUNCTION.value, write_callback)
-    print("Write callback set result:", result)
-    
-    # Perform the transfer
-    print("Performing HTTP request...")
+
+    # var effective_url = UnsafePointer[Int8]()
+    # getinfo_result = bindings.curl_easy_getinfo(curl, CURLINFO.CURLINFO_EFFECTIVE_URL.value, effective_url.bitcast[NoneType]())
+    # print("getinfo Result:", getinfo_result, getinfo_result == 0)
+    # print("Effective URL:", StringSlice(unsafe_from_utf8_ptr=effective_url))
+    # if getinfo_result == 0:
+    #     print("Effective URL:", StringSlice(unsafe_from_utf8_ptr=effective_url))
+    # else:
+    #     print("Failed to get effective URL:", getinfo_result)
+    #     bindings.curl_easy_cleanup(curl)
+    #     bindings.curl_global_cleanup()
+    #     return
+
+    # Set the callback function to handle received data
+    result = bindings.curl_easy_setopt_write_function(curl, CURLOPT.CURLOPT_WRITEFUNCTION.value, write_callback)
+    print("callback Result:", result)
+
+    # # Pass the address of our string buffer to the callback function
+    # var read_buffer = UnsafePointer[Int8]()
+    # result = bindings.curl_easy_setopt(curl, CURLOPT.CURLOPT_WRITEDATA.value, read_buffer.bitcast[NoneType]())
+    # print("read buffer Result:", result)
+
+    # var effective_url = UnsafePointer[Int8]()
+    # getinfo_result = bindings.curl_easy_getinfo(curl, CURLINFO.CURLINFO_EFFECTIVE_URL.value, effective_url.bitcast[NoneType]())
+    # print("getinfo Result:", getinfo_result)
+    # if getinfo_result == 0:
+    #     print("Effective URL:", StringSlice(unsafe_from_utf8_ptr=effective_url))
+    # else:
+    #     print("Failed to get effective URL:", getinfo_result)
+    #     bindings.curl_easy_cleanup(curl)
+    #     bindings.curl_global_cleanup()
+    #     return
+
+    # result = bindings.curl_easy_setopt_long(curl, CURLOPT.CURLOPT_SSL_VERIFYHOST.value, 0)
+    # print("disable verify result Result:", result)
+
+    # result = bindings.curl_easy_setopt_long(curl, CURLOPT.CURLOPT_CA_CACHE_TIMEOUT.value, 604800)
+    # print("CA cache timeout Result:", result)
+
+    # Perform the transfer. The response will be sent to standard output by default.
     res = bindings.curl_easy_perform(curl)
     print("curl_easy_perform() result:", res)
 
@@ -60,3 +102,4 @@ fn main():
 
     bindings.curl_easy_cleanup(curl)
     bindings.curl_global_cleanup()
+    print("url:", url)

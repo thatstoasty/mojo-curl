@@ -33,24 +33,24 @@ publish = { cmd = "python3 scripts/util.py publish", env = { PREFIX_API_KEY = "$
 
 [package]
 name = "curl"
-version = "25.6.0"
+version = "25.7.0"
 
 [package.build]
 backend = { name = "pixi-build-mojo", version = "*" }
 
 [dependencies]
-mojo = ">=0.25.5.0,<1"
+mojo = ">=0.25.6.0,<0.25.7.0"
 libcurl = "*"
 
 [package.build-dependencies]
-mojo-compiler = ">=0.25.5.0,<1"
+mojo-compiler = ">=0.25.6.0,<0.25.7.0"
 libcurl = "*"
 
 [package.host-dependencies]
-mojo = ">=0.25.5.0,<1"
+mojo = ">=0.25.6.0,<0.25.7.0"
 
 [package.run-dependencies]
-mojo = ">=0.25.5.0,<1"
+mojo = ">=0.25.6.0,<0.25.7.0"
 libcurl = "*"
 
 [feature.util.dependencies]

@@ -305,6 +305,10 @@ struct curl_version_info_data:
     var protocols: UnsafePointer[UnsafePointer[c_char]]
 
 @fieldwise_init
+struct va_list:
+    var ptr: UnsafePointer[c_char]
+
+@fieldwise_init
 struct curl(Copyable, Movable):
     """CURL Easy interface C API binding struct."""
 
@@ -373,24 +377,59 @@ struct curl(Copyable, Movable):
         return self.lib.get_function[fn (CURL, CURLoption, OpaquePointer) -> CURLcode]("curl_easy_setopt")(
             curl, option, parameter
         )
+    
+    fn _curl_easy_setopt[type: AnyType](self, curl: CURL, option: CURLoption, args: type) -> CURLcode:
+        """Set options for a curl easy handle."""
+        # var loaded_pack = args.get_loaded_kgen_pack()
+        return self.lib.get_function[
+            fn (curl: CURL, option: CURLoption, args: va_list) -> CURLcode
+        ]("curl_easy_setopt")(
+            curl, option, va_list(UnsafePointer(to=args).bitcast[c_char]())
+        )
 
     fn curl_easy_setopt_string(self, curl: CURL, option: CURLoption, mut parameter: String) -> CURLcode:
         """Set a string option for a curl easy handle."""
-        return self.lib.get_function[
-            fn (CURL, CURLoption, UnsafePointer[c_char, mut=False]) -> CURLcode
-        ]("curl_easy_setopt")(curl, option, parameter.unsafe_cstr_ptr())
+        # return __mlir_op.`pop.external_call`[
+        #     func = "curl_easy_setopt".value,
+        #     variadicType = __mlir_attr[
+        #         `(`,
+        #         `!kgen.pointer<none>,`,
+        #         `!pop.scalar<si32>,`,
+        #         `!kgen.pointer<scalar<si8>>`,
+        #         `) -> !pop.scalar<si32>`,
+        #     ],
+        #     _type=Int32,
+        # ](
+        #     curl, option, parameter.unsafe_cstr_ptr()
+        # )
+
+        return self._curl_easy_setopt(curl, option, parameter.unsafe_cstr_ptr())
+        
+        # var args = UnsafePointer(to=parameter.unsafe_cstr_ptr())
+        # return self.lib.get_function[
+        #     fn (CURL, CURLoption, UnsafePointer[c_char, mut=False]) -> CURLcode
+        # ]("curl_easy_setopt")(
+        #     curl, option, parameter.unsafe_cstr_ptr()
+        # )
+        # return self.lib.get_function[
+        #     fn (CURL, CURLoption, UnsafePointer[c_char, mut=False]) -> CURLcode
+        # ]("curl_easy_setopt")(
+        #     curl, option, parameter.unsafe_cstr_ptr()
+        # )
 
     fn curl_easy_setopt_long(self, curl: CURL, option: CURLoption, parameter: c_long) -> CURLcode:
         """Set a long/integer option for a curl easy handle."""
-        return self.lib.get_function[fn (CURL, CURLoption, c_long) -> CURLcode]("curl_easy_setopt")(
-            curl, option, parameter
-        )
+        return self._curl_easy_setopt(curl, option, parameter)
+        # return self.lib.get_function[fn (CURL, CURLoption, c_long) -> CURLcode]("curl_easy_setopt")(
+        #     curl, option, parameter
+        # )
     
     fn curl_easy_setopt_write_function(self, curl: CURL, option: CURLoption, parameter: curl_write_callback) -> CURLcode:
         """Set options for a curl easy handle."""
-        return self.lib.get_function[fn (CURL, CURLoption, curl_write_callback) -> CURLcode]("curl_easy_setopt")(
-            curl, option, parameter
-        )
+        return self._curl_easy_setopt(curl, option, parameter)
+        # return self.lib.get_function[fn (CURL, CURLoption, curl_write_callback) -> CURLcode]("curl_easy_setopt")(
+        #     curl, option, parameter
+        # )
 
     fn curl_easy_perform(self, curl: CURL) -> CURLcode:
         """Perform a blocking file transfer."""
@@ -403,6 +442,12 @@ struct curl(Copyable, Movable):
     fn curl_easy_getinfo(self, curl: CURL, info: CURLINFO, parameter: OpaquePointer) -> CURLcode:
         """Extract information from a curl handle."""
         return self.lib.get_function[fn (CURL, CURLINFO, OpaquePointer) -> CURLcode]("curl_easy_getinfo")(
+            curl, info, parameter
+        )
+
+    fn curl_easy_getinfo_long(self, curl: CURL, info: CURLINFO, parameter: UnsafePointer[c_long]) -> CURLcode:
+        """Extract information from a curl handle."""
+        return self.lib.get_function[fn (CURL, CURLINFO, UnsafePointer[c_long]) -> CURLcode]("curl_easy_getinfo")(
             curl, info, parameter
         )
 
