@@ -1,8 +1,17 @@
 # from curl.c.bindings import CURL_HTTP_VERSION_NONE, CURL_HTTP_VERSION_2_0, CURL_HTTP_VERSION_3, CURL_HTTP_VERSION_1_1, CURL_GLOBAL_DEFAULT, curl_write_callback
 # from curl.c.curl import CURLOPT, CURLINFO, c_long
-from curl.c.raw_bindings import CURLOPT, CURLINFO, CURL_GLOBAL_DEFAULT, SafeCurl, ExternalImmutOpaquePointer, ExternalImmutPointer, curl_write_callback
 from sys import stdout
-from sys.ffi import c_char, c_size_t, c_long
+from sys.ffi import c_char, c_long, c_size_t
+
+from curl.c.raw_bindings import (
+    CURL_GLOBAL_DEFAULT,
+    CURLINFO,
+    CURLOPT,
+    ExternalImmutOpaquePointer,
+    ExternalImmutPointer,
+    SafeCurl,
+    curl_write_callback,
+)
 from memory import OpaqueMutPointer, UnsafeImmutPointer
 
 

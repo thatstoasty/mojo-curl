@@ -1,6 +1,7 @@
-from curl.easy import InnerEasy
-from curl.c.types import Option, Result, ExternalImmutPointer, ExternalImmutOpaquePointer
-from sys.ffi import c_char, c_size_t, c_long
+from sys.ffi import c_char, c_long, c_size_t
+
+from curl.c.types import ExternalImmutOpaquePointer, ExternalImmutPointer, Option, Result
+from curl.easy import Easy
 from memory import OpaqueMutPointer, UnsafeImmutPointer
 
 
@@ -11,15 +12,15 @@ fn write_callback(ptr: ExternalImmutPointer[c_char], size: c_size_t, nmemb: c_si
 
 
 fn main():
-    var easy = InnerEasy()
+    var easy = Easy()
 
     # Set the url
     var url: String = "https://example.com"
-    result = easy.set_option(Option.URL, url)
+    result = easy.url(url)
     print("URL set Result:", result)
 
     # Set the callback function to handle received data
-    result = easy.set_option(Option.WRITE_FUNCTION, write_callback)
+    result = easy.write_function(write_callback)
     print("Write callback set result:", result)
 
     # Perform the transfer. The response will be sent to standard output by default.

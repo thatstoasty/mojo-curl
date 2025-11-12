@@ -2142,3 +2142,36 @@ struct Easy:
         CURLOPT_HTTP09_ALLOWED.
         """
         return self.inner.set_option(Option.HTTP09_ALLOWED, Int(allow))
+
+    # =========================================================================
+    # Callback options
+
+    fn write_function(mut self, callback: curl_write_callback) -> Result:
+        """Set callback for writing received data.
+
+        This callback function gets called by libcurl as soon as there is data
+        received that needs to be saved.
+
+        The callback function will be passed as much data as possible in all
+        invokes, but you must not make any assumptions. It may be one byte, it
+        may be thousands. If `show_header` is enabled, which makes header data
+        get passed to the write callback, you can get up to
+        `CURL_MAX_HTTP_HEADER` bytes of header data passed into it. This
+        usually means 100K.
+
+        This function may be called with zero bytes data if the transferred file
+        is empty.
+
+        The callback should return the number of bytes actually taken care of.
+        If that amount differs from the amount passed to your callback function,
+        it'll signal an error condition to the library. This will cause the
+        transfer to get aborted and the libcurl function used will return
+        an error with `is_write_error`.
+
+        By default data is sent into the void, and this corresponds to the
+        `CURLOPT_WRITEFUNCTION` option.
+
+        Note: In Mojo, the callback function must match the curl_write_callback
+        signature defined in the bindings.
+        """
+        return self.inner.set_option(Option.WRITE_FUNCTION, callback)

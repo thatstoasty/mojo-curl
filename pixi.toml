@@ -23,7 +23,7 @@ test-curl = { depends-on = ["build-wrapper"], cmd = "mojo test.mojo" }
 
 # Linting and Formatting
 lint_docs = "python3 scripts/check-docstrings.py"
-mojo_format = "mojo format mosqlite3 --line-length 120"
+mojo_format = "mojo format curl --line-length 120"
 sort_imports = "isort **/*.mojo -m 3 --line-length 120 --lines-after-imports 2 --trailing-comma"
 format = [{ task = "mojo_format" }, { task = "sort_imports" }]
 
