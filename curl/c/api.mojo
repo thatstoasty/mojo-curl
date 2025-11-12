@@ -1,39 +1,30 @@
-from sys.ffi import _get_global
+from sys.ffi import _get_global, _Global
 
-from memory import UnsafePointer
+from memory.legacy_unsafe_pointer import LegacyUnsafePointer
 from curl.c.bindings import curl
+from curl.c.types import CURL_GLOBAL_DEFAULT
 
 
-fn _init_global() -> UnsafePointer[NoneType]:
-    var ptr = UnsafePointer[curl].alloc(1)
+fn _init_global() -> LegacyUnsafePointer[NoneType]:
+    var ptr = alloc[curl](1)
     ptr[] = curl()
+    _ = ptr[].global_init(CURL_GLOBAL_DEFAULT)
     return ptr.bitcast[NoneType]()
 
 
-fn _destroy_global(lib: UnsafePointer[NoneType]):
+fn _destroy_global(lib: LegacyUnsafePointer[NoneType]):
     var p = lib.bitcast[curl]()
-    p[].lib.close()
+    p[].global_cleanup()
     lib.free()
 
 
 @always_inline
-fn _get_global_curl_itf() -> _CurlInterfaceImpl:
-    var ptr = _get_global["curl", _init_global, _destroy_global]()
-    return _CurlInterfaceImpl(ptr.bitcast[curl]())
+fn get_curl_handle() -> LegacyUnsafePointer[curl]:
+    """Initializes or gets the global curl handle.
 
+    DO NOT FREE THE POINTER MANUALLY. It will be freed automatically on program exit.
 
-struct _CurlInterfaceImpl:
-    var _curl: UnsafePointer[curl]
-
-    fn __init__(out self, sqlite: UnsafePointer[curl]):
-        self._curl = sqlite
-
-    fn __copyinit__(out self, existing: Self):
-        self._curl = existing._curl
-
-    fn curl(self) -> curl:
-        return self._curl[]
-
-
-fn _impl() -> curl:
-    return _get_global_curl_itf().curl()
+    Returns:
+        A pointer to the global curl handle.
+    """
+    return _get_global["curl", _init_global, _destroy_global]().bitcast[curl]()
