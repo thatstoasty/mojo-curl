@@ -29,3 +29,8 @@ CURLcode curl_easy_getinfo_string(CURL *curl, CURLINFO info, char **param) {
 CURLcode curl_easy_getinfo_long(CURL *curl, CURLINFO info, long *param) {
     return curl_easy_getinfo(curl, info, param);
 }
+
+// Wrapper for curl_easy_getinfo with double output
+CURLcode curl_easy_getinfo_double(CURL *curl, CURLINFO info, double *param) {
+    return curl_easy_getinfo(curl, info, param);
+}

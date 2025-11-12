@@ -27,7 +27,7 @@
 
 #     fn __init__(out self):
 #         """Initialize the curl binding by loading the libcurl shared library.
-        
+
 #         This constructor attempts to load libcurl from common system locations.
 #         It will search for the library in standard paths and raise an error
 #         if libcurl cannot be found.
@@ -61,13 +61,13 @@
 #     # Global libcurl functions
 #     fn curl_global_init(self, flags: c_long) -> CURLcode:
 #         """Global libcurl initialization.
-        
+
 #         This function sets up the program environment that libcurl needs.
 #         This function must be called at least once within a program (a program is all the code that shares a memory space) before the program calls any other function in libcurl.
-        
+
 #         Args:
 #             flags: Initialization flags (e.g., CURL_GLOBAL_DEFAULT).
-        
+
 #         Returns:
 #             CURLE_OK on success, or an error code on failure.
 #         """
@@ -75,7 +75,7 @@
 
 #     fn curl_global_cleanup(self) -> NoneType:
 #         """Global libcurl cleanup.
-        
+
 #         This function releases resources acquired by curl_global_init().
 #         You should call curl_global_cleanup() once per program when you're done using libcurl.
 #         """
@@ -83,7 +83,7 @@
 
 #     fn curl_version(self) -> UnsafePointer[c_char]:
 #         """Return the version string of libcurl.
-        
+
 #         Returns:
 #             A pointer to a null-terminated string containing the version.
 #         """
@@ -91,10 +91,10 @@
 
 #     fn curl_version_info(self, type: c_int) -> UnsafePointer[curl_version_info_data]:
 #         """Return detailed version information about libcurl.
-        
+
 #         Args:
 #             type: The version info type (usually CURLVERSION_NOW).
-            
+
 #         Returns:
 #             A pointer to a curl_version_info_data structure.
 #         """
@@ -103,11 +103,11 @@
 #     # Easy interface functions
 #     fn curl_easy_init(self) -> CURL:
 #         """Start a libcurl easy session.
-        
+
 #         This function allocates and returns a CURL easy handle that you must use
 #         as input to other functions in the easy interface. This call MUST have
 #         a corresponding call to curl_easy_cleanup() when the operation is complete.
-        
+
 #         Returns:
 #             A CURL handle on success, or NULL on error.
 #         """
@@ -115,11 +115,11 @@
 
 #     fn curl_easy_setopt(self, curl: CURL, option: CURLoption, parameter: OpaquePointer) -> CURLcode:
 #         """Set options for a curl easy handle.
-        
+
 #         This function is used to tell libcurl how to behave. By setting the
 #         appropriate options, the application can change libcurl's behavior.
 #         All options are set with an option followed by a parameter.
-        
+
 #         Args:
 #             curl: The CURL handle to set options for.
 #             option: The option to set (e.g., CURLOPT_URL, CURLOPT_WRITEFUNCTION).
@@ -134,14 +134,14 @@
 
 #     fn curl_easy_setopt_string(self, curl: CURL, option: CURLoption, parameter: UnsafePointer[c_char, mut=False]) -> CURLcode:
 #         """Set a string option for a curl easy handle.
-        
+
 #         Convenience method for setting string options without manual casting.
-        
+
 #         Args:
 #             curl: The CURL handle to set options for.
 #             option: The string option to set.
 #             parameter: The string value for the option.
-            
+
 #         Returns:
 #             CURLE_OK on success, or an error code on failure.
 #         """
@@ -151,14 +151,14 @@
 
 #     fn curl_easy_setopt_long(self, curl: CURL, option: CURLoption, parameter: c_long) -> CURLcode:
 #         """Set a long/integer option for a curl easy handle.
-        
+
 #         Convenience method for setting integer options.
-        
+
 #         Args:
 #             curl: The CURL handle to set options for.
 #             option: The integer option to set.
 #             parameter: The integer value for the option.
-            
+
 #         Returns:
 #             CURLE_OK on success, or an error code on failure.
 #         """
@@ -168,11 +168,11 @@
 
 #     fn curl_easy_perform(self, curl: CURL) -> CURLcode:
 #         """Perform a blocking file transfer.
-        
+
 #         This function performs the entire request in a blocking manner and returns
 #         when done, or if it failed. For non-blocking behavior, consider using the
 #         multi interface instead.
-        
+
 #         Args:
 #             curl: The CURL handle to perform the transfer with.
 
@@ -183,11 +183,11 @@
 
 #     fn curl_easy_cleanup(self, curl: CURL) -> NoneType:
 #         """End a libcurl easy handle.
-        
+
 #         This function must be the last function to call for an easy session.
 #         It is the opposite of the curl_easy_init() function and must be called
 #         with the same handle as input that a curl_easy_init() call returned.
-        
+
 #         Args:
 #             curl: The CURL handle to cleanup.
 #         """
@@ -195,13 +195,13 @@
 
 #     fn curl_easy_getinfo(self, curl: CURL, info: CURLINFO, parameter: OpaquePointer) -> CURLcode:
 #         """Extract information from a curl handle.
-        
+
 #         Request internal information from the curl session with this function.
 #         The third argument MUST be pointing to the specific type of the used option
 #         which is documented in each option's manual page. The data pointed to
 #         will be filled in accordingly and can be relied upon only if the function
 #         returns CURLE_OK.
-        
+
 #         Args:
 #             curl: The CURL handle to extract info from.
 #             info: The information to extract.
@@ -216,15 +216,15 @@
 
 #     fn curl_easy_duphandle(self, curl: CURL) -> CURL:
 #         """Clone a libcurl session handle.
-        
+
 #         Creates a new curl session handle with the same options set for the handle
 #         passed in. Duplicating a handle could only be a matter of cloning data and
 #         options, internal state info and things like persistent connections cannot
 #         be transferred.
-        
+
 #         Args:
 #             curl: The CURL handle to duplicate.
-            
+
 #         Returns:
 #             A new CURL handle on success, or NULL on error.
 #         """
@@ -232,14 +232,14 @@
 
 #     fn curl_easy_reset(self, curl: CURL) -> NoneType:
 #         """Reset all options of a libcurl session handle.
-        
+
 #         Re-initializes all options previously set on a specified CURL handle to
 #         the default values. This puts back the handle to the same state as it was
 #         in when it was just created with curl_easy_init().
-        
+
 #         It does keep: live connections, the Session ID cache, the DNS cache,
 #         the cookies and shares.
-        
+
 #         Args:
 #             curl: The CURL handle to reset.
 #         """
@@ -247,19 +247,19 @@
 
 #     fn curl_easy_recv(self, curl: CURL, buffer: OpaquePointer, buflen: c_size_t, n: UnsafePointer[c_size_t]) -> CURLcode:
 #         """Receives raw data on an "easy" connection.
-        
+
 #         This function receives raw data from the established connection. You may
 #         use it together with curl_easy_send() to implement custom protocols using
 #         libcurl's easy interface. This functionality can be particularly useful if
 #         you use proxies and/or SSL encryption: libcurl will take care of proxy
 #         negotiation and connection setup.
-        
+
 #         Args:
 #             curl: The CURL handle for the connection.
 #             buffer: Buffer to store the received data.
 #             buflen: Size of the buffer.
 #             n: Pointer to store the number of bytes actually received.
-            
+
 #         Returns:
 #             CURLE_OK on success, or an error code on failure.
 #         """
@@ -269,19 +269,19 @@
 
 #     fn curl_easy_send(self, curl: CURL, buffer: OpaquePointer, buflen: c_size_t, n: UnsafePointer[c_size_t]) -> CURLcode:
 #         """Sends raw data over an "easy" connection.
-        
+
 #         This function sends raw data over the established connection. You may use
 #         it together with curl_easy_recv() to implement custom protocols using
 #         libcurl's easy interface. This functionality can be particularly useful if
 #         you use proxies and/or SSL encryption: libcurl will take care of proxy
 #         negotiation and connection setup.
-        
+
 #         Args:
 #             curl: The CURL handle for the connection.
 #             buffer: Buffer containing the data to send.
 #             buflen: Size of the data to send.
 #             n: Pointer to store the number of bytes actually sent.
-            
+
 #         Returns:
 #             CURLE_OK on success, or an error code on failure.
 #         """
@@ -291,15 +291,15 @@
 
 #     fn curl_easy_upkeep(self, curl: CURL) -> CURLcode:
 #         """Perform any connection upkeep checks.
-        
+
 #         Some protocols have "connection upkeep" mechanisms. These mechanisms
 #         usually send some traffic on existing connections in order to keep them
 #         alive; this can prevent connections from being closed due to overzealous
 #         firewalls, for example.
-        
+
 #         Args:
 #             curl: The CURL handle to perform upkeep on.
-            
+
 #         Returns:
 #             CURLE_OK on success, or an error code on failure.
 #         """
@@ -307,12 +307,12 @@
 
 #     fn curl_easy_strerror(self, code: CURLcode) -> UnsafePointer[c_char]:
 #         """Return string describing error code.
-        
+
 #         This function returns a string describing the CURLcode error code passed in the argument errornum.
-        
+
 #         Args:
 #             code: The CURLcode error code.
-            
+
 #         Returns:
 #             A pointer to a null-terminated string describing the error.
 #         """
@@ -320,11 +320,11 @@
 
 #     fn curl_easy_getdate(self, datestr: UnsafePointer[c_char, mut=False], unused: UnsafePointer[c_long]) -> c_long:
 #         """Parse a date string and return it as seconds since epoch.
-        
+
 #         Args:
 #             datestr: The date string to parse.
 #             unused: Unused parameter (pass NULL).
-            
+
 #         Returns:
 #             Seconds since epoch, or -1 on error.
 #         """
@@ -335,11 +335,11 @@
 #     # String list functions
 #     fn curl_slist_append(self, list: curl_slist, string: UnsafePointer[c_char, mut=False]) -> curl_slist:
 #         """Append a string to a curl string list.
-        
+
 #         Args:
 #             list: The existing string list (can be NULL).
 #             string: The string to append.
-            
+
 #         Returns:
 #             A pointer to the new list, or NULL on error.
 #         """
@@ -349,7 +349,7 @@
 
 #     fn curl_slist_free_all(self, list: curl_slist) -> NoneType:
 #         """Free an entire curl string list.
-        
+
 #         Args:
 #             list: The string list to free.
 #         """
@@ -358,12 +358,12 @@
 #     # URL encoding/decoding functions
 #     fn curl_easy_escape(self, curl: CURL, string: UnsafePointer[c_char, mut=False], length: c_int) -> UnsafePointer[c_char]:
 #         """URL encode a string.
-        
+
 #         Args:
 #             curl: The CURL handle.
 #             string: The string to encode.
 #             length: Length of the string, or 0 for strlen(string).
-            
+
 #         Returns:
 #             A pointer to the encoded string, or NULL on error. Must be freed with curl_free().
 #         """
@@ -373,13 +373,13 @@
 
 #     fn curl_easy_unescape(self, curl: CURL, string: UnsafePointer[c_char, mut=False], length: c_int, outlength: UnsafePointer[c_int]) -> UnsafePointer[c_char]:
 #         """URL decode a string.
-        
+
 #         Args:
 #             curl: The CURL handle.
 #             string: The string to decode.
 #             length: Length of the string, or 0 for strlen(string).
 #             outlength: Pointer to store the length of the decoded string.
-            
+
 #         Returns:
 #             A pointer to the decoded string, or NULL on error. Must be freed with curl_free().
 #         """
@@ -389,10 +389,10 @@
 
 #     fn curl_free(self, ptr: OpaquePointer) -> NoneType:
 #         """Free memory allocated by libcurl.
-        
+
 #         This function should be used to free strings returned by curl functions
 #         like curl_easy_escape() and curl_easy_unescape().
-        
+
 #         Args:
 #             ptr: Pointer to the memory to free.
 #         """
@@ -401,7 +401,7 @@
 #     # Multi interface functions
 #     fn curl_multi_init(self) -> CURLM:
 #         """Initialize a multi session.
-        
+
 #         Returns:
 #             A CURLM handle on success, or NULL on error.
 #         """
@@ -409,11 +409,11 @@
 
 #     fn curl_multi_add_handle(self, multi_handle: CURLM, curl_handle: CURL) -> CURLMcode:
 #         """Add an easy handle to a multi session.
-        
+
 #         Args:
 #             multi_handle: The multi handle.
 #             curl_handle: The easy handle to add.
-            
+
 #         Returns:
 #             CURLM_OK on success, or an error code on failure.
 #         """
@@ -421,11 +421,11 @@
 
 #     fn curl_multi_remove_handle(self, multi_handle: CURLM, curl_handle: CURL) -> CURLMcode:
 #         """Remove an easy handle from a multi session.
-        
+
 #         Args:
 #             multi_handle: The multi handle.
 #             curl_handle: The easy handle to remove.
-            
+
 #         Returns:
 #             CURLM_OK on success, or an error code on failure.
 #         """
@@ -433,11 +433,11 @@
 
 #     fn curl_multi_perform(self, multi_handle: CURLM, running_handles: UnsafePointer[c_int]) -> CURLMcode:
 #         """Perform transfers on all added handles.
-        
+
 #         Args:
 #             multi_handle: The multi handle.
 #             running_handles: Pointer to store the number of running handles.
-            
+
 #         Returns:
 #             CURLM_OK on success, or an error code on failure.
 #         """
@@ -447,10 +447,10 @@
 
 #     fn curl_multi_cleanup(self, multi_handle: CURLM) -> CURLMcode:
 #         """Clean up a multi session.
-        
+
 #         Args:
 #             multi_handle: The multi handle to cleanup.
-            
+
 #         Returns:
 #             CURLM_OK on success, or an error code on failure.
 #         """
@@ -458,11 +458,11 @@
 
 #     fn curl_multi_info_read(self, multi_handle: CURLM, msgs_in_queue: UnsafePointer[c_int]) -> CURLMsg:
 #         """Read info from individual transfers.
-        
+
 #         Args:
 #             multi_handle: The multi handle.
 #             msgs_in_queue: Pointer to store the number of messages in queue.
-            
+
 #         Returns:
 #             A pointer to a CURLMsg structure, or NULL if no more messages.
 #         """
@@ -472,7 +472,7 @@
 
 #     fn curl_multi_strerror(self, code: CURLMcode) -> UnsafePointer[c_char]:
 #         """Return string describing multi error code.
-        
+
 #         Args:
 #             code: The CURLMcode error code.
 
@@ -484,10 +484,10 @@
 #     # Utility methods for common operations
 #     fn get_error_message(self, code: CURLcode) -> String:
 #         """Get a human-readable error message for a curl error code.
-        
+
 #         Args:
 #             code: The CURLcode error code.
-            
+
 #         Returns:
 #             A string description of the error.
 #         """
@@ -526,10 +526,10 @@
 
 #     fn is_success(self, code: CURLcode) -> Bool:
 #         """Check if a curl operation was successful.
-        
+
 #         Args:
 #             code: The CURLcode to check.
-            
+
 #         Returns:
 #             True if the operation was successful, False otherwise.
 #         """

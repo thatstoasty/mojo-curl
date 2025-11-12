@@ -377,7 +377,7 @@
 #         return self.lib.get_function[fn (CURL, CURLoption, OpaquePointer) -> CURLcode]("curl_easy_setopt")(
 #             curl, option, parameter
 #         )
-    
+
 #     fn _curl_easy_setopt[type: AnyType](self, curl: CURL, option: CURLoption, args: type) -> CURLcode:
 #         """Set options for a curl easy handle."""
 #         # var loaded_pack = args.get_loaded_kgen_pack()
@@ -404,7 +404,7 @@
 #         # )
 
 #         return self._curl_easy_setopt(curl, option, parameter.unsafe_cstr_ptr())
-        
+
 #         # var args = UnsafePointer(to=parameter.unsafe_cstr_ptr())
 #         # return self.lib.get_function[
 #         #     fn (CURL, CURLoption, UnsafePointer[c_char, mut=False]) -> CURLcode
@@ -423,7 +423,7 @@
 #         # return self.lib.get_function[fn (CURL, CURLoption, c_long) -> CURLcode]("curl_easy_setopt")(
 #         #     curl, option, parameter
 #         # )
-    
+
 #     fn curl_easy_setopt_write_function(self, curl: CURL, option: CURLoption, parameter: curl_write_callback) -> CURLcode:
 #         """Set options for a curl easy handle."""
 #         return self._curl_easy_setopt(curl, option, parameter)

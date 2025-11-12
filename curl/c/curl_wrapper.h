@@ -17,6 +17,7 @@ CURLcode curl_easy_setopt_callback(CURL *curl, CURLoption option, void *callback
 // Type-safe wrapper functions for curl_easy_getinfo
 CURLcode curl_easy_getinfo_string(CURL *curl, CURLINFO info, char **param);
 CURLcode curl_easy_getinfo_long(CURL *curl, CURLINFO info, long *param);
+CURLcode curl_easy_getinfo_double(CURL *curl, CURLINFO info, double *param);
 
 #ifdef __cplusplus
 }

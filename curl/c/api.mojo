@@ -1,8 +1,8 @@
 from sys.ffi import _get_global, _Global
 
-from memory.legacy_unsafe_pointer import LegacyUnsafePointer
 from curl.c.bindings import curl
 from curl.c.types import CURL_GLOBAL_DEFAULT
+from memory.legacy_unsafe_pointer import LegacyUnsafePointer
 
 
 fn _init_global() -> LegacyUnsafePointer[NoneType]:
