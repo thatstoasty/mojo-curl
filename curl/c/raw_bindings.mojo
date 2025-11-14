@@ -98,13 +98,11 @@ struct _curl(Movable):
         )(curl, option, parameter)
 
     # Safe getinfo functions using wrapper
-    fn curl_easy_getinfo_string[
-        origin: ImmutOrigin, origin2: MutOrigin
-    ](
+    fn curl_easy_getinfo_string[origin: MutOrigin](
         self,
         curl: ExternalImmutOpaquePointer,
         info: CURLINFO,
-        parameter: UnsafeMutPointer[UnsafeImmutPointer[c_char, origin], origin2],
+        parameter: UnsafeMutPointer[ExternalMutPointer[c_char], origin],
     ) -> CURLcode:
         """Get string info from a curl easy handle using safe wrapper."""
         return self.wrapper_lib.get_function[fn (type_of(curl), type_of(info), type_of(parameter)) -> CURLcode](

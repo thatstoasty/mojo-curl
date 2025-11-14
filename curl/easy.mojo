@@ -2196,3 +2196,9 @@ struct Easy:
         """
         return self.inner.headers(origin)
     
+    fn get_scheme(self) raises -> String:
+        """Get URL scheme used in transfer
+
+        Corresponds to `CURLINFO_SCHEME`.
+        """
+        return self.inner.get_scheme()

@@ -3,6 +3,7 @@ struct Protocol(ImplicitlyCopyable, Copyable, Movable, Writable):
     var value: UInt8
     alias HTTP_10 = Self(0)
     alias HTTP_11 = Self(1)
+    alias HTTPS = Self(2)
 
     fn write_to[T: Writer, //](self, mut writer: T):
         writer.write(self.value)
@@ -13,6 +14,9 @@ struct Protocol(ImplicitlyCopyable, Copyable, Movable, Writable):
             return Self.HTTP_11
         elif s == "HTTP/1.0":
             return Self.HTTP_10
+        elif s == "https":
+            # HTTP/2 is not yet supported; default to HTTP/1.1
+            return Self.HTTPS
         else:
             raise Error("Invalid protocol: ", s)
 

@@ -1,4 +1,4 @@
-from sys.ffi import c_long
+from sys.ffi import c_long, c_char
 
 from curl.c.api import get_curl_handle
 from curl.c.bindings import curl
@@ -33,13 +33,13 @@ struct InnerEasy:
         info: Info,
     ) raises -> String:
         """Get string info from a curl easy handle using safe wrapper."""
-        var response = String()
-        var ptr = UnsafePointer(response.unsafe_cstr_ptr())
-        var result = get_curl_handle()[].easy_getinfo(self.easy, info, ptr)
+        # Data is filled by data owned curl and must not be freed by the caller (this library) :)
+        var data = ExternalMutPointer[c_char]()
+        var result = get_curl_handle()[].easy_getinfo(self.easy, info, data)
         if result.value != 0:
             raise Error("Failed to get info: ", self.describe_error(result))
 
-        return response^
+        return String(StringSlice(unsafe_from_utf8_ptr=data))
 
     fn get_info_long(
         self,
@@ -2162,6 +2162,13 @@ struct InnerEasy:
         CURLOPT_HTTP09_ALLOWED.
         """
         return self.set_option(Option.HTTP09_ALLOWED, Int(allow))
+    
+    fn get_scheme(self) raises -> String:
+        """Get URL scheme used in transfer
+
+        Corresponds to `CURLINFO_SCHEME`.
+        """
+        return self.get_info(Info.SCHEME)
 
     fn headers(self, origin: HeaderOrigin) -> Dict[String, String]:
         """Move to next header set for multi-response requests.

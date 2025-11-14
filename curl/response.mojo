@@ -58,7 +58,7 @@ struct HTTPResponse(Movable):
         # var cookies = ResponseCookieJar()
 
         # TODO: Use easy to get protocol, status, code and reason.
-        var protocol: Protocol = Protocol.HTTP_11
+        var protocol: Protocol = Protocol.from_string(easy.get_scheme())
         var status_code: String = "200"
         var reason: String = "OK"
 

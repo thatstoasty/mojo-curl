@@ -58,10 +58,12 @@ struct curl:
         return self.lib.curl_easy_setopt_callback(easy, option.value, parameter)
 
     # Safe getinfo functions using wrapper
-    fn easy_getinfo[
-        origin: ImmutOrigin
-    ](self, easy: ExternalImmutOpaquePointer, info: Info, mut parameter: UnsafeImmutPointer[c_char, origin]) -> Result:
-        """Get string info from a curl easy handle using safe wrapper."""
+    fn easy_getinfo(self, easy: ExternalImmutOpaquePointer, info: Info, mut parameter: ExternalMutPointer[c_char]) -> Result:
+        """Get string info from a curl easy handle using safe wrapper.
+        
+        The pointer is NULL or points to private memory. You **must not free it**.
+        The memory gets freed automatically when you call `curl_easy_cleanup` on the corresponding curl handle.
+        """
         return self.lib.curl_easy_getinfo_string(easy, info.value, UnsafePointer(to=parameter))
 
     fn easy_getinfo(
