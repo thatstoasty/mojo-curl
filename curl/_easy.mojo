@@ -2,7 +2,8 @@ from sys.ffi import c_long
 
 from curl.c.api import get_curl_handle
 from curl.c.bindings import curl
-from curl.c.types import CURL, Info, Option, Result, curl_write_callback
+from curl.c.types import CURL, Info, Option, Result, curl_write_callback, ExternalMutPointer
+from curl.c.header import HeaderOrigin, curl_header
 
 
 struct InnerEasy:
@@ -72,9 +73,11 @@ struct InnerEasy:
         """End a libcurl easy handle."""
         return get_curl_handle()[].easy_cleanup(self.easy)
 
-    fn describe_error(self, code: Result) -> StringSlice[ImmutAnyOrigin]:
+    fn describe_error(self, code: Result) -> String:
         """Return string describing error code."""
-        return StringSlice(unsafe_from_utf8_ptr=get_curl_handle()[].easy_strerror(code))
+        # TODO: StringSlice crashes, probably getting skill issued by
+        # pointer lifetime. Theoretically StringSlice[ImmutAnyOrigin] should work.
+        return String(unsafe_from_utf8_ptr=get_curl_handle()[].easy_strerror(code))
 
     # Behavior options
 
@@ -2159,3 +2162,26 @@ struct InnerEasy:
         CURLOPT_HTTP09_ALLOWED.
         """
         return self.set_option(Option.HTTP09_ALLOWED, Int(allow))
+
+    fn headers(self, origin: HeaderOrigin) -> Dict[String, String]:
+        """Move to next header set for multi-response requests.
+
+        When performing a request that can return multiple responses - such as
+        a HTTP/1.1 request with the "Expect: 100-continue" header or a HTTP/2
+        request with server push - this option can be used to advance to the
+        next header set in the response stream.
+
+        By default this option is not set and corresponds to
+        CURLOPT_NEXTHEADER.
+        """
+        var headers = Dict[String, String]()
+        var prev = ExternalMutPointer[curl_header]()
+
+        while True:
+            var h = get_curl_handle()[].easy_nextheader(self.easy, origin.value, 0, prev)
+            if not h:
+                break
+            prev = h
+            headers[String(unsafe_from_utf8_ptr=h[].name)] = String(unsafe_from_utf8_ptr=h[].value)
+
+        return headers^

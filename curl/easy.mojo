@@ -3,7 +3,8 @@ from sys.ffi import c_long
 from curl._easy import InnerEasy
 from curl.c.bindings import curl
 from curl.c.types import CURL, Info, Option, Result, curl_write_callback
-
+from curl.list import CurlList
+from curl.c.header import HeaderOrigin
 
 struct Easy:
     var inner: InnerEasy
@@ -56,7 +57,7 @@ struct Easy:
         """End a libcurl easy handle."""
         return self.inner.cleanup()
 
-    fn describe_error(self, code: Result) -> StringSlice[ImmutAnyOrigin]:
+    fn describe_error(self, code: Result) -> String:
         """Return string describing error code."""
         return self.inner.describe_error(code)
 
@@ -798,23 +799,21 @@ struct Easy:
         """
         return self.inner.set_option(Option.USERAGENT, useragent)
 
-    # TODO: http_headers - needs List type implementation
-    # fn http_headers(mut self, list: List) -> Result:
-    #     """Add some headers to this HTTP request.
-    #
-    #     If you add a header that is otherwise used internally, the value here
-    #     takes precedence. If a header is added with no content (like `Accept:`)
-    #     the internally the header will get disabled. To add a header with no
-    #     content, use the form `MyHeader;` (note the trailing semicolon).
-    #
-    #     Headers must not be CRLF terminated. Many replaced headers have common
-    #     shortcuts which should be preferred.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_HTTPHEADER`
-    #     """
-    #     # TODO: Implement this when List type is available
-    #     pass
+    fn http_headers(mut self, headers: CurlList) -> Result:
+        """Add some headers to this HTTP request.
+    
+        If you add a header that is otherwise used internally, the value here
+        takes precedence. If a header is added with no content (like `Accept:`)
+        the internally the header will get disabled. To add a header with no
+        content, use the form `MyHeader;` (note the trailing semicolon).
+    
+        Headers must not be CRLF terminated. Many replaced headers have common
+        shortcuts which should be preferred.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_HTTPHEADER`
+        """
+        return self.set_option(Option.HTTP_HEADER, headers.raw.bitcast[NoneType]())
 
     # # Add some headers to send to the HTTP proxy.
     # #
@@ -2175,3 +2174,25 @@ struct Easy:
         signature defined in the bindings.
         """
         return self.inner.set_option(Option.WRITE_FUNCTION, callback)
+    
+    fn write_data[origin: MutOrigin](mut self, data: OpaqueMutPointer[origin]) -> Result:
+        """Set custom pointer to pass to write callback.
+
+        By default this option is not set and corresponds to
+        `CURLOPT_WRITEDATA`.
+        """
+        return self.inner.set_option(Option.WRITE_DATA, data)
+
+    fn headers(self, origin: HeaderOrigin = HeaderOrigin.HEADER) -> Dict[String, String]:
+        """Move to next header set for multi-response requests.
+
+        When performing a request that can return multiple responses - such as
+        a HTTP/1.1 request with the "Expect: 100-continue" header or a HTTP/2
+        request with server push - this option can be used to advance to the
+        next header set in the response stream.
+
+        By default this option is not set and corresponds to
+        `CURLOPT_NEXTHEADER`.
+        """
+        return self.inner.headers(origin)
+    

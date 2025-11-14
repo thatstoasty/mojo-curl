@@ -1,10 +1,10 @@
 import os
 import pathlib
 from sys import CompilationTarget, env_get_string, ffi
-from sys.ffi import OwnedDLHandle, c_char, c_int, c_long
+from sys.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 
-from curl.c.types import CURL, ExternalImmutOpaquePointer, ExternalImmutPointer, curl_write_callback
-
+from curl.c.types import curl_slist, CURL, ExternalImmutOpaquePointer, ExternalImmutPointer, ExternalMutPointer, curl_write_callback
+from curl.c.header import curl_header
 
 alias CURLcode = c_int
 alias CURLoption = c_int
@@ -140,3 +140,75 @@ struct _curl(Movable):
         return self.curl_lib.get_function[fn (type_of(code)) -> ExternalImmutPointer[c_char]]("curl_easy_strerror")(
             code
         )
+
+    # String list functions
+    fn curl_slist_append(self, list: ExternalMutPointer[curl_slist], string: UnsafeImmutPointer[c_char]) -> ExternalMutPointer[curl_slist]:
+        """Append a string to a curl string list.
+
+        Args:
+            list: The existing string list (can be NULL).
+            string: The string to append.
+
+        Returns:
+            A pointer to the new list, or NULL on error.
+        """
+        return self.curl_lib.get_function[
+            fn (type_of(list), type_of(string)) -> ExternalMutPointer[curl_slist]
+        ]("curl_slist_append")(list, string)
+
+    fn curl_slist_free_all(self, list: ExternalMutPointer[curl_slist]):
+        """Free an entire curl string list.
+
+        Args:
+            list: The string list to free.
+        """
+        self.curl_lib.get_function[fn (type_of(list)) -> NoneType]("curl_slist_free_all")(list)
+
+    fn curl_easy_header(
+        self,
+        easy: ExternalImmutOpaquePointer,
+        name: UnsafeImmutPointer[c_char],
+        index: c_size_t,
+        origin: c_uint,
+        request: c_int,
+        hout: UnsafeMutPointer[ExternalMutPointer[curl_header]],
+    ) -> c_int:
+        """Get a specific header from a curl easy handle.
+        
+        Args:
+            easy: The curl easy handle.
+            name: The name of the header to retrieve.
+            index: The index of the header to retrieve (0-based).
+            origin: The origin bitmask to filter headers.
+            request: The request number to filter headers.
+            hout: Pointer to store the retrieved header.
+        
+        Returns:
+            CURLHcode result code.
+        """
+        return self.curl_lib.get_function[
+            fn (type_of(easy), type_of(name), type_of(index), type_of(origin), type_of(request), type_of(hout)) -> c_int
+        ]("curl_easy_header")(easy, name, index, origin, request, hout)
+
+
+    fn curl_easy_nextheader(
+        self,
+        easy: ExternalImmutOpaquePointer,
+        origin: c_uint,
+        request: c_int,
+        prev: ExternalMutPointer[curl_header],
+    ) -> ExternalMutPointer[curl_header]:
+        """Get the next header in the list for a curl easy handle.
+
+        Args:
+            easy: The curl easy handle.
+            origin: The origin bitmask to filter headers.
+            request: The request number to filter headers.
+            prev: The previous header in the list (NULL to start from the beginning).
+
+        Returns:
+            A pointer to the next header in the list, or NULL if there are no more headers.
+        """
+        return self.curl_lib.get_function[
+            fn (type_of(easy), type_of(origin), type_of(request), type_of(prev)) -> ExternalMutPointer[curl_header]
+        ]("curl_easy_nextheader")(easy, origin, request, prev)

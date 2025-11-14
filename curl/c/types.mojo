@@ -18,6 +18,7 @@ alias CURL = ExternalImmutOpaquePointer
 # alias CURLMsg = OpaquePointer
 
 
+@register_passable("trivial")
 struct curl_slist:
     """Singly linked list structure for curl string lists."""
 
@@ -32,11 +33,11 @@ alias curl_off_t = c_long
 
 # Callback function types
 alias curl_write_callback = fn (
-    ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalImmutOpaquePointer
+    ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer
 ) -> c_size_t
-alias curl_read_callback = fn (ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalImmutOpaquePointer) -> c_size_t
+alias curl_read_callback = fn (ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer) -> c_size_t
 alias curl_progress_callback = fn (ExternalImmutOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
-alias curl_debug_callback = fn (CURL, c_int, UnsafePointer[c_char], c_size_t, ExternalImmutOpaquePointer) -> c_int
+alias curl_debug_callback = fn (CURL, c_int, UnsafePointer[c_char], c_size_t, ExternalMutOpaquePointer) -> c_int
 alias curl_xferinfo_callback = fn (ExternalImmutOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
 in 7.32.0, avoids the use of floating point numbers and provides more
@@ -199,6 +200,9 @@ struct OptionType(Copyable, Movable):
     @implicit
     fn __init__(out self, value: c_int):
         self.value = value
+    
+    fn __add__(self, other: Int) -> OptionType:
+        return OptionType(self.value + other)
 
 
 # CURLOPT options (commonly used ones)
@@ -206,238 +210,239 @@ struct OptionType(Copyable, Movable):
 struct Option(Copyable, Movable):
     var value: c_int
 
-    alias FILE: Self = OptionType.OBJECT_POINT.value + 1
-    alias URL: Self = OptionType.OBJECT_POINT.value + 2
-    alias PORT: Self = OptionType.LONG.value + 3
-    alias PROXY: Self = OptionType.OBJECT_POINT.value + 4
-    alias USER_PWD: Self = OptionType.OBJECT_POINT.value + 5
-    alias PROXY_USER_PWD: Self = OptionType.OBJECT_POINT.value + 6
-    alias RANGE: Self = OptionType.OBJECT_POINT.value + 7
-    alias IN_FILE: Self = OptionType.OBJECT_POINT.value + 9
-    alias ERROR_BUFFER: Self = OptionType.OBJECT_POINT.value + 10
-    alias WRITE_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 11
-    alias READ_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 12
-    alias TIMEOUT: Self = OptionType.LONG.value + 13
-    alias IN_FILE_SIZE: Self = OptionType.LONG.value + 14
-    alias POST_FIELDS: Self = OptionType.OBJECT_POINT.value + 15
-    alias REFERER: Self = OptionType.OBJECT_POINT.value + 16
-    alias FTP_PORT: Self = OptionType.OBJECT_POINT.value + 17
-    alias USERAGENT: Self = OptionType.OBJECT_POINT.value + 18
-    alias LOW_SPEED_LIMIT: Self = OptionType.LONG.value + 19
-    alias LOW_SPEED_TIME: Self = OptionType.LONG.value + 20
-    alias RESUME_FROM: Self = OptionType.LONG.value + 21
-    alias COOKIE: Self = OptionType.OBJECT_POINT.value + 22
-    alias HTTP_HEADER: Self = OptionType.OBJECT_POINT.value + 23
-    alias HTTP_POST: Self = OptionType.OBJECT_POINT.value + 24
-    alias SSL_CERT: Self = OptionType.OBJECT_POINT.value + 25
-    alias KEY_PASSWD: Self = OptionType.OBJECT_POINT.value + 26
-    alias CRLF: Self = OptionType.LONG.value + 27
-    alias QUOTE: Self = OptionType.OBJECT_POINT.value + 28
-    alias WRITE_HEADER: Self = OptionType.OBJECT_POINT.value + 29
-    alias COOKIE_FILE: Self = OptionType.OBJECT_POINT.value + 31
-    alias SSL_VERSION: Self = OptionType.LONG.value + 32
-    alias TIME_CONDITION: Self = OptionType.LONG.value + 33
-    alias TIME_VALUE: Self = OptionType.LONG.value + 34
-    alias CUSTOM_REQUEST: Self = OptionType.OBJECT_POINT.value + 36
-    alias STDERR: Self = OptionType.OBJECT_POINT.value + 37
-    alias POST_QUOTE: Self = OptionType.OBJECT_POINT.value + 39
-    alias VERBOSE: Self = OptionType.LONG.value + 41
-    alias HEADER: Self = OptionType.LONG.value + 42
-    alias NO_PROGRESS: Self = OptionType.LONG.value + 43
-    alias NO_BODY: Self = OptionType.LONG.value + 44
-    alias FAIL_ON_ERROR: Self = OptionType.LONG.value + 45
-    alias UPLOAD: Self = OptionType.LONG.value + 46
-    alias POST: Self = OptionType.LONG.value + 47
-    alias DIR_LIST_ONLY: Self = OptionType.LONG.value + 48
-    alias APPEND: Self = OptionType.LONG.value + 50
-    alias NETRC: Self = OptionType.LONG.value + 51
-    alias FOLLOW_LOCATION: Self = OptionType.LONG.value + 52
-    alias TRANSFER_TEXT: Self = OptionType.LONG.value + 53
-    alias PUT: Self = OptionType.LONG.value + 54
-    alias PROGRESS_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 56
-    alias PROGRESS_DATA: Self = OptionType.OBJECT_POINT.value + 57
-    alias AUTO_REFERER: Self = OptionType.LONG.value + 58
-    alias PROXY_PORT: Self = OptionType.LONG.value + 59
-    alias POST_FIELD_SIZE: Self = OptionType.LONG.value + 60
-    alias HTTP_PROXY_TUNNEL: Self = OptionType.LONG.value + 61
-    alias INTERFACE: Self = OptionType.OBJECT_POINT.value + 62
-    alias KRB_LEVEL: Self = OptionType.OBJECT_POINT.value + 63
-    alias SSL_VERIFYPEER: Self = OptionType.LONG.value + 64
-    alias CAINFO: Self = OptionType.OBJECT_POINT.value + 65
-    alias MAXREDIRS: Self = OptionType.LONG.value + 68
-    alias FILE_TIME: Self = OptionType.LONG.value + 69
-    alias TELNET_OPTIONS: Self = OptionType.OBJECT_POINT.value + 70
-    alias MAX_CONNECTS: Self = OptionType.LONG.value + 71
-    alias FRESH_CONNECT: Self = OptionType.LONG.value + 74
-    alias FORBID_REUSE: Self = OptionType.LONG.value + 75
-    alias RANDOM_FILE: Self = OptionType.OBJECT_POINT.value + 76
-    alias EGD_SOCKET: Self = OptionType.OBJECT_POINT.value + 77
-    alias CONNECT_TIMEOUT: Self = OptionType.LONG.value + 78
-    alias HEADER_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 79
-    alias HTTPGET: Self = OptionType.LONG.value + 80
-    alias SSL_VERIFY_HOST: Self = OptionType.LONG.value + 81
-    alias COOKIEJAR: Self = OptionType.OBJECT_POINT.value + 82
-    alias SSL_CIPHER_LIST: Self = OptionType.OBJECT_POINT.value + 83
-    alias HTTP_VERSION: Self = OptionType.LONG.value + 84
-    alias FTP_USE_EPSV: Self = OptionType.LONG.value + 85
-    alias SSL_CERT_TYPE: Self = OptionType.OBJECT_POINT.value + 86
-    alias SSL_KEY: Self = OptionType.OBJECT_POINT.value + 87
-    alias SSL_KEY_TYPE: Self = OptionType.OBJECT_POINT.value + 88
-    alias SSL_ENGINE: Self = OptionType.OBJECT_POINT.value + 89
-    alias SSL_ENGINE_DEFAULT: Self = OptionType.LONG.value + 90
-    alias DNS_USE_GLOBAL_CACHE: Self = OptionType.LONG.value + 91
-    alias DNS_CACHE_TIMEOUT: Self = OptionType.LONG.value + 92
-    alias PREQUOTE: Self = OptionType.OBJECT_POINT.value + 93
-    alias DEBUG_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 94
-    alias DEBUG_DATA: Self = OptionType.OBJECT_POINT.value + 95
-    alias COOKIE_SESSION: Self = OptionType.LONG.value + 96
-    alias CAPATH: Self = OptionType.OBJECT_POINT.value + 97
-    alias BUFFER_SIZE: Self = OptionType.LONG.value + 98
-    alias NO_SIGNAL: Self = OptionType.LONG.value + 99
-    alias SHARE: Self = OptionType.OBJECT_POINT.value + 100
-    alias PROXY_TYPE: Self = OptionType.LONG.value + 101
-    alias ACCEPT_ENCODING: Self = OptionType.OBJECT_POINT.value + 102
-    alias PRIVATE: Self = OptionType.OBJECT_POINT.value + 103
-    alias HTTP200_ALIASES: Self = OptionType.OBJECT_POINT.value + 104
-    alias UNRESTRICTED_AUTH: Self = OptionType.LONG.value + 105
-    alias FTP_USE_EPRT: Self = OptionType.LONG.value + 106
-    alias HTTP_AUTH: Self = OptionType.LONG.value + 107
-    alias SSL_CTX_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 108
-    alias SSL_CTX_DATA: Self = OptionType.OBJECT_POINT.value + 109
-    alias FTP_CREATE_MISSING_DIRS: Self = OptionType.LONG.value + 110
-    alias PROXY_AUTH: Self = OptionType.LONG.value + 111
-    alias FTP_RESPONSE_TIMEOUT: Self = OptionType.LONG.value + 112
-    alias IP_RESOLVE: Self = OptionType.LONG.value + 113
-    alias MAX_FILE_SIZE: Self = OptionType.LONG.value + 114
-    alias IN_FILE_SIZE_LARGE: Self = OptionType.OFF_T.value + 115
-    alias RESUME_FROM_LARGE: Self = OptionType.OFF_T.value + 116
-    alias MAX_FILE_SIZE_LARGE: Self = OptionType.OFF_T.value + 117
-    alias NETRC_FILE: Self = OptionType.OBJECT_POINT.value + 118
-    alias USE_SSL: Self = OptionType.LONG.value + 119
-    alias POST_FIELD_SIZE_LARGE: Self = OptionType.OFF_T.value + 120
-    alias TCP_NODELAY: Self = OptionType.LONG.value + 121
-    alias FTP_SSL_AUTH: Self = OptionType.LONG.value + 129
-    alias IOCTL_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 130
-    alias IOCTL_DATA: Self = OptionType.OBJECT_POINT.value + 131
-    alias FTP_ACCOUNT: Self = OptionType.OBJECT_POINT.value + 134
-    alias COOKIE_LIST: Self = OptionType.OBJECT_POINT.value + 135
-    alias IGNORE_CONTENT_LENGTH: Self = OptionType.LONG.value + 136
-    alias FTP_SKIP_PASV_IP: Self = OptionType.LONG.value + 137
-    alias FTP_FILE_METHOD: Self = OptionType.LONG.value + 138
-    alias LOCAL_PORT: Self = OptionType.LONG.value + 139
-    alias LOCAL_PORT_RANGE: Self = OptionType.LONG.value + 140
-    alias CONNECT_ONLY: Self = OptionType.LONG.value + 141
-    alias CONV_FROM_NETWORK_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 142
-    alias CONV_TO_NETWORK_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 143
-    alias CONV_FROM_UTF8_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 144
-    alias MAX_SEND_SPEED_LARGE: Self = OptionType.OFF_T.value + 145
-    alias MAX_RECV_SPEED_LARGE: Self = OptionType.OFF_T.value + 146
-    alias FTP_ALTERNATIVE_TO_USER: Self = OptionType.OBJECT_POINT.value + 147
-    alias SOCKOPT_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 148
-    alias SOCKOPT_DATA: Self = OptionType.OBJECT_POINT.value + 149
-    alias SSL_SESSIONID_CACHE: Self = OptionType.LONG.value + 150
-    alias SSH_AUTH_TYPES: Self = OptionType.LONG.value + 151
-    alias SSH_PUBLIC_KEYFILE: Self = OptionType.OBJECT_POINT.value + 152
-    alias SSH_PRIVATE_KEYFILE: Self = OptionType.OBJECT_POINT.value + 153
-    alias FTP_SSL_CCC: Self = OptionType.LONG.value + 154
-    alias TIMEOUT_MS: Self = OptionType.LONG.value + 155
-    alias CONNECT_TIMEOUT_MS: Self = OptionType.LONG.value + 156
-    alias HTTP_TRANSFER_DECODING: Self = OptionType.LONG.value + 157
-    alias HTTP_CONTENT_DECODING: Self = OptionType.LONG.value + 158
-    alias NEW_FILE_PERMS: Self = OptionType.LONG.value + 159
-    alias NEW_DIRECTORY_PERMS: Self = OptionType.LONG.value + 160
-    alias POST_REDIR: Self = OptionType.LONG.value + 161
-    alias SSH_HOST_PUBLIC_KEY_MD5: Self = OptionType.OBJECT_POINT.value + 162
-    alias OPEN_SOCKET_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 163
-    alias OPEN_SOCKET_DATA: Self = OptionType.OBJECT_POINT.value + 164
-    alias COPY_POST_FIELDS: Self = OptionType.OBJECT_POINT.value + 165
-    alias PROXY_TRANSFER_MODE: Self = OptionType.LONG.value + 166
-    alias SEEK_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 167
-    alias SEEK_DATA: Self = OptionType.OBJECT_POINT.value + 168
-    alias CRL_FILE: Self = OptionType.OBJECT_POINT.value + 169
-    alias ISSUER_CERT: Self = OptionType.OBJECT_POINT.value + 170
-    alias ADDRESS_SCOPE: Self = OptionType.LONG.value + 171
-    alias CERT_INFO: Self = OptionType.LONG.value + 172
-    alias USERNAME: Self = OptionType.OBJECT_POINT.value + 173
-    alias PASSWORD: Self = OptionType.OBJECT_POINT.value + 174
-    alias PROXY_USERNAME: Self = OptionType.OBJECT_POINT.value + 175
-    alias PROXY_PASSWORD: Self = OptionType.OBJECT_POINT.value + 176
-    alias NO_PROXY: Self = OptionType.OBJECT_POINT.value + 177
-    alias TFTP_BLK_SIZE: Self = OptionType.LONG.value + 178
-    alias SOCKS5_GSSAPI_SERVICE: Self = OptionType.OBJECT_POINT.value + 179
-    alias SOCKS5_GSSAPI_NEC: Self = OptionType.LONG.value + 180
-    alias PROTOCOLS: Self = OptionType.LONG.value + 181
-    alias REDIR_PROTOCOLS: Self = OptionType.LONG.value + 182
-    alias SSH_KNOWNHOSTS: Self = OptionType.OBJECT_POINT.value + 183
-    alias SSH_KEY_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 184
-    alias SSH_KEY_DATA: Self = OptionType.OBJECT_POINT.value + 185
-    alias MAIL_FROM: Self = OptionType.OBJECT_POINT.value + 186
-    alias MAIL_RCPT: Self = OptionType.OBJECT_POINT.value + 187
-    alias FTP_USE_PRET: Self = OptionType.LONG.value + 188
-    alias RTSP_REQUEST: Self = OptionType.LONG.value + 189
-    alias RTSP_SESSION_ID: Self = OptionType.OBJECT_POINT.value + 190
-    alias RTSP_STREAM_URI: Self = OptionType.OBJECT_POINT.value + 191
-    alias RTSP_TRANSPORT: Self = OptionType.OBJECT_POINT.value + 192
-    alias RTSP_CLIENT_CSEQ: Self = OptionType.LONG.value + 193
-    alias RTSP_SERVER_CSEQ: Self = OptionType.LONG.value + 194
-    alias INTERLEAVE_DATA: Self = OptionType.OBJECT_POINT.value + 195
-    alias INTERLEAVE_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 196
-    alias WILDCARD_MATCH: Self = OptionType.LONG.value + 197
-    alias CHUNK_BGN_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 198
-    alias CHUNK_END_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 199
-    alias FN_MATCH_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 200
-    alias CHUNK_DATA: Self = OptionType.OBJECT_POINT.value + 201
-    alias FN_MATCH_DATA: Self = OptionType.OBJECT_POINT.value + 202
-    alias RESOLVE: Self = OptionType.OBJECT_POINT.value + 203
-    alias TLS_AUTH_USERNAME: Self = OptionType.OBJECT_POINT.value + 204
-    alias TLS_AUTH_PASSWORD: Self = OptionType.OBJECT_POINT.value + 205
-    alias TLS_AUTH_TYPE: Self = OptionType.OBJECT_POINT.value + 206
-    alias TRANSFER_ENCODING: Self = OptionType.LONG.value + 207
-    alias CLOSE_SOCKET_FUNCTION: Self = OptionType.FUNCTION_POINT.value + 208
-    alias CLOSE_SOCKET_DATA: Self = OptionType.OBJECT_POINT.value + 209
-    alias GSSAPI_DELEGATION: Self = OptionType.LONG.value + 210
-    alias DNS_SERVERS: Self = OptionType.OBJECT_POINT.value + 211
-    alias TCP_KEEPALIVE: Self = OptionType.LONG.value + 213
-    alias TCP_KEEPIDLE: Self = OptionType.LONG.value + 214
-    alias TCP_KEEPINTVL: Self = OptionType.LONG.value + 215
-    alias SSL_OPTIONS: Self = OptionType.LONG.value + 216
-    alias EXPECT_100_TIMEOUT_MS: Self = OptionType.LONG.value + 227
-    alias PINNED_PUBLIC_KEY: Self = OptionType.OBJECT_POINT.value + 230
-    alias UNIX_SOCKET_PATH: Self = OptionType.OBJECT_POINT.value + 231
-    alias PATH_AS_IS: Self = OptionType.LONG.value + 234
-    alias PIPE_WAIT: Self = OptionType.LONG.value + 237
-    alias CONNECT_TO: Self = OptionType.OBJECT_POINT.value + 243
-    alias PROXY_CAINFO: Self = OptionType.OBJECT_POINT.value + 246
-    alias PROXY_CAPATH: Self = OptionType.OBJECT_POINT.value + 247
-    alias PROXY_SSL_VERIFYPEER: Self = OptionType.LONG.value + 248
-    alias PROXY_SSL_VERIFYHOST: Self = OptionType.LONG.value + 249
-    alias PROXY_SSL_VERSION: Self = OptionType.VALUES.value + 250
-    alias PROXY_SSL_CERT: Self = OptionType.OBJECT_POINT.value + 254
-    alias PROXY_SSL_CERT_TYPE: Self = OptionType.OBJECT_POINT.value + 255
-    alias PROXY_SSL_KEY: Self = OptionType.OBJECT_POINT.value + 256
-    alias PROXY_SSL_KEY_TYPE: Self = OptionType.OBJECT_POINT.value + 257
-    alias PROXY_KEYPASSWD: Self = OptionType.OBJECT_POINT.value + 258
-    alias PROXY_SSL_CIPHER_LIST: Self = OptionType.OBJECT_POINT.value + 259
-    alias PROXY_CRL_FILE: Self = OptionType.OBJECT_POINT.value + 260
-    alias PROXY_SSL_OPTIONS: Self = OptionType.LONG.value + 261
-    alias ABSTRACT_UNIX_SOCKET: Self = OptionType.OBJECT_POINT.value + 264
-    alias DOH_URL: Self = OptionType.OBJECT_POINT.value + 279
-    alias UPLOAD_BUFFER_SIZE: Self = OptionType.LONG.value + 280
-    alias HTTP09_ALLOWED: Self = OptionType.LONG.value + 285
-    alias MAX_AGE_CONN: Self = OptionType.LONG.value + 288
-    alias SSL_CERT_BLOB: Self = OptionType.BLOB.value + 291
-    alias SSL_KEY_BLOB: Self = OptionType.BLOB.value + 292
-    alias PROXY_SSL_CERT_BLOB: Self = OptionType.BLOB.value + 293
-    alias PROXY_SSL_KEY_BLOB: Self = OptionType.BLOB.value + 294
-    alias ISSUER_CERT_BLOB: Self = OptionType.BLOB.value + 295
-    alias PROXY_ISSUER_CERT: Self = OptionType.OBJECT_POINT.value + 296
-    alias PROXY_ISSUER_CERT_BLOB: Self = OptionType.BLOB.value + 297
-    alias AWS_SIGV4: Self = OptionType.OBJECT_POINT.value + 305
-    alias DOH_SSL_VERIFY_PEER: Self = OptionType.LONG.value + 306
-    alias DOH_SSL_VERIFY_HOST: Self = OptionType.LONG.value + 307
-    alias DOH_SSL_VERIFY_STATUS: Self = OptionType.LONG.value + 308
-    alias CAINFO_BLOB: Self = OptionType.BLOB.value + 309
-    alias PROXY_CAINFO_BLOB: Self = OptionType.BLOB.value + 310
+    alias WRITE_DATA: Self = OptionType.OBJECT_POINT + 1
+    alias FILE: Self = Self.WRITE_DATA
+    alias URL: Self = OptionType.OBJECT_POINT + 2
+    alias PORT: Self = OptionType.LONG + 3
+    alias PROXY: Self = OptionType.OBJECT_POINT + 4
+    alias USER_PWD: Self = OptionType.OBJECT_POINT + 5
+    alias PROXY_USER_PWD: Self = OptionType.OBJECT_POINT + 6
+    alias RANGE: Self = OptionType.OBJECT_POINT + 7
+    alias IN_FILE: Self = OptionType.OBJECT_POINT + 9
+    alias ERROR_BUFFER: Self = OptionType.OBJECT_POINT + 10
+    alias WRITE_FUNCTION: Self = OptionType.FUNCTION_POINT + 11
+    alias READ_FUNCTION: Self = OptionType.FUNCTION_POINT + 12
+    alias TIMEOUT: Self = OptionType.LONG + 13
+    alias IN_FILE_SIZE: Self = OptionType.LONG + 14
+    alias POST_FIELDS: Self = OptionType.OBJECT_POINT + 15
+    alias REFERER: Self = OptionType.OBJECT_POINT + 16
+    alias FTP_PORT: Self = OptionType.OBJECT_POINT + 17
+    alias USERAGENT: Self = OptionType.OBJECT_POINT + 18
+    alias LOW_SPEED_LIMIT: Self = OptionType.LONG + 19
+    alias LOW_SPEED_TIME: Self = OptionType.LONG + 20
+    alias RESUME_FROM: Self = OptionType.LONG + 21
+    alias COOKIE: Self = OptionType.OBJECT_POINT + 22
+    alias HTTP_HEADER: Self = OptionType.OBJECT_POINT + 23
+    alias HTTP_POST: Self = OptionType.OBJECT_POINT + 24
+    alias SSL_CERT: Self = OptionType.OBJECT_POINT + 25
+    alias KEY_PASSWD: Self = OptionType.OBJECT_POINT + 26
+    alias CRLF: Self = OptionType.LONG + 27
+    alias QUOTE: Self = OptionType.OBJECT_POINT + 28
+    alias WRITE_HEADER: Self = OptionType.OBJECT_POINT + 29
+    alias COOKIE_FILE: Self = OptionType.OBJECT_POINT + 31
+    alias SSL_VERSION: Self = OptionType.LONG + 32
+    alias TIME_CONDITION: Self = OptionType.LONG + 33
+    alias TIME_VALUE: Self = OptionType.LONG + 34
+    alias CUSTOM_REQUEST: Self = OptionType.OBJECT_POINT + 36
+    alias STDERR: Self = OptionType.OBJECT_POINT + 37
+    alias POST_QUOTE: Self = OptionType.OBJECT_POINT + 39
+    alias VERBOSE: Self = OptionType.LONG + 41
+    alias HEADER: Self = OptionType.LONG + 42
+    alias NO_PROGRESS: Self = OptionType.LONG + 43
+    alias NO_BODY: Self = OptionType.LONG + 44
+    alias FAIL_ON_ERROR: Self = OptionType.LONG + 45
+    alias UPLOAD: Self = OptionType.LONG + 46
+    alias POST: Self = OptionType.LONG + 47
+    alias DIR_LIST_ONLY: Self = OptionType.LONG + 48
+    alias APPEND: Self = OptionType.LONG + 50
+    alias NETRC: Self = OptionType.LONG + 51
+    alias FOLLOW_LOCATION: Self = OptionType.LONG + 52
+    alias TRANSFER_TEXT: Self = OptionType.LONG + 53
+    alias PUT: Self = OptionType.LONG + 54
+    alias PROGRESS_FUNCTION: Self = OptionType.FUNCTION_POINT + 56
+    alias PROGRESS_DATA: Self = OptionType.OBJECT_POINT + 57
+    alias AUTO_REFERER: Self = OptionType.LONG + 58
+    alias PROXY_PORT: Self = OptionType.LONG + 59
+    alias POST_FIELD_SIZE: Self = OptionType.LONG + 60
+    alias HTTP_PROXY_TUNNEL: Self = OptionType.LONG + 61
+    alias INTERFACE: Self = OptionType.OBJECT_POINT + 62
+    alias KRB_LEVEL: Self = OptionType.OBJECT_POINT + 63
+    alias SSL_VERIFYPEER: Self = OptionType.LONG + 64
+    alias CAINFO: Self = OptionType.OBJECT_POINT + 65
+    alias MAXREDIRS: Self = OptionType.LONG + 68
+    alias FILE_TIME: Self = OptionType.LONG + 69
+    alias TELNET_OPTIONS: Self = OptionType.OBJECT_POINT + 70
+    alias MAX_CONNECTS: Self = OptionType.LONG + 71
+    alias FRESH_CONNECT: Self = OptionType.LONG + 74
+    alias FORBID_REUSE: Self = OptionType.LONG + 75
+    alias RANDOM_FILE: Self = OptionType.OBJECT_POINT + 76
+    alias EGD_SOCKET: Self = OptionType.OBJECT_POINT + 77
+    alias CONNECT_TIMEOUT: Self = OptionType.LONG + 78
+    alias HEADER_FUNCTION: Self = OptionType.FUNCTION_POINT + 79
+    alias HTTPGET: Self = OptionType.LONG + 80
+    alias SSL_VERIFY_HOST: Self = OptionType.LONG + 81
+    alias COOKIEJAR: Self = OptionType.OBJECT_POINT + 82
+    alias SSL_CIPHER_LIST: Self = OptionType.OBJECT_POINT + 83
+    alias HTTP_VERSION: Self = OptionType.LONG + 84
+    alias FTP_USE_EPSV: Self = OptionType.LONG + 85
+    alias SSL_CERT_TYPE: Self = OptionType.OBJECT_POINT + 86
+    alias SSL_KEY: Self = OptionType.OBJECT_POINT + 87
+    alias SSL_KEY_TYPE: Self = OptionType.OBJECT_POINT + 88
+    alias SSL_ENGINE: Self = OptionType.OBJECT_POINT + 89
+    alias SSL_ENGINE_DEFAULT: Self = OptionType.LONG + 90
+    alias DNS_USE_GLOBAL_CACHE: Self = OptionType.LONG + 91
+    alias DNS_CACHE_TIMEOUT: Self = OptionType.LONG + 92
+    alias PREQUOTE: Self = OptionType.OBJECT_POINT + 93
+    alias DEBUG_FUNCTION: Self = OptionType.FUNCTION_POINT + 94
+    alias DEBUG_DATA: Self = OptionType.OBJECT_POINT + 95
+    alias COOKIE_SESSION: Self = OptionType.LONG + 96
+    alias CAPATH: Self = OptionType.OBJECT_POINT + 97
+    alias BUFFER_SIZE: Self = OptionType.LONG + 98
+    alias NO_SIGNAL: Self = OptionType.LONG + 99
+    alias SHARE: Self = OptionType.OBJECT_POINT + 100
+    alias PROXY_TYPE: Self = OptionType.LONG + 101
+    alias ACCEPT_ENCODING: Self = OptionType.OBJECT_POINT + 102
+    alias PRIVATE: Self = OptionType.OBJECT_POINT + 103
+    alias HTTP200_ALIASES: Self = OptionType.OBJECT_POINT + 104
+    alias UNRESTRICTED_AUTH: Self = OptionType.LONG + 105
+    alias FTP_USE_EPRT: Self = OptionType.LONG + 106
+    alias HTTP_AUTH: Self = OptionType.LONG + 107
+    alias SSL_CTX_FUNCTION: Self = OptionType.FUNCTION_POINT + 108
+    alias SSL_CTX_DATA: Self = OptionType.OBJECT_POINT + 109
+    alias FTP_CREATE_MISSING_DIRS: Self = OptionType.LONG + 110
+    alias PROXY_AUTH: Self = OptionType.LONG + 111
+    alias FTP_RESPONSE_TIMEOUT: Self = OptionType.LONG + 112
+    alias IP_RESOLVE: Self = OptionType.LONG + 113
+    alias MAX_FILE_SIZE: Self = OptionType.LONG + 114
+    alias IN_FILE_SIZE_LARGE: Self = OptionType.OFF_T + 115
+    alias RESUME_FROM_LARGE: Self = OptionType.OFF_T + 116
+    alias MAX_FILE_SIZE_LARGE: Self = OptionType.OFF_T + 117
+    alias NETRC_FILE: Self = OptionType.OBJECT_POINT + 118
+    alias USE_SSL: Self = OptionType.LONG + 119
+    alias POST_FIELD_SIZE_LARGE: Self = OptionType.OFF_T + 120
+    alias TCP_NODELAY: Self = OptionType.LONG + 121
+    alias FTP_SSL_AUTH: Self = OptionType.LONG + 129
+    alias IOCTL_FUNCTION: Self = OptionType.FUNCTION_POINT + 130
+    alias IOCTL_DATA: Self = OptionType.OBJECT_POINT + 131
+    alias FTP_ACCOUNT: Self = OptionType.OBJECT_POINT + 134
+    alias COOKIE_LIST: Self = OptionType.OBJECT_POINT + 135
+    alias IGNORE_CONTENT_LENGTH: Self = OptionType.LONG + 136
+    alias FTP_SKIP_PASV_IP: Self = OptionType.LONG + 137
+    alias FTP_FILE_METHOD: Self = OptionType.LONG + 138
+    alias LOCAL_PORT: Self = OptionType.LONG + 139
+    alias LOCAL_PORT_RANGE: Self = OptionType.LONG + 140
+    alias CONNECT_ONLY: Self = OptionType.LONG + 141
+    alias CONV_FROM_NETWORK_FUNCTION: Self = OptionType.FUNCTION_POINT + 142
+    alias CONV_TO_NETWORK_FUNCTION: Self = OptionType.FUNCTION_POINT + 143
+    alias CONV_FROM_UTF8_FUNCTION: Self = OptionType.FUNCTION_POINT + 144
+    alias MAX_SEND_SPEED_LARGE: Self = OptionType.OFF_T + 145
+    alias MAX_RECV_SPEED_LARGE: Self = OptionType.OFF_T + 146
+    alias FTP_ALTERNATIVE_TO_USER: Self = OptionType.OBJECT_POINT + 147
+    alias SOCKOPT_FUNCTION: Self = OptionType.FUNCTION_POINT + 148
+    alias SOCKOPT_DATA: Self = OptionType.OBJECT_POINT + 149
+    alias SSL_SESSIONID_CACHE: Self = OptionType.LONG + 150
+    alias SSH_AUTH_TYPES: Self = OptionType.LONG + 151
+    alias SSH_PUBLIC_KEYFILE: Self = OptionType.OBJECT_POINT + 152
+    alias SSH_PRIVATE_KEYFILE: Self = OptionType.OBJECT_POINT + 153
+    alias FTP_SSL_CCC: Self = OptionType.LONG + 154
+    alias TIMEOUT_MS: Self = OptionType.LONG + 155
+    alias CONNECT_TIMEOUT_MS: Self = OptionType.LONG + 156
+    alias HTTP_TRANSFER_DECODING: Self = OptionType.LONG + 157
+    alias HTTP_CONTENT_DECODING: Self = OptionType.LONG + 158
+    alias NEW_FILE_PERMS: Self = OptionType.LONG + 159
+    alias NEW_DIRECTORY_PERMS: Self = OptionType.LONG + 160
+    alias POST_REDIR: Self = OptionType.LONG + 161
+    alias SSH_HOST_PUBLIC_KEY_MD5: Self = OptionType.OBJECT_POINT + 162
+    alias OPEN_SOCKET_FUNCTION: Self = OptionType.FUNCTION_POINT + 163
+    alias OPEN_SOCKET_DATA: Self = OptionType.OBJECT_POINT + 164
+    alias COPY_POST_FIELDS: Self = OptionType.OBJECT_POINT + 165
+    alias PROXY_TRANSFER_MODE: Self = OptionType.LONG + 166
+    alias SEEK_FUNCTION: Self = OptionType.FUNCTION_POINT + 167
+    alias SEEK_DATA: Self = OptionType.OBJECT_POINT + 168
+    alias CRL_FILE: Self = OptionType.OBJECT_POINT + 169
+    alias ISSUER_CERT: Self = OptionType.OBJECT_POINT + 170
+    alias ADDRESS_SCOPE: Self = OptionType.LONG + 171
+    alias CERT_INFO: Self = OptionType.LONG + 172
+    alias USERNAME: Self = OptionType.OBJECT_POINT + 173
+    alias PASSWORD: Self = OptionType.OBJECT_POINT + 174
+    alias PROXY_USERNAME: Self = OptionType.OBJECT_POINT + 175
+    alias PROXY_PASSWORD: Self = OptionType.OBJECT_POINT + 176
+    alias NO_PROXY: Self = OptionType.OBJECT_POINT + 177
+    alias TFTP_BLK_SIZE: Self = OptionType.LONG + 178
+    alias SOCKS5_GSSAPI_SERVICE: Self = OptionType.OBJECT_POINT + 179
+    alias SOCKS5_GSSAPI_NEC: Self = OptionType.LONG + 180
+    alias PROTOCOLS: Self = OptionType.LONG + 181
+    alias REDIR_PROTOCOLS: Self = OptionType.LONG + 182
+    alias SSH_KNOWNHOSTS: Self = OptionType.OBJECT_POINT + 183
+    alias SSH_KEY_FUNCTION: Self = OptionType.FUNCTION_POINT + 184
+    alias SSH_KEY_DATA: Self = OptionType.OBJECT_POINT + 185
+    alias MAIL_FROM: Self = OptionType.OBJECT_POINT + 186
+    alias MAIL_RCPT: Self = OptionType.OBJECT_POINT + 187
+    alias FTP_USE_PRET: Self = OptionType.LONG + 188
+    alias RTSP_REQUEST: Self = OptionType.LONG + 189
+    alias RTSP_SESSION_ID: Self = OptionType.OBJECT_POINT + 190
+    alias RTSP_STREAM_URI: Self = OptionType.OBJECT_POINT + 191
+    alias RTSP_TRANSPORT: Self = OptionType.OBJECT_POINT + 192
+    alias RTSP_CLIENT_CSEQ: Self = OptionType.LONG + 193
+    alias RTSP_SERVER_CSEQ: Self = OptionType.LONG + 194
+    alias INTERLEAVE_DATA: Self = OptionType.OBJECT_POINT + 195
+    alias INTERLEAVE_FUNCTION: Self = OptionType.FUNCTION_POINT + 196
+    alias WILDCARD_MATCH: Self = OptionType.LONG + 197
+    alias CHUNK_BGN_FUNCTION: Self = OptionType.FUNCTION_POINT + 198
+    alias CHUNK_END_FUNCTION: Self = OptionType.FUNCTION_POINT + 199
+    alias FN_MATCH_FUNCTION: Self = OptionType.FUNCTION_POINT + 200
+    alias CHUNK_DATA: Self = OptionType.OBJECT_POINT + 201
+    alias FN_MATCH_DATA: Self = OptionType.OBJECT_POINT + 202
+    alias RESOLVE: Self = OptionType.OBJECT_POINT + 203
+    alias TLS_AUTH_USERNAME: Self = OptionType.OBJECT_POINT + 204
+    alias TLS_AUTH_PASSWORD: Self = OptionType.OBJECT_POINT + 205
+    alias TLS_AUTH_TYPE: Self = OptionType.OBJECT_POINT + 206
+    alias TRANSFER_ENCODING: Self = OptionType.LONG + 207
+    alias CLOSE_SOCKET_FUNCTION: Self = OptionType.FUNCTION_POINT + 208
+    alias CLOSE_SOCKET_DATA: Self = OptionType.OBJECT_POINT + 209
+    alias GSSAPI_DELEGATION: Self = OptionType.LONG + 210
+    alias DNS_SERVERS: Self = OptionType.OBJECT_POINT + 211
+    alias TCP_KEEPALIVE: Self = OptionType.LONG + 213
+    alias TCP_KEEPIDLE: Self = OptionType.LONG + 214
+    alias TCP_KEEPINTVL: Self = OptionType.LONG + 215
+    alias SSL_OPTIONS: Self = OptionType.LONG + 216
+    alias EXPECT_100_TIMEOUT_MS: Self = OptionType.LONG + 227
+    alias PINNED_PUBLIC_KEY: Self = OptionType.OBJECT_POINT + 230
+    alias UNIX_SOCKET_PATH: Self = OptionType.OBJECT_POINT + 231
+    alias PATH_AS_IS: Self = OptionType.LONG + 234
+    alias PIPE_WAIT: Self = OptionType.LONG + 237
+    alias CONNECT_TO: Self = OptionType.OBJECT_POINT + 243
+    alias PROXY_CAINFO: Self = OptionType.OBJECT_POINT + 246
+    alias PROXY_CAPATH: Self = OptionType.OBJECT_POINT + 247
+    alias PROXY_SSL_VERIFYPEER: Self = OptionType.LONG + 248
+    alias PROXY_SSL_VERIFYHOST: Self = OptionType.LONG + 249
+    alias PROXY_SSL_VERSION: Self = OptionType.VALUES + 250
+    alias PROXY_SSL_CERT: Self = OptionType.OBJECT_POINT + 254
+    alias PROXY_SSL_CERT_TYPE: Self = OptionType.OBJECT_POINT + 255
+    alias PROXY_SSL_KEY: Self = OptionType.OBJECT_POINT + 256
+    alias PROXY_SSL_KEY_TYPE: Self = OptionType.OBJECT_POINT + 257
+    alias PROXY_KEYPASSWD: Self = OptionType.OBJECT_POINT + 258
+    alias PROXY_SSL_CIPHER_LIST: Self = OptionType.OBJECT_POINT + 259
+    alias PROXY_CRL_FILE: Self = OptionType.OBJECT_POINT + 260
+    alias PROXY_SSL_OPTIONS: Self = OptionType.LONG + 261
+    alias ABSTRACT_UNIX_SOCKET: Self = OptionType.OBJECT_POINT + 264
+    alias DOH_URL: Self = OptionType.OBJECT_POINT + 279
+    alias UPLOAD_BUFFER_SIZE: Self = OptionType.LONG + 280
+    alias HTTP09_ALLOWED: Self = OptionType.LONG + 285
+    alias MAX_AGE_CONN: Self = OptionType.LONG + 288
+    alias SSL_CERT_BLOB: Self = OptionType.BLOB + 291
+    alias SSL_KEY_BLOB: Self = OptionType.BLOB + 292
+    alias PROXY_SSL_CERT_BLOB: Self = OptionType.BLOB + 293
+    alias PROXY_SSL_KEY_BLOB: Self = OptionType.BLOB + 294
+    alias ISSUER_CERT_BLOB: Self = OptionType.BLOB + 295
+    alias PROXY_ISSUER_CERT: Self = OptionType.OBJECT_POINT + 296
+    alias PROXY_ISSUER_CERT_BLOB: Self = OptionType.BLOB + 297
+    alias AWS_SIGV4: Self = OptionType.OBJECT_POINT + 305
+    alias DOH_SSL_VERIFY_PEER: Self = OptionType.LONG + 306
+    alias DOH_SSL_VERIFY_HOST: Self = OptionType.LONG + 307
+    alias DOH_SSL_VERIFY_STATUS: Self = OptionType.LONG + 308
+    alias CAINFO_BLOB: Self = OptionType.BLOB + 309
+    alias PROXY_CAINFO_BLOB: Self = OptionType.BLOB + 310
 
     @implicit
     fn __init__(out self, value: Int):
@@ -446,6 +451,10 @@ struct Option(Copyable, Movable):
     @implicit
     fn __init__(out self, value: c_int):
         self.value = value
+    
+    @implicit
+    fn __init__(out self, value: OptionType):
+        self.value = value.value
 
 
 @fieldwise_init
@@ -465,6 +474,9 @@ struct InfoType(Copyable, Movable):
     @implicit
     fn __init__(out self, value: Int):
         self.value = value
+    
+    fn __add__(self, value: Int) -> InfoType:
+        return InfoType(self.value + value)
 
 
 # Info options (commonly used ones)
@@ -474,48 +486,48 @@ struct Info(Copyable, Movable):
 
     var value: c_int
 
-    alias EFFECTIVE_URL: Self = InfoType.STRING.value + 1
-    alias RESPONSE_CODE: Self = InfoType.LONG.value + 2
-    alias TOTAL_TIME: Self = InfoType.DOUBLE.value + 3
-    alias NAME_LOOKUP_TIME: Self = InfoType.DOUBLE.value + 4
-    alias CONNECT_TIME: Self = InfoType.DOUBLE.value + 5
-    alias PRE_TRANSFER_TIME: Self = InfoType.DOUBLE.value + 6
-    alias SIZE_UPLOAD: Self = InfoType.DOUBLE.value + 7
-    alias SIZE_DOWNLOAD: Self = InfoType.DOUBLE.value + 8
-    alias SPEED_DOWNLOAD: Self = InfoType.DOUBLE.value + 9
-    alias SPEED_UPLOAD: Self = InfoType.DOUBLE.value + 10
-    alias HEADER_SIZE: Self = InfoType.LONG.value + 11
-    alias REQUEST_SIZE: Self = InfoType.LONG.value + 12
-    alias SSL_VERIFY_RESULT: Self = InfoType.LONG.value + 13
-    alias FILE_TIME: Self = InfoType.LONG.value + 14
-    alias CONTENT_LENGTH_DOWNLOAD: Self = InfoType.DOUBLE.value + 15
-    alias CONTENT_LENGTH_UPLOAD: Self = InfoType.DOUBLE.value + 16
-    alias START_TRANSFER_TIME: Self = InfoType.DOUBLE.value + 17
-    alias CONTENT_TYPE: Self = InfoType.STRING.value + 18
-    alias REDIRECT_TIME: Self = InfoType.DOUBLE.value + 19
-    alias REDIRECT_COUNT: Self = InfoType.LONG.value + 20
-    alias PRIVATE: Self = InfoType.STRING.value + 21
-    alias HTTP_CONNECT_CODE: Self = InfoType.LONG.value + 22
-    alias HTTP_AUTH_AVAIL: Self = InfoType.LONG.value + 23
-    alias PROXY_AUTH_AVAIL: Self = InfoType.LONG.value + 24
-    alias OS_ERRNO: Self = InfoType.LONG.value + 25
-    alias NUM_CONNECTS: Self = InfoType.LONG.value + 26
-    alias SSL_ENGINES: Self = InfoType.SLIST.value + 27
-    alias COOKIE_LIST: Self = InfoType.SLIST.value + 28
-    alias LAST_SOCKET: Self = InfoType.LONG.value + 29
-    alias FTP_ENTRY_PATH: Self = InfoType.STRING.value + 30
-    alias REDIRECT_URL: Self = InfoType.STRING.value + 31
-    alias PRIMARY_IP: Self = InfoType.STRING.value + 32
-    alias APP_CONNECT_TIME: Self = InfoType.DOUBLE.value + 33
-    alias CERTINFO: Self = InfoType.SLIST.value + 34
-    alias CONDITION_UNMET: Self = InfoType.LONG.value + 35
-    alias RTSP_SESSION_ID: Self = InfoType.STRING.value + 36
-    alias RTSP_CLIENT_CSEQ: Self = InfoType.LONG.value + 37
-    alias RTSP_SERVER_CSEQ: Self = InfoType.LONG.value + 38
-    alias RTSP_CSEQ_RECV: Self = InfoType.LONG.value + 39
-    alias PRIMARY_PORT: Self = InfoType.LONG.value + 40
-    alias LOCAL_IP: Self = InfoType.STRING.value + 41
-    alias LOCAL_PORT: Self = InfoType.LONG.value + 42
+    alias EFFECTIVE_URL: Self = InfoType.STRING + 1
+    alias RESPONSE_CODE: Self = InfoType.LONG + 2
+    alias TOTAL_TIME: Self = InfoType.DOUBLE + 3
+    alias NAME_LOOKUP_TIME: Self = InfoType.DOUBLE + 4
+    alias CONNECT_TIME: Self = InfoType.DOUBLE + 5
+    alias PRE_TRANSFER_TIME: Self = InfoType.DOUBLE + 6
+    alias SIZE_UPLOAD: Self = InfoType.DOUBLE + 7
+    alias SIZE_DOWNLOAD: Self = InfoType.DOUBLE + 8
+    alias SPEED_DOWNLOAD: Self = InfoType.DOUBLE + 9
+    alias SPEED_UPLOAD: Self = InfoType.DOUBLE + 10
+    alias HEADER_SIZE: Self = InfoType.LONG + 11
+    alias REQUEST_SIZE: Self = InfoType.LONG + 12
+    alias SSL_VERIFY_RESULT: Self = InfoType.LONG + 13
+    alias FILE_TIME: Self = InfoType.LONG + 14
+    alias CONTENT_LENGTH_DOWNLOAD: Self = InfoType.DOUBLE + 15
+    alias CONTENT_LENGTH_UPLOAD: Self = InfoType.DOUBLE + 16
+    alias START_TRANSFER_TIME: Self = InfoType.DOUBLE + 17
+    alias CONTENT_TYPE: Self = InfoType.STRING + 18
+    alias REDIRECT_TIME: Self = InfoType.DOUBLE + 19
+    alias REDIRECT_COUNT: Self = InfoType.LONG + 20
+    alias PRIVATE: Self = InfoType.STRING + 21
+    alias HTTP_CONNECT_CODE: Self = InfoType.LONG + 22
+    alias HTTP_AUTH_AVAIL: Self = InfoType.LONG + 23
+    alias PROXY_AUTH_AVAIL: Self = InfoType.LONG + 24
+    alias OS_ERRNO: Self = InfoType.LONG + 25
+    alias NUM_CONNECTS: Self = InfoType.LONG + 26
+    alias SSL_ENGINES: Self = InfoType.SLIST + 27
+    alias COOKIE_LIST: Self = InfoType.SLIST + 28
+    alias LAST_SOCKET: Self = InfoType.LONG + 29
+    alias FTP_ENTRY_PATH: Self = InfoType.STRING + 30
+    alias REDIRECT_URL: Self = InfoType.STRING + 31
+    alias PRIMARY_IP: Self = InfoType.STRING + 32
+    alias APP_CONNECT_TIME: Self = InfoType.DOUBLE + 33
+    alias CERTINFO: Self = InfoType.SLIST + 34
+    alias CONDITION_UNMET: Self = InfoType.LONG + 35
+    alias RTSP_SESSION_ID: Self = InfoType.STRING + 36
+    alias RTSP_CLIENT_CSEQ: Self = InfoType.LONG + 37
+    alias RTSP_SERVER_CSEQ: Self = InfoType.LONG + 38
+    alias RTSP_CSEQ_RECV: Self = InfoType.LONG + 39
+    alias PRIMARY_PORT: Self = InfoType.LONG + 40
+    alias LOCAL_IP: Self = InfoType.STRING + 41
+    alias LOCAL_PORT: Self = InfoType.LONG + 42
 
     @implicit
     fn __init__(out self, value: Int):
@@ -524,6 +536,10 @@ struct Info(Copyable, Movable):
     @implicit
     fn __init__(out self, value: Int32):
         self.value = value
+    
+    @implicit
+    fn __init__(out self, value: InfoType):
+        self.value = value.value
 
 
 # HTTP version options

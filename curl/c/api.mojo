@@ -2,24 +2,23 @@ from sys.ffi import _get_global, _Global
 
 from curl.c.bindings import curl
 from curl.c.types import CURL_GLOBAL_DEFAULT
-from memory.legacy_unsafe_pointer import LegacyUnsafePointer
 
 
-fn _init_global() -> LegacyUnsafePointer[NoneType]:
+fn _init_global() -> OpaquePointer[MutAnyOrigin]:
     var ptr = alloc[curl](1)
     ptr[] = curl()
     _ = ptr[].global_init(CURL_GLOBAL_DEFAULT)
     return ptr.bitcast[NoneType]()
 
 
-fn _destroy_global(lib: LegacyUnsafePointer[NoneType]):
+fn _destroy_global(lib: OpaquePointer[MutAnyOrigin]):
     var p = lib.bitcast[curl]()
     p[].global_cleanup()
     lib.free()
 
 
 @always_inline
-fn get_curl_handle() -> LegacyUnsafePointer[curl]:
+fn get_curl_handle() -> UnsafePointer[curl, MutAnyOrigin]:
     """Initializes or gets the global curl handle.
 
     DO NOT FREE THE POINTER MANUALLY. It will be freed automatically on program exit.

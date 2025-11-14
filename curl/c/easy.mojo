@@ -332,28 +332,28 @@
 #             datestr, unused
 #         )
 
-#     # String list functions
-#     fn curl_slist_append(self, list: curl_slist, string: UnsafePointer[c_char, mut=False]) -> curl_slist:
-#         """Append a string to a curl string list.
+    # # String list functions
+    # fn curl_slist_append(self, list: curl_slist, string: UnsafePointer[c_char, mut=False]) -> curl_slist:
+    #     """Append a string to a curl string list.
 
-#         Args:
-#             list: The existing string list (can be NULL).
-#             string: The string to append.
+    #     Args:
+    #         list: The existing string list (can be NULL).
+    #         string: The string to append.
 
-#         Returns:
-#             A pointer to the new list, or NULL on error.
-#         """
-#         return self.lib.get_function[fn (curl_slist, UnsafePointer[c_char, mut=False]) -> curl_slist]("curl_slist_append")(
-#             list, string
-#         )
+    #     Returns:
+    #         A pointer to the new list, or NULL on error.
+    #     """
+    #     return self.lib.get_function[fn (curl_slist, UnsafePointer[c_char, mut=False]) -> curl_slist]("curl_slist_append")(
+    #         list, string
+    #     )
 
-#     fn curl_slist_free_all(self, list: curl_slist) -> NoneType:
-#         """Free an entire curl string list.
+    # fn curl_slist_free_all(self, list: curl_slist) -> NoneType:
+    #     """Free an entire curl string list.
 
-#         Args:
-#             list: The string list to free.
-#         """
-#         return self.lib.get_function[fn (curl_slist) -> NoneType]("curl_slist_free_all")(list)
+    #     Args:
+    #         list: The string list to free.
+    #     """
+    #     return self.lib.get_function[fn (curl_slist) -> NoneType]("curl_slist_free_all")(list)
 
 #     # URL encoding/decoding functions
 #     fn curl_easy_escape(self, curl: CURL, string: UnsafePointer[c_char, mut=False], length: c_int) -> UnsafePointer[c_char]:
