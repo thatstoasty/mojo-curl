@@ -727,12 +727,12 @@ struct Easy:
         """
         return self.inner.set_option(Option.POST_REDIR, redirects)
 
-    fn put(mut self, enable: Bool) -> Result:
-        """Make an HTTP PUT request.
+    # fn put(mut self, enable: Bool) -> Result:
+    #     """Make an HTTP PUT request.
 
-        By default this option is `false` and corresponds to `CURLOPT_PUT`.
-        """
-        return self.inner.set_option(Option.PUT, Int(enable))
+    #     By default this option is `false` and corresponds to `CURLOPT_PUT`.
+    #     """
+    #     return self.inner.set_option(Option.PUT, Int(enable))
 
     fn post(mut self, enable: Bool) -> Result:
         """Make an HTTP POST request.
@@ -746,19 +746,28 @@ struct Easy:
         By default this option is `false` and corresponds to `CURLOPT_POST`.
         """
         return self.inner.set_option(Option.POST, Int(enable))
+    
+    fn post_fields(mut self, data: Span[UInt8]) -> Result:
+        """Configures the data that will be uploaded as part of a POST.
+    
+        Note that the data is copied into this handle and if that's not desired
+        then the read callbacks can be used instead.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COPYPOSTFIELDS`.
+        """
+        return self.inner.post_fields(data)
 
-    # TODO: post_fields_copy - needs byte array handling
-    # fn post_fields_copy(mut self, data: List[UInt8]) -> Result:
-    #     """Configures the data that will be uploaded as part of a POST.
-    #
-    #     Note that the data is copied into this handle and if that's not desired
-    #     then the read callbacks can be used instead.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_COPYPOSTFIELDS`.
-    #     """
-    #     # TODO: Implement this when we have better byte array support
-    #     pass
+    fn post_fields_copy(mut self, data: Span[UInt8]) -> Result:
+        """Configures the data that will be uploaded as part of a POST.
+    
+        Note that the data is copied into this handle and if that's not desired
+        then the read callbacks can be used instead.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COPYPOSTFIELDS`.
+        """
+        self.inner.post_fields_copy(data)
 
     fn post_field_size(mut self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
@@ -771,7 +780,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_POSTFIELDSIZE_LARGE`.
         """
-        return self.inner.set_option(Option.POST_FIELD_SIZE_LARGE, size)
+        return self.inner.post_field_size(size)
 
     # TODO: httppost - needs Form type implementation
     # fn httppost(mut self, form: Form) -> Result:

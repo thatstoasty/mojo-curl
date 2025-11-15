@@ -42,14 +42,21 @@ struct curl:
     fn easy_setopt(self, easy: ExternalImmutOpaquePointer, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_string(easy, option.value, parameter.unsafe_cstr_ptr())
+    
+    fn easy_setopt[origin: ImmutOrigin](
+        self, easy: ExternalImmutOpaquePointer, option: Option, parameter: Span[UInt8, origin]
+    ) -> Result:
+        """Set a pointer option for a curl easy handle using safe wrapper."""
+        var ptr = parameter.unsafe_ptr().bitcast[c_char]()
+        return self.lib.curl_easy_setopt_string(easy, option.value, ptr)
 
     fn easy_setopt(self, easy: ExternalImmutOpaquePointer, option: Option, parameter: c_long) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
-    fn easy_setopt[
-        origin: MutOrigin
-    ](self, easy: ExternalImmutOpaquePointer, option: Option, parameter: OpaqueMutPointer[origin]) -> Result:
+    fn easy_setopt[origin: MutOrigin](
+        self, easy: ExternalImmutOpaquePointer, option: Option, parameter: OpaqueMutPointer[origin]
+    ) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 

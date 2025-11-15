@@ -40,7 +40,6 @@ fn parse_response_headers(mut r: ByteReader) raises -> Tuple[Protocol, String, S
     )
 
 
-
 @fieldwise_init
 struct HTTPResponse(Movable):
     var headers: Dict[String, String]
@@ -59,7 +58,7 @@ struct HTTPResponse(Movable):
 
         # TODO: Use easy to get protocol, status, code and reason.
         var protocol: Protocol = Protocol.from_string(easy.get_scheme())
-        var status_code: String = "200"
+        var status_code = easy.response_code()
         var reason: String = "OK"
 
         # try:
@@ -172,7 +171,7 @@ struct HTTPResponse(Movable):
         # cookies: ResponseCookieJar = ResponseCookieJar(),
         status_code: StatusCode = StatusCode.OK,
         reason: String = "OK",
-        protocol: Protocol = Protocol.HTTP_11,
+        protocol: Protocol = Protocol.HTTP,
     ) raises:
         self.headers = headers^
         # self.cookies = cookies

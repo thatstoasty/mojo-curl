@@ -1,19 +1,16 @@
 @fieldwise_init
 struct Protocol(ImplicitlyCopyable, Copyable, Movable, Writable):
     var value: UInt8
-    alias HTTP_10 = Self(0)
-    alias HTTP_11 = Self(1)
-    alias HTTPS = Self(2)
+    alias HTTP = Self(0)
+    alias HTTPS = Self(1)
 
     fn write_to[T: Writer, //](self, mut writer: T):
         writer.write(self.value)
 
     @staticmethod
     fn from_string(s: StringSlice) raises -> Self:
-        if s == "HTTP/1.1":
-            return Self.HTTP_11
-        elif s == "HTTP/1.0":
-            return Self.HTTP_10
+        if s == "http":
+            return Self.HTTP
         elif s == "https":
             # HTTP/2 is not yet supported; default to HTTP/1.1
             return Self.HTTPS
@@ -257,7 +254,7 @@ struct StatusCode(Copyable, EqualityComparable, Movable, Writable):
 
 
 @fieldwise_init
-struct RequestMethod(ImplicitlyCopyable, Copyable, Movable, Writable):
+struct RequestMethod(ImplicitlyCopyable, Copyable, Movable, Writable, EqualityComparable):
     var value: UInt8
 
     alias GET = Self(0)
@@ -272,7 +269,7 @@ struct RequestMethod(ImplicitlyCopyable, Copyable, Movable, Writable):
         writer.write(self.value)
 
     @staticmethod
-    fn from_string(s: StringSlice) raises -> RequestMethod:
+    fn from_string(s: StringSlice) raises -> Self:
         if s == "GET":
             return RequestMethod.GET
         elif s == "POST":
@@ -289,3 +286,6 @@ struct RequestMethod(ImplicitlyCopyable, Copyable, Movable, Writable):
             return RequestMethod.OPTIONS
         else:
             raise Error("Invalid HTTP method: ", s)
+
+    fn __eq__(self, other: Self) -> Bool:
+        return self.value == other.value

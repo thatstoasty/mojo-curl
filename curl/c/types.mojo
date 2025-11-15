@@ -216,7 +216,6 @@ struct Option(Copyable, Movable):
     alias RESUME_FROM: Self = Self.LONG + 21
     alias COOKIE: Self = Self.OBJECT_POINT + 22
     alias HTTP_HEADER: Self = Self.OBJECT_POINT + 23
-    alias HTTP_POST: Self = Self.OBJECT_POINT + 24
     alias SSL_CERT: Self = Self.OBJECT_POINT + 25
     alias KEY_PASSWD: Self = Self.OBJECT_POINT + 26
     alias CRLF: Self = Self.LONG + 27
@@ -241,8 +240,6 @@ struct Option(Copyable, Movable):
     alias NETRC: Self = Self.LONG + 51
     alias FOLLOW_LOCATION: Self = Self.LONG + 52
     alias TRANSFER_TEXT: Self = Self.LONG + 53
-    alias PUT: Self = Self.LONG + 54
-    alias PROGRESS_FUNCTION: Self = Self.FUNCTION_POINT + 56
     alias PROGRESS_DATA: Self = Self.OBJECT_POINT + 57
     alias AUTO_REFERER: Self = Self.LONG + 58
     alias PROXY_PORT: Self = Self.LONG + 59
@@ -258,8 +255,6 @@ struct Option(Copyable, Movable):
     alias MAX_CONNECTS: Self = Self.LONG + 71
     alias FRESH_CONNECT: Self = Self.LONG + 74
     alias FORBID_REUSE: Self = Self.LONG + 75
-    alias RANDOM_FILE: Self = Self.OBJECT_POINT + 76
-    alias EGD_SOCKET: Self = Self.OBJECT_POINT + 77
     alias CONNECT_TIMEOUT: Self = Self.LONG + 78
     alias HEADER_FUNCTION: Self = Self.FUNCTION_POINT + 79
     alias HTTPGET: Self = Self.LONG + 80
@@ -273,7 +268,6 @@ struct Option(Copyable, Movable):
     alias SSL_KEY_TYPE: Self = Self.OBJECT_POINT + 88
     alias SSL_ENGINE: Self = Self.OBJECT_POINT + 89
     alias SSL_ENGINE_DEFAULT: Self = Self.LONG + 90
-    alias DNS_USE_GLOBAL_CACHE: Self = Self.LONG + 91
     alias DNS_CACHE_TIMEOUT: Self = Self.LONG + 92
     alias PREQUOTE: Self = Self.OBJECT_POINT + 93
     alias DEBUG_FUNCTION: Self = Self.FUNCTION_POINT + 94
@@ -305,8 +299,6 @@ struct Option(Copyable, Movable):
     alias POST_FIELD_SIZE_LARGE: Self = Self.OFF_T + 120
     alias TCP_NODELAY: Self = Self.LONG + 121
     alias FTP_SSL_AUTH: Self = Self.LONG + 129
-    alias IOCTL_FUNCTION: Self = Self.FUNCTION_POINT + 130
-    alias IOCTL_DATA: Self = Self.OBJECT_POINT + 131
     alias FTP_ACCOUNT: Self = Self.OBJECT_POINT + 134
     alias COOKIE_LIST: Self = Self.OBJECT_POINT + 135
     alias IGNORE_CONTENT_LENGTH: Self = Self.LONG + 136
@@ -315,9 +307,6 @@ struct Option(Copyable, Movable):
     alias LOCAL_PORT: Self = Self.LONG + 139
     alias LOCAL_PORT_RANGE: Self = Self.LONG + 140
     alias CONNECT_ONLY: Self = Self.LONG + 141
-    alias CONV_FROM_NETWORK_FUNCTION: Self = Self.FUNCTION_POINT + 142
-    alias CONV_TO_NETWORK_FUNCTION: Self = Self.FUNCTION_POINT + 143
-    alias CONV_FROM_UTF8_FUNCTION: Self = Self.FUNCTION_POINT + 144
     alias MAX_SEND_SPEED_LARGE: Self = Self.OFF_T + 145
     alias MAX_RECV_SPEED_LARGE: Self = Self.OFF_T + 146
     alias FTP_ALTERNATIVE_TO_USER: Self = Self.OBJECT_POINT + 147
@@ -352,10 +341,7 @@ struct Option(Copyable, Movable):
     alias PROXY_PASSWORD: Self = Self.OBJECT_POINT + 176
     alias NO_PROXY: Self = Self.OBJECT_POINT + 177
     alias TFTP_BLK_SIZE: Self = Self.LONG + 178
-    alias SOCKS5_GSSAPI_SERVICE: Self = Self.OBJECT_POINT + 179
     alias SOCKS5_GSSAPI_NEC: Self = Self.LONG + 180
-    alias PROTOCOLS: Self = Self.LONG + 181
-    alias REDIR_PROTOCOLS: Self = Self.LONG + 182
     alias SSH_KNOWNHOSTS: Self = Self.OBJECT_POINT + 183
     alias SSH_KEY_FUNCTION: Self = Self.FUNCTION_POINT + 184
     alias SSH_KEY_DATA: Self = Self.OBJECT_POINT + 185
@@ -426,6 +412,25 @@ struct Option(Copyable, Movable):
     alias DOH_SSL_VERIFY_STATUS: Self = Self.LONG + 308
     alias CAINFO_BLOB: Self = Self.BLOB + 309
     alias PROXY_CAINFO_BLOB: Self = Self.BLOB + 310
+    alias SSH_HOST_PUBLIC_KEY_SHA256: Self = Self.OBJECT_POINT + 311
+    alias PREREQ_FUNCTION: Self = Self.FUNCTION_POINT + 312
+    alias PREREQ_DATA: Self = Self.OBJECT_POINT + 313
+    alias MAX_LIFETIME_CONN: Self = Self.LONG + 314
+    alias MIME_OPTIONS: Self = Self.LONG + 315
+    alias SSH_HOST_KEY_FUNCTION: Self = Self.FUNCTION_POINT + 316
+    alias SSH_HOST_KEY_DATA: Self = Self.OBJECT_POINT + 317
+    alias PROTOCOLS_STR: Self = Self.OBJECT_POINT + 318
+    alias REDIR_PROTOCOLS_STR: Self = Self.OBJECT_POINT + 319
+    alias WS_OPTIONS: Self = Self.LONG + 320
+    alias CA_CACHE_TIMEOUT: Self = Self.LONG + 321
+    alias QUICK_EXIT: Self = Self.LONG + 322
+    alias HAPROXY_CLIENT_IP: Self = Self.OBJECT_POINT + 323
+    alias SERVER_RESPONSE_TIMEOUT_MS: Self = Self.LONG + 324
+    alias ECH: Self = Self.OBJECT_POINT + 325
+    alias TCP_KEEPCNT: Self = Self.LONG + 326
+    alias UPLOAD_FLAGS: Self = Self.LONG + 327
+    alias SSL_SIGNATURE_ALGORITHMS: Self = Self.OBJECT_POINT + 328
+
 
     @implicit
     fn __init__(out self, value: Int):
@@ -454,74 +459,141 @@ struct Info(Copyable, Movable):
     alias TYPE_MASK = 0xF00000
 
     alias EFFECTIVE_URL: Self = Self.STRING + 1
+    """[CURLINFO_EFFECTIVE_URL] Get the last used effective URL."""
     alias RESPONSE_CODE: Self = Self.LONG + 2
+    """[CURLINFO_RESPONSE_CODE] Get the last received response code."""
     alias TOTAL_TIME: Self = Self.DOUBLE + 3
+    """[CURLINFO_TOTAL_TIME] Get total time of previous transfer."""
     alias NAME_LOOKUP_TIME: Self = Self.DOUBLE + 4
+    """[CURLINFO_NAME_LOOKUP_TIME] Get time from start until name resolving completed."""
     alias CONNECT_TIME: Self = Self.DOUBLE + 5
+    """[CURLINFO_CONNECT_TIME] Get time from start until connect to remote host completed."""
     alias PRE_TRANSFER_TIME: Self = Self.DOUBLE + 6
-    alias SIZE_UPLOAD: Self = Self.DOUBLE + 7
-    alias SIZE_DOWNLOAD: Self = Self.DOUBLE + 8
-    alias SPEED_DOWNLOAD: Self = Self.DOUBLE + 9
-    alias SPEED_UPLOAD: Self = Self.DOUBLE + 10
+    """[CURLINFO_PRETRANSFER_TIME] Get time from start until file transfer is just about to begin."""
+    alias SIZE_UPLOAD_T: Self = Self.OFF_T + 7
+    """[CURLINFO_SIZE_UPLOAD_T] Get number of bytes uploaded."""
+    alias SIZE_DOWNLOAD_T: Self = Self.OFF_T + 8
+    """[CURLINFO_SIZE_DOWNLOAD_T] Get number of bytes downloaded."""
+    alias SPEED_DOWNLOAD_T: Self = Self.OFF_T + 9
+    """[CURLINFO_SPEED_DOWNLOAD_T] Get average download speed in number of bytes per second."""
+    alias SPEED_UPLOAD_T: Self = Self.OFF_T + 10
+    """[CURLINFO_SPEED_UPLOAD_T] Get average upload speed in number of bytes per second."""
     alias HEADER_SIZE: Self = Self.LONG + 11
+    """[CURLINFO_HEADER_SIZE] Get number of bytes of all headers received."""
     alias REQUEST_SIZE: Self = Self.LONG + 12
+    """[CURLINFO_REQUEST_SIZE] Get number of bytes sent in the issued HTTP requests."""
     alias SSL_VERIFY_RESULT: Self = Self.LONG + 13
+    """[CURLINFO_SSL_VERIFY_RESULT] Get certificate verification result."""
     alias FILE_TIME: Self = Self.LONG + 14
-    alias CONTENT_LENGTH_DOWNLOAD: Self = Self.DOUBLE + 15
-    alias CONTENT_LENGTH_UPLOAD: Self = Self.DOUBLE + 16
+    """[CURLINFO_FILE_TIME] Get remote time of the retrieved document."""
+    alias CONTENT_LENGTH_DOWNLOAD_T: Self = Self.OFF_T + 15
+    """[CURLINFO_CONTENT_LENGTH_DOWNLOAD_T] Get content length from the Content-Length header."""
+    alias CONTENT_LENGTH_UPLOAD_T: Self = Self.OFF_T + 16
+    """[CURLINFO_CONTENT_LENGTH_UPLOAD_T] Get upload size."""
     alias START_TRANSFER_TIME: Self = Self.DOUBLE + 17
+    """[CURLINFO_STARTTRANSFER_TIME] Get time from start until first byte is received by libcurl."""
     alias CONTENT_TYPE: Self = Self.STRING + 18
+    """[CURLINFO_CONTENT_TYPE] Get content type from the Content-Type: header."""
     alias REDIRECT_TIME: Self = Self.DOUBLE + 19
+    """[CURLINFO_REDIRECT_TIME] Get time for all redirection steps before final transaction started."""
     alias REDIRECT_COUNT: Self = Self.LONG + 20
+    """[CURLINFO_REDIRECT_COUNT] Get total number of redirects that were followed."""
     alias PRIVATE: Self = Self.STRING + 21
+    """[CURLINFO_PRIVATE] Get user's private data pointer."""
     alias HTTP_CONNECT_CODE: Self = Self.LONG + 22
+    """[CURLINFO_HTTP_CONNECTCODE] Get last proxy CONNECT response code."""
     alias HTTP_AUTH_AVAIL: Self = Self.LONG + 23
+    """[CURLINFO_HTTPAUTH_AVAIL] Get available HTTP authentication methods."""
     alias PROXY_AUTH_AVAIL: Self = Self.LONG + 24
+    """[CURLINFO_PROXYAUTH_AVAIL] Get available HTTP proxy authentication methods."""
     alias OS_ERRNO: Self = Self.LONG + 25
+    """[CURLINFO_OS_ERRNO] Get the errno from the last failure to connect."""
     alias NUM_CONNECTS: Self = Self.LONG + 26
+    """[CURLINFO_NUM_CONNECTS] Get number of new successful connections used for previous transfer."""
     alias SSL_ENGINES: Self = Self.SLIST + 27
+    """[CURLINFO_SSL_ENGINES] Get a list of OpenSSL crypto engines."""
     alias COOKIE_LIST: Self = Self.SLIST + 28
-    alias LAST_SOCKET: Self = Self.LONG + 29
+    """[CURLINFO_COOKIELIST] Get list of all known cookies."""
     alias FTP_ENTRY_PATH: Self = Self.STRING + 30
+    """[CURLINFO_FTP_ENTRY_PATH] Get the entry path after logging in to an FTP server."""
     alias REDIRECT_URL: Self = Self.STRING + 31
+    """[CURLINFO_REDIRECT_URL] Get URL a redirect would take you to, had you enabled redirects."""
     alias PRIMARY_IP: Self = Self.STRING + 32
+    """[CURLINFO_PRIMARY_IP] Get destination IP address of the last connection."""
     alias APP_CONNECT_TIME: Self = Self.DOUBLE + 33
+    """[CURLINFO_APPCONNECT_TIME] Get time from start until SSL connect/handshake completed."""
     alias CERTINFO: Self = Self.SLIST + 34
+    """[CURLINFO_CERTINFO] Get certificate chain."""
     alias CONDITION_UNMET: Self = Self.LONG + 35
+    """[CURLINFO_CONDITION_UNMET] Get whether or not a time conditional was met or 304 HTTP response."""
     alias RTSP_SESSION_ID: Self = Self.STRING + 36
+    """[CURLINFO_RTSP_SESSION_ID] Get RTSP session ID."""
     alias RTSP_CLIENT_CSEQ: Self = Self.LONG + 37
+    """[CURLINFO_RTSP_CLIENT_CSEQ] Get the RTSP client CSeq that is expected next."""
     alias RTSP_SERVER_CSEQ: Self = Self.LONG + 38
+    """[CURLINFO_RTSP_SERVER_CSEQ] Get the RTSP server CSeq that is expected next."""
     alias RTSP_CSEQ_RECV: Self = Self.LONG + 39
+    """[CURLINFO_RTSP_CSEQ_RECV] Get RTSP CSeq last received."""
     alias PRIMARY_PORT: Self = Self.LONG + 40
+    """[CURLINFO_PRIMARY_PORT] Get destination port of the last connection."""
     alias LOCAL_IP: Self = Self.STRING + 41
+    """[CURLINFO_LOCAL_IP] Get source IP address of the last connection."""
     alias LOCAL_PORT: Self = Self.LONG + 42
-    alias ACTIVESOCKET: Self = Self.SOCKET + 44
-    alias TLS_SSL_PTR: Self = Self.PTR    + 45
-    alias HTTP_VERSION: Self = Self.LONG   + 46
+    """[CURLINFO_LOCAL_PORT] Get source port number of the last connection."""
+    alias ACTIVE_SOCKET: Self = Self.SOCKET + 44
+    """[CURLINFO_ACTIVESOCKET] Get the session's active socket."""
+    alias TLS_SSL_PTR: Self = Self.PTR + 45
+    """[CURLINFO_TLS_SSL_PTR] Get TLS session info that can be used for further processing."""
+    alias HTTP_VERSION: Self = Self.LONG + 46
+    """[CURLINFO_HTTP_VERSION] Get the http version used in the connection."""
     alias PROXY_SSL_VERIFYRESULT: Self = Self.LONG + 47
+    """[CURLINFO_PROXY_SSL_VERIFYRESULT] Get proxy certificate verification result."""
     alias SCHEME: Self = Self.STRING + 49
+    """[CURLINFO_SCHEME] Get the scheme used for the connection."""
     alias TOTAL_TIME_T: Self = Self.OFF_T + 50
+    """[CURLINFO_TOTAL_TIME_T] Get total time of previous transfer in microseconds."""
     alias NAMELOOKUP_TIME_T: Self = Self.OFF_T + 51
+    """[CURLINFO_NAMELOOKUP_TIME_T] Get time from start until name resolving completed in microseconds."""
     alias CONNECT_TIME_T: Self = Self.OFF_T + 52
+    """[CURLINFO_CONNECT_TIME_T] Get time from start until connect to remote host completed in microseconds."""
     alias PRETRANSFER_TIME_T: Self = Self.OFF_T + 53
+    """[CURLINFO_PRETRANSFER_TIME_T] Get time from start until file transfer is just about to begin in microseconds."""
     alias STARTTRANSFER_TIME_T: Self = Self.OFF_T + 54
+    """[CURLINFO_STARTTRANSFER_TIME_T] Get time from start until first byte is received by libcurl in microseconds."""
     alias REDIRECT_TIME_T: Self = Self.OFF_T + 55
+    """[CURLINFO_REDIRECT_TIME_T] Get time for all redirection steps before final transaction started in microseconds."""
     alias APPCONNECT_TIME_T: Self = Self.OFF_T + 56
+    """[CURLINFO_APPCONNECT_TIME_T] Get time from start until SSL connect/handshake completed in microseconds."""
     alias RETRY_AFTER: Self = Self.OFF_T + 57
+    """[CURLINFO_RETRY_AFTER] Get the value from the Retry-After header."""
     alias EFFECTIVE_METHOD: Self = Self.STRING + 58
+    """[CURLINFO_EFFECTIVE_METHOD] Get last used HTTP method."""
     alias PROXY_ERROR: Self = Self.LONG + 59
+    """[CURLINFO_PROXY_ERROR] Get detailed proxy error."""
     alias REFERER: Self = Self.STRING + 60
+    """[CURLINFO_REFERER] Get referrer header."""
     alias CAINFO: Self = Self.STRING + 61
+    """[CURLINFO_CAINFO] Get the default value for CURLOPT_CAINFO."""
     alias CAPATH: Self = Self.STRING + 62
+    """[CURLINFO_CAPATH] Get the default value for CURLOPT_CAPATH."""
     alias XFER_ID: Self = Self.OFF_T + 63
+    """[CURLINFO_XFER_ID] Get the ID of the transfer."""
     alias CONN_ID: Self = Self.OFF_T + 64
+    """[CURLINFO_CONN_ID] Get the ID of the last connection used by the transfer."""
     alias QUEUE_TIME_T: Self = Self.OFF_T + 65
+    """[CURLINFO_QUEUE_TIME_T] Get the time the transfer was held in a waiting queue before it could start in microseconds."""
     alias USED_PROXY: Self = Self.LONG + 66
+    """[CURLINFO_USED_PROXY] Get whether the proxy was used."""
     alias POSTTRANSFER_TIME_T: Self = Self.OFF_T + 67
+    """[CURLINFO_POSTTRANSFER_TIME_T] Get the time from start until the last byte is sent by libcurl in microseconds."""
     alias EARLYDATA_SENT_T: Self = Self.OFF_T + 68
+    """[CURLINFO_EARLYDATA_SENT_T] Get amount of TLS early data sent in number of bytes."""
     alias HTTPAUTH_USED: Self = Self.LONG + 69
+    """[CURLINFO_HTTPAUTH_USED] Get used HTTP authentication method."""
     alias PROXYAUTH_USED: Self = Self.LONG + 70
+    """[CURLINFO_PROXYAUTH_USED] Get used HTTP proxy authentication methods."""
     alias LASTONE: Self = 70
+    """Marker for the last valid CURLINFO option."""
 
     @implicit
     fn __init__(out self, value: Int):

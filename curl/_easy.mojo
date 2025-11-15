@@ -15,6 +15,10 @@ struct InnerEasy:
     fn set_option(self, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
         return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
+    
+    fn set_option[origin: ImmutOrigin](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
+        """Set a pointer option for a curl easy handle using safe wrapper."""
+        return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
 
     fn set_option(self, option: Option, parameter: Int) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
@@ -756,6 +760,9 @@ struct InnerEasy:
     fn post(mut self, enable: Bool) -> Result:
         """Make an HTTP POST request.
 
+        To send a zero-length (empty) POST, set `CURLOPT_POSTFIELDS` to an empty string,
+        or set `CURLOPT_POST` to 1 and `CURLOPT_POSTFIELDSIZE` to 0.
+
         This will also make the library use the
         `Content-Type: application/x-www-form-urlencoded` header.
 
@@ -765,19 +772,33 @@ struct InnerEasy:
         By default this option is `false` and corresponds to `CURLOPT_POST`.
         """
         return self.set_option(Option.POST, Int(enable))
+    
+    fn post_fields(mut self, data: Span[UInt8]) -> Result:
+        """Configures the data that will be uploaded as part of a POST.
 
-    # TODO: post_fields_copy - needs byte array handling
-    # fn post_fields_copy(mut self, data: List[UInt8]) -> Result:
-    #     """Configures the data that will be uploaded as part of a POST.
-    #
-    #     Note that the data is copied into this handle and if that's not desired
-    #     then the read callbacks can be used instead.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_COPYPOSTFIELDS`.
-    #     """
-    #     # TODO: Implement this when we have better byte array support
-    #     pass
+        If `CURLOPT_POSTFIELDS` is explicitly set to NULL then libcurl gets
+        the POST data from the read callback.
+    
+        The data pointed to is NOT copied by the library: as a consequence,
+        it must be preserved by the calling application until the associated transfer finishes.
+        This behavior can be changed (so libcurl does copy the data)
+        by instead using the `CURLOPT_COPYPOSTFIELDS` option (`post_fields_copy()`).
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_POSTFIELDS`.
+        """
+        return self.set_option(Option.POST_FIELDS, data)
+
+    fn post_fields_copy(mut self, data: Span[UInt8]) -> Result:
+        """Configures the data that will be uploaded as part of a POST.
+    
+        Note that the data is copied into this handle and if that's not desired
+        then the read callbacks can be used instead.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COPYPOSTFIELDS`.
+        """
+        return self.set_option(Option.COPY_POST_FIELDS, data)
 
     fn post_field_size(mut self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a

@@ -1,5 +1,4 @@
 from memory import UnsafePointer
-from memory.span import _SpanIter
 
 
 alias DEFAULT_BUFFER_SIZE = 4096
