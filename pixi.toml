@@ -23,8 +23,8 @@ examples = "python3 scripts/util.py run-examples"
 template = "python3 scripts/util.py generate-recipe"
 
 # Curl wrapper build tasks
-build-wrapper = "gcc -shared -fPIC -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl -o curl/c/libcurl_wrapper.dylib curl/c/curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl"
-clean-wrapper = "rm -f curl/c/libcurl_wrapper.dylib"
+build-wrapper = "gcc -shared -fPIC -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl -o ./libcurl_wrapper.dylib ./curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl"
+clean-wrapper = "rm -f ./libcurl_wrapper.dylib"
 test-curl = { depends-on = ["build-wrapper"], cmd = "mojo test.mojo" }
 
 # Linting and Formatting
@@ -47,12 +47,13 @@ backend = { name = "pixi-build-mojo", version = "*" }
 [dependencies]
 mojo = ">=0.25.6.0,<0.25.7.0"
 libcurl = "*"
-emberjson = { git = "https://github.com/bgreni/EmberJson.git", branch = "main", subdirectory = "." }
+# emberjson = { git = "https://github.com/bgreni/EmberJson.git", branch = "main", subdirectory = "." }
+emberjson = { path = "../../other/EmberJson" }
 
 [package.build-dependencies]
 mojo-compiler = ">=0.25.6.0,<0.25.7.0"
 libcurl = "*"
-emberjson = "==0.2.0"
+emberjson = { path = "../../other/EmberJson" }
 
 [package.host-dependencies]
 mojo = ">=0.25.6.0,<0.25.7.0"
@@ -60,7 +61,7 @@ mojo = ">=0.25.6.0,<0.25.7.0"
 [package.run-dependencies]
 mojo = ">=0.25.6.0,<0.25.7.0"
 libcurl = "*"
-emberjson = "==0.2.0"
+emberjson = { path = "../../other/EmberJson" }
 
 [feature.util.dependencies]
 typer = ">=0.16.0,<0.17"

@@ -30,9 +30,13 @@ struct curl:
         """Global libcurl cleanup."""
         self.lib.curl_global_cleanup()
 
-    fn version(self) -> StringSlice[ImmutAnyOrigin]:
+    fn version(self) -> String:
         """Return the version string of libcurl."""
-        return StringSlice(unsafe_from_utf8_ptr=self.lib.curl_version())
+        # TODO: Constructing StringSlice should technically work? Seems like an issue with
+        # ExternalPointer external origins. It's not an AnyOrigin,
+        # so there's probably some issue there that I'm not aware of.
+        # It's ok, just allocate a small string here.
+        return String(unsafe_from_utf8_ptr=self.lib.curl_version())
 
     # Easy interface functions
     fn easy_init(self) -> CURL:

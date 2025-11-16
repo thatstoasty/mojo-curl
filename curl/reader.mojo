@@ -1,19 +1,17 @@
 from memory import UnsafePointer
 
-
-alias DEFAULT_BUFFER_SIZE = 4096
-
-alias CRLF = "\r\n"
-alias WHITESPACE = " "
+comptime DEFAULT_BUFFER_SIZE = 4096
+comptime CRLF = "\r\n"
+comptime WHITESPACE = " "
 
 
 struct BytesConstant:
-    alias WHITESPACE = Byte(ord(WHITESPACE))
-    alias COLON = Byte(ord(":"))
-    alias CR = Byte(ord("\r"))
-    alias LF = Byte(ord("\n"))
-    alias CRLF = CRLF.as_bytes()
-    alias DOUBLE_CRLF = "\r\n\r\n".as_bytes()
+    comptime WHITESPACE = Byte(ord(WHITESPACE))
+    comptime COLON = Byte(ord(":"))
+    comptime CR = Byte(ord("\r"))
+    comptime LF = Byte(ord("\n"))
+    comptime CRLF = CRLF.as_bytes()
+    comptime DOUBLE_CRLF = "\r\n\r\n".as_bytes()
 
 
 fn bytes_equal(lhs: Span[Byte], rhs: Span[Byte]) -> Bool:
@@ -44,8 +42,8 @@ fn is_space(b: Byte) -> Bool:
     return b == BytesConstant.WHITESPACE
 
 
-alias EndOfReaderError = "No more bytes to read."
-alias OutOfBoundsError = "Tried to read past the end of the ByteReader."
+comptime EndOfReaderError = "No more bytes to read."
+comptime OutOfBoundsError = "Tried to read past the end of the ByteReader."
 
 
 # TODO: Assess if I need this reader, or if I can just use Span directly. Or optimize it.

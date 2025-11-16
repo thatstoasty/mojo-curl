@@ -72,7 +72,7 @@ struct Easy:
 
         By default, this option is `false`.
         """
-        return self.inner.set_option(Option.VERBOSE, Int(verbose))
+        return self.inner.verbose(verbose)
 
     fn show_header(mut self, show: Bool) -> Result:
         """Indicates whether header information is streamed to the output body of
@@ -88,7 +88,7 @@ struct Easy:
         By default, this option is `false` and corresponds to
         `CURLOPT_HEADER`.
         """
-        return self.inner.set_option(Option.HEADER, Int(show))
+        return self.inner.show_header(show)
 
     fn progress(mut self, progress: Bool) -> Result:
         """Indicates whether a progress meter will be shown for requests done with
@@ -99,7 +99,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_NOPROGRESS`.
         """
-        return self.inner.set_option(Option.NO_PROGRESS, Int(not progress))
+        return self.inner.progress(progress)
 
     fn signal(mut self, signal: Bool) -> Result:
         """Inform libcurl whether or not it should install signal handlers or
@@ -116,7 +116,7 @@ struct Easy:
 
         [libcurl docs]: https://curl.haxx.se/libcurl/c/threadsafe.html
         """
-        return self.inner.set_option(Option.NO_SIGNAL, Int(not signal))
+        return self.inner.signal(signal)
 
     fn wildcard_match(mut self, m: Bool) -> Result:
         """Indicates whether multiple files will be transferred based on the file
@@ -127,7 +127,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_WILDCARDMATCH`.
         """
-        return self.inner.set_option(Option.WILDCARD_MATCH, Int(m))
+        return self.inner.wildcard_match(m)
 
     # =========================================================================
     # Error options
@@ -142,7 +142,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_FAILONERROR`.
         """
-        return self.inner.set_option(Option.FAIL_ON_ERROR, Int(fail))
+        return self.inner.fail_on_error(fail)
 
     # =========================================================================
     # Network options
@@ -162,34 +162,34 @@ struct Easy:
         By default this option is not set and `perform` will not work until it
         is set. This option corresponds to `CURLOPT_URL`.
         """
-        return self.inner.set_option(Option.URL, url)
+        return self.inner.url(url)
 
     fn port(mut self, port: Int) -> Result:
         """Configures the port number to connect to, instead of the one specified
         in the URL or the default of the protocol.
         """
-        return self.inner.set_option(Option.PORT, port)
+        return self.inner.port(port)
 
     # =========================================================================
     # Connection options
 
-    fn connect_to(mut self, list: List) -> Result:
-        """Connect to a specific host and port.
+    # fn connect_to(mut self, list: List) -> Result:
+    #     """Connect to a specific host and port.
 
-        Each single string should be written using the format
-        `HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT` where `HOST` is the host of
-        the request, `PORT` is the port of the request, `CONNECT-TO-HOST` is the
-        host name to connect to, and `CONNECT-TO-PORT` is the port to connect
-        to.
+    #     Each single string should be written using the format
+    #     `HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT` where `HOST` is the host of
+    #     the request, `PORT` is the port of the request, `CONNECT-TO-HOST` is the
+    #     host name to connect to, and `CONNECT-TO-PORT` is the port to connect
+    #     to.
 
-        The first string that matches the request's host and port is used.
+    #     The first string that matches the request's host and port is used.
 
-        By default, this option is empty and corresponds to
-        `CURLOPT_CONNECT_TO`.
-        """
-        # TODO: Implement list handling for CURLOPT_CONNECT_TO
-        # This requires curl_slist support which needs to be added
-        return Result(0)
+    #     By default, this option is empty and corresponds to
+    #     `CURLOPT_CONNECT_TO`.
+    #     """
+    #     # TODO: Implement list handling for CURLOPT_CONNECT_TO
+    #     # This requires curl_slist support which needs to be added
+    #     return Result(0)
 
     fn path_as_is(mut self, as_is: Bool) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
@@ -197,14 +197,14 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_PATH_AS_IS`.
         """
-        return self.inner.set_option(Option.PATH_AS_IS, Int(as_is))
+        return self.inner.path_as_is(as_is)
 
     fn proxy(mut self, mut url: String) -> Result:
         """Provide the URL of a proxy to use.
 
         By default this option is not set and corresponds to `CURLOPT_PROXY`.
         """
-        return self.inner.set_option(Option.PROXY, url)
+        return self.inner.proxy(url)
 
     fn proxy_port(mut self, port: Int) -> Result:
         """Provide port number the proxy is listening on.
@@ -212,7 +212,7 @@ struct Easy:
         By default this option is not set (the default port for the proxy
         protocol is used) and corresponds to `CURLOPT_PROXYPORT`.
         """
-        return self.inner.set_option(Option.PROXY_PORT, port)
+        return self.inner.proxy_port(port)
 
     fn no_proxy(mut self, mut skip: String) -> Result:
         """Provide a list of hosts that should not be proxied to.
@@ -224,7 +224,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_NOPROXY`.
         """
-        return self.inner.set_option(Option.NO_PROXY, skip)
+        return self.inner.no_proxy(skip)
 
     fn http_proxy_tunnel(mut self, tunnel: Bool) -> Result:
         """Inform curl whether it should tunnel all operations through the proxy.
@@ -235,7 +235,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_HTTPPROXYTUNNEL`.
         """
-        return self.inner.set_option(Option.HTTP_PROXY_TUNNEL, Int(tunnel))
+        return self.inner.http_proxy_tunnel(tunnel)
 
     fn interface(mut self, mut interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
@@ -245,7 +245,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_INTERFACE`.
         """
-        return self.inner.set_option(Option.INTERFACE, interface)
+        return self.inner.interface(interface)
 
     fn set_local_port(mut self, port: Int) -> Result:
         """Indicate which port should be bound to locally for this connection.
@@ -253,7 +253,7 @@ struct Easy:
         By default this option is 0 (any port) and corresponds to
         `CURLOPT_LOCALPORT`.
         """
-        return self.inner.set_option(Option.LOCAL_PORT, port)
+        return self.inner.set_local_port(port)
 
     fn local_port_range(mut self, range: Int) -> Result:
         """Indicates the number of attempts libcurl will perform to find a working
@@ -262,7 +262,7 @@ struct Easy:
         By default this option is 1 and corresponds to
         `CURLOPT_LOCALPORTRANGE`.
         """
-        return self.inner.set_option(Option.LOCAL_PORT_RANGE, range)
+        return self.inner.local_port_range(range)
 
     fn dns_servers(mut self, mut servers: String) -> Result:
         """Sets the DNS servers that will be used.
@@ -273,7 +273,7 @@ struct Easy:
         This option can only be used if libcurl is linked against
         c-ares, otherwise setting it will return an error.
         """
-        return self.inner.set_option(Option.DNS_SERVERS, servers)
+        return self.inner.dns_servers(servers)
 
     fn dns_cache_timeout(mut self, seconds: Int) -> Result:
         """Sets the timeout of how long name resolves will be kept in memory.
@@ -283,7 +283,7 @@ struct Easy:
         By default this option is 60s and corresponds to
         `CURLOPT_DNS_CACHE_TIMEOUT`.
         """
-        return self.inner.set_option(Option.DNS_CACHE_TIMEOUT, seconds)
+        return self.inner.dns_cache_timeout(seconds)
 
     fn doh_url(mut self, mut url: String) -> Result:
         """Provide the DNS-over-HTTPS URL.
@@ -306,7 +306,7 @@ struct Easy:
 
         By default this option is not set and corresponds to `CURLOPT_DOH_URL`.
         """
-        return self.inner.set_option(Option.DOH_URL, url)
+        return self.inner.doh_url(url)
 
     fn doh_ssl_verify_peer(mut self, verify: Bool) -> Result:
         """This option tells curl to verify the authenticity of the DoH
@@ -345,7 +345,7 @@ struct Easy:
         By default this option is set to `true` and corresponds to
         `CURLOPT_DOH_SSL_VERIFYPEER`.
         """
-        return self.inner.set_option(Option.DOH_SSL_VERIFY_PEER, Int(verify))
+        return self.inner.doh_ssl_verify_peer(verify)
 
     fn doh_ssl_verify_host(mut self, verify: Bool) -> Result:
         """Tells curl to verify the DoH (DNS-over-HTTPS) server's certificate name
@@ -374,7 +374,7 @@ struct Easy:
         By default this option is set to `true` and corresponds to
         `CURLOPT_DOH_SSL_VERIFYHOST`.
         """
-        return self.inner.set_option(Option.DOH_SSL_VERIFY_HOST, Int(2 if verify else 0))
+        return self.inner.doh_ssl_verify_host(verify)
 
     fn proxy_cainfo(mut self, mut cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
@@ -382,7 +382,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXY_CAINFO`.
         """
-        return self.inner.set_option(Option.PROXY_CAINFO, cainfo)
+        return self.inner.proxy_cainfo(cainfo)
 
     fn proxy_capath(mut self, mut path: String) -> Result:
         """Specify a directory holding CA certificates for proxy.
@@ -395,7 +395,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXY_CAPATH`.
         """
-        return self.inner.set_option(Option.PROXY_CAPATH, path)
+        return self.inner.proxy_capath(path)
 
     fn proxy_sslcert(mut self, mut sslcert: String) -> Result:
         """Set client certificate for proxy.
@@ -403,7 +403,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXY_SSLCERT`.
         """
-        return self.inner.set_option(Option.PROXY_SSL_CERT, sslcert)
+        return self.inner.proxy_sslcert(sslcert)
 
     fn proxy_sslcert_type(mut self, mut kind: String) -> Result:
         """Set the type of client certificate for proxy.
@@ -411,7 +411,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXY_SSLCERTTYPE`.
         """
-        return self.inner.set_option(Option.PROXY_SSL_CERT_TYPE, kind)
+        return self.inner.proxy_sslcert_type(kind)
 
     fn proxy_sslkey(mut self, mut sslkey: String) -> Result:
         """Set private key for HTTPS proxy.
@@ -419,7 +419,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXY_SSLKEY`.
         """
-        return self.inner.set_option(Option.PROXY_SSL_KEY, sslkey)
+        return self.inner.proxy_sslkey(sslkey)
 
     fn proxy_sslkey_type(mut self, mut kind: String) -> Result:
         """Set type of the private key file for HTTPS proxy.
@@ -436,7 +436,7 @@ struct Easy:
         By default this option is "PEM" and corresponds to
         `CURLOPT_PROXY_SSLKEYTYPE`.
         """
-        return self.inner.set_option(Option.PROXY_SSL_KEY_TYPE, kind)
+        return self.inner.proxy_sslkey_type(kind)
 
     fn proxy_key_password(mut self, mut password: String) -> Result:
         """Set passphrase to private key for HTTPS proxy.
@@ -448,7 +448,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_PROXY_KEYPASSWD`.
         """
-        return self.inner.set_option(Option.PROXY_KEYPASSWD, password)
+        return self.inner.proxy_key_password(password)
 
     fn proxy_type(mut self, kind: Int) -> Result:
         """Indicates the type of proxy being used.
@@ -456,7 +456,7 @@ struct Easy:
         By default this option is `ProxyType::Http` and corresponds to
         `CURLOPT_PROXYTYPE`.
         """
-        return self.inner.set_option(Option.PROXY_TYPE, kind)
+        return self.inner.proxy_type(kind)
 
     fn doh_ssl_verify_status(mut self, verify: Bool) -> Result:
         """Pass a long as parameter set to 1 to enable or 0 to disable.
@@ -474,7 +474,7 @@ struct Easy:
         By default this option is set to `false` and corresponds to
         `CURLOPT_DOH_SSL_VERIFYSTATUS`.
         """
-        return self.inner.set_option(Option.DOH_SSL_VERIFY_STATUS, Int(verify))
+        return self.inner.doh_ssl_verify_status(verify)
 
     fn buffer_size(mut self, size: Int) -> Result:
         """Specify the preferred receive buffer size, in bytes.
@@ -486,7 +486,7 @@ struct Easy:
         By default this option is the maximum write size and corresponds to
         `CURLOPT_BUFFERSIZE`.
         """
-        return self.inner.set_option(Option.BUFFER_SIZE, size)
+        return self.inner.buffer_size(size)
 
     fn upload_buffer_size(mut self, size: Int) -> Result:
         """Specify the preferred send buffer size, in bytes.
@@ -497,7 +497,7 @@ struct Easy:
 
         The upload buffer size is by default 64 kilobytes.
         """
-        return self.inner.set_option(Option.UPLOAD_BUFFER_SIZE, size)
+        return self.inner.upload_buffer_size(size)
 
     # # Enable or disable TCP Fast Open
     # #
@@ -517,7 +517,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_TCP_NODELAY`.
         """
-        return self.inner.set_option(Option.TCP_NODELAY, Int(enable))
+        return self.inner.tcp_nodelay(enable)
 
     fn tcp_keepalive(mut self, enable: Bool) -> Result:
         """Configures whether TCP keepalive probes will be sent.
@@ -528,7 +528,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_TCP_KEEPALIVE`.
         """
-        return self.inner.set_option(Option.TCP_KEEPALIVE, Int(enable))
+        return self.inner.tcp_keepalive(enable)
 
     fn tcp_keepidle(mut self, seconds: Int) -> Result:
         """Configures the TCP keepalive idle time wait.
@@ -538,14 +538,14 @@ struct Easy:
 
         By default this corresponds to `CURLOPT_TCP_KEEPIDLE`.
         """
-        return self.inner.set_option(Option.TCP_KEEPIDLE, seconds)
+        return self.inner.tcp_keepidle(seconds)
 
     fn tcp_keepintvl(mut self, seconds: Int) -> Result:
         """Configures the delay between keepalive probes.
 
         By default this corresponds to `CURLOPT_TCP_KEEPINTVL`.
         """
-        return self.inner.set_option(Option.TCP_KEEPINTVL, seconds)
+        return self.inner.tcp_keepintvl(seconds)
 
     fn address_scope(mut self, scope: Int) -> Result:
         """Configures the scope for local IPv6 addresses.
@@ -555,7 +555,7 @@ struct Easy:
 
         By default this value is 0 and corresponds to `CURLOPT_ADDRESS_SCOPE`
         """
-        return self.inner.set_option(Option.ADDRESS_SCOPE, scope)
+        return self.inner.address_scope(scope)
 
     # =========================================================================
     # Names and passwords
@@ -565,14 +565,14 @@ struct Easy:
 
         By default this value is not set and corresponds to `CURLOPT_USERNAME`.
         """
-        return self.inner.set_option(Option.USERNAME, user)
+        return self.inner.username(user)
 
     fn password(mut self, mut pass_: String) -> Result:
         """Configures the password to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_PASSWORD`.
         """
-        return self.inner.set_option(Option.PASSWORD, pass_)
+        return self.inner.password(pass_)
 
     fn http_auth(mut self, auth: Int) -> Result:
         """Set HTTP server authentication methods to try.
@@ -587,7 +587,7 @@ struct Easy:
 
         By default this value is basic and corresponds to `CURLOPT_HTTPAUTH`.
         """
-        return self.inner.set_option(Option.HTTP_AUTH, auth)
+        return self.inner.http_auth(auth)
 
     fn aws_sigv4(mut self, mut param: String) -> Result:
         """Provides AWS V4 signature authentication on HTTP(S) header.
@@ -613,7 +613,7 @@ struct Easy:
 
         By default this is not set and corresponds to `CURLOPT_AWS_SIGV4`.
         """
-        return self.inner.set_option(Option.AWS_SIGV4, param)
+        return self.inner.aws_sigv4(param)
 
     fn proxy_username(mut self, mut user: String) -> Result:
         """Configures the proxy username to pass as authentication for this
@@ -622,7 +622,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXYUSERNAME`.
         """
-        return self.inner.set_option(Option.PROXY_USERNAME, user)
+        return self.inner.proxy_username(user)
 
     fn proxy_password(mut self, mut pass_: String) -> Result:
         """Configures the proxy password to pass as authentication for this
@@ -631,7 +631,7 @@ struct Easy:
         By default this value is not set and corresponds to
         `CURLOPT_PROXYPASSWORD`.
         """
-        return self.inner.set_option(Option.PROXY_PASSWORD, pass_)
+        return self.inner.proxy_password(pass_)
 
     fn proxy_auth(mut self, auth: Int) -> Result:
         """Set HTTP proxy authentication methods to try.
@@ -644,14 +644,14 @@ struct Easy:
 
         By default this value is basic and corresponds to `CURLOPT_PROXYAUTH`.
         """
-        return self.inner.set_option(Option.PROXY_AUTH, auth)
+        return self.inner.proxy_auth(auth)
 
     fn netrc(mut self, netrc: Int) -> Result:
         """Enable .netrc parsing.
 
         By default the .netrc file is ignored and corresponds to `CURL_NETRC_IGNORED`.
         """
-        return self.inner.set_option(Option.NETRC, netrc)
+        return self.inner.netrc(netrc)
 
     # =========================================================================
     # HTTP Options
@@ -662,7 +662,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_AUTOREFERER`.
         """
-        return self.inner.set_option(Option.AUTO_REFERER, Int(enable))
+        return self.inner.autoreferer(enable)
 
     fn accept_encoding(mut self, mut encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
@@ -676,7 +676,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_ACCEPT_ENCODING`.
         """
-        return self.inner.set_option(Option.ACCEPT_ENCODING, encoding)
+        return self.inner.accept_encoding(encoding)
 
     fn transfer_encoding(mut self, enable: Bool) -> Result:
         """Request the HTTP Transfer Encoding.
@@ -684,7 +684,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_TRANSFER_ENCODING`.
         """
-        return self.inner.set_option(Option.TRANSFER_ENCODING, Int(enable))
+        return self.inner.transfer_encoding(enable)
 
     fn follow_location(mut self, enable: Bool) -> Result:
         """Follow HTTP 3xx redirects.
@@ -695,7 +695,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_FOLLOWLOCATION`.
         """
-        return self.inner.set_option(Option.FOLLOW_LOCATION, Int(enable))
+        return self.inner.follow_location(enable)
 
     fn unrestricted_auth(mut self, enable: Bool) -> Result:
         """Send credentials to hosts other than the first as well.
@@ -706,7 +706,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_UNRESTRICTED_AUTH`.
         """
-        return self.inner.set_option(Option.UNRESTRICTED_AUTH, Int(enable))
+        return self.inner.unrestricted_auth(enable)
 
     fn max_redirections(mut self, max: Int) -> Result:
         """Set the maximum number of redirects allowed.
@@ -716,7 +716,7 @@ struct Easy:
         By default this option is `-1` (unlimited) and corresponds to
         `CURLOPT_MAXREDIRS`.
         """
-        return self.inner.set_option(Option.MAXREDIRS, max)
+        return self.inner.max_redirections(max)
 
     fn post_redirections(mut self, redirects: Int) -> Result:
         """Set the policy for handling redirects to POST requests.
@@ -725,7 +725,7 @@ struct Easy:
         of the `PostRedirections` flags will preserve the POST method for the
         selected response codes.
         """
-        return self.inner.set_option(Option.POST_REDIR, redirects)
+        return self.inner.post_redirections(redirects)
 
     # fn put(mut self, enable: Bool) -> Result:
     #     """Make an HTTP PUT request.
@@ -745,7 +745,7 @@ struct Easy:
 
         By default this option is `false` and corresponds to `CURLOPT_POST`.
         """
-        return self.inner.set_option(Option.POST, Int(enable))
+        return self.inner.post(enable)
     
     fn post_fields(mut self, data: Span[UInt8]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
@@ -767,7 +767,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_COPYPOSTFIELDS`.
         """
-        self.inner.post_fields_copy(data)
+        return self.inner.post_fields_copy(data)
 
     fn post_field_size(mut self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
@@ -798,7 +798,7 @@ struct Easy:
 
         By default this option is not set and corresponds to `CURLOPT_REFERER`.
         """
-        return self.inner.set_option(Option.REFERER, referer)
+        return self.inner.referer(referer)
 
     fn useragent(mut self, mut useragent: String) -> Result:
         """Sets the HTTP user-agent header.
@@ -806,7 +806,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_USERAGENT`.
         """
-        return self.inner.set_option(Option.USERAGENT, useragent)
+        return self.inner.useragent(useragent)
 
     fn http_headers(mut self, headers: CurlList) -> Result:
         """Add some headers to this HTTP request.
@@ -845,7 +845,7 @@ struct Easy:
 
         By default this option is not set and corresponds to `CURLOPT_COOKIE`.
         """
-        return self.inner.set_option(Option.COOKIE, cookie)
+        return self.inner.cookie(cookie)
 
     # TODO: cookie_file - needs path handling
     # fn cookie_file(mut self, file: String) -> Result:
@@ -901,7 +901,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_COOKIESESSION`.
         """
-        return self.inner.set_option(Option.COOKIE_SESSION, Int(session))
+        return self.inner.cookie_session(session)
 
     fn cookie_list(mut self, mut cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
@@ -930,14 +930,14 @@ struct Easy:
 
         By default this options corresponds to `CURLOPT_COOKIELIST`
         """
-        return self.inner.set_option(Option.COOKIE_LIST, cookie)
+        return self.inner.cookie_list(cookie)
 
     fn get(mut self, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
 
         By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
         """
-        return self.inner.set_option(Option.HTTPGET, Int(enable))
+        return self.inner.get(enable)
 
     # # Ask for a HTTP GET request.
     # #
@@ -951,7 +951,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_IGNORE_CONTENT_LENGTH`.
         """
-        return self.inner.set_option(Option.IGNORE_CONTENT_LENGTH, Int(ignore))
+        return self.inner.ignore_content_length(ignore)
 
     fn http_content_decoding(mut self, enable: Bool) -> Result:
         """Enable or disable HTTP content decoding.
@@ -959,7 +959,7 @@ struct Easy:
         By default this option is `true` and corresponds to
         `CURLOPT_HTTP_CONTENT_DECODING`.
         """
-        return self.inner.set_option(Option.HTTP_CONTENT_DECODING, Int(enable))
+        return self.inner.http_content_decoding(enable)
 
     fn http_transfer_decoding(mut self, enable: Bool) -> Result:
         """Enable or disable HTTP transfer decoding.
@@ -967,7 +967,7 @@ struct Easy:
         By default this option is `true` and corresponds to
         `CURLOPT_HTTP_TRANSFER_DECODING`.
         """
-        return self.inner.set_option(Option.HTTP_TRANSFER_DECODING, Int(enable))
+        return self.inner.http_transfer_decoding(enable)
 
     # # Timeout for the Expect: 100-continue response
     # #
@@ -1015,7 +1015,7 @@ struct Easy:
 
         By default this option is not set and corresponds to `CURLOPT_RANGE`.
         """
-        return self.inner.set_option(Option.RANGE, range)
+        return self.inner.range(range)
 
     fn resume_from(mut self, from_byte: Int) -> Result:
         """Set a point to resume transfer from.
@@ -1025,7 +1025,7 @@ struct Easy:
         By default this option is 0 and corresponds to
         `CURLOPT_RESUME_FROM_LARGE`.
         """
-        return self.inner.set_option(Option.RESUME_FROM_LARGE, from_byte)
+        return self.inner.resume_from(from_byte)
 
     fn custom_request(mut self, mut request: String) -> Result:
         """Set a custom request string.
@@ -1037,7 +1037,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_CUSTOMREQUEST`.
         """
-        return self.inner.set_option(Option.CUSTOM_REQUEST, request)
+        return self.inner.custom_request(request)
 
     fn fetch_filetime(mut self, fetch: Bool) -> Result:
         """Get the modification time of the remote resource.
@@ -1050,7 +1050,7 @@ struct Easy:
 
         By default this option is `false` and corresponds to `CURLOPT_FILETIME`
         """
-        return self.inner.set_option(Option.FILE_TIME, Int(fetch))
+        return self.inner.fetch_filetime(fetch)
 
     fn nobody(mut self, enable: Bool) -> Result:
         """Indicate whether to download the request without getting the body.
@@ -1059,7 +1059,7 @@ struct Easy:
 
         By default this option is `false` and corresponds to `CURLOPT_NOBODY`.
         """
-        return self.inner.set_option(Option.NO_BODY, Int(enable))
+        return self.inner.nobody(enable)
 
     fn in_filesize(mut self, size: Int) -> Result:
         """Set the size of the input file to send off.
@@ -1067,7 +1067,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_INFILESIZE_LARGE`.
         """
-        return self.inner.set_option(Option.IN_FILE_SIZE_LARGE, size)
+        return self.inner.in_filesize(size)
 
     fn upload(mut self, enable: Bool) -> Result:
         """Enable or disable data upload.
@@ -1078,7 +1078,7 @@ struct Easy:
 
         By default this option is `false` and corresponds to `CURLOPT_UPLOAD`.
         """
-        return self.inner.set_option(Option.UPLOAD, Int(enable))
+        return self.inner.upload(enable)
 
     fn max_filesize(mut self, size: Int) -> Result:
         """Configure the maximum file size to download.
@@ -1086,7 +1086,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_MAXFILESIZE_LARGE`.
         """
-        return self.inner.set_option(Option.MAX_FILE_SIZE_LARGE, size)
+        return self.inner.max_filesize(size)
 
     fn time_condition(mut self, cond: Int) -> Result:
         """Selects a condition for a time request.
@@ -1096,7 +1096,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_TIMECONDITION`.
         """
-        return self.inner.set_option(Option.TIME_CONDITION, cond)
+        return self.inner.time_condition(cond)
 
     fn time_value(mut self, val: Int) -> Result:
         """Sets the time value for a conditional request.
@@ -1107,7 +1107,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_TIMEVALUE`.
         """
-        return self.inner.set_option(Option.TIME_VALUE, val)
+        return self.inner.time_value(val)
 
     # =========================================================================
     # Connection Options
@@ -1135,7 +1135,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_TIMEOUT_MS`.
         """
-        return self.inner.set_option(Option.TIMEOUT_MS, timeout_ms)
+        return self.inner.timeout(timeout_ms)
 
     fn low_speed_limit(mut self, limit: Int) -> Result:
         """Set the low speed limit in bytes per second.
@@ -1147,7 +1147,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_LOW_SPEED_LIMIT`.
         """
-        return self.inner.set_option(Option.LOW_SPEED_LIMIT, limit)
+        return self.inner.low_speed_limit(limit)
 
     fn low_speed_time(mut self, seconds: Int) -> Result:
         """Set the low speed time period.
@@ -1158,7 +1158,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_LOW_SPEED_TIME`.
         """
-        return self.inner.set_option(Option.LOW_SPEED_TIME, seconds)
+        return self.inner.low_speed_time(seconds)
 
     fn max_send_speed(mut self, speed: Int) -> Result:
         """Rate limit data upload speed.
@@ -1170,7 +1170,7 @@ struct Easy:
         By default this option is not set (unlimited speed) and corresponds to
         `CURLOPT_MAX_SEND_SPEED_LARGE`.
         """
-        return self.inner.set_option(Option.MAX_SEND_SPEED_LARGE, speed)
+        return self.inner.max_send_speed(speed)
 
     fn max_recv_speed(mut self, speed: Int) -> Result:
         """Rate limit data download speed.
@@ -1182,7 +1182,7 @@ struct Easy:
         By default this option is not set (unlimited speed) and corresponds to
         `CURLOPT_MAX_RECV_SPEED_LARGE`.
         """
-        return self.inner.set_option(Option.MAX_RECV_SPEED_LARGE, speed)
+        return self.inner.max_recv_speed(speed)
 
     fn max_connects(mut self, max: Int) -> Result:
         """Set the maximum connection cache size.
@@ -1200,7 +1200,7 @@ struct Easy:
         By default this option is set to 5 and corresponds to
         `CURLOPT_MAXCONNECTS`
         """
-        return self.inner.set_option(Option.MAX_CONNECTS, max)
+        return self.inner.max_connects(max)
 
     fn maxage_conn(mut self, max_age_seconds: Int) -> Result:
         """Set the maximum idle time allowed for a connection.
@@ -1211,7 +1211,7 @@ struct Easy:
 
         By default, a value of 118 seconds is used.
         """
-        return self.inner.set_option(Option.MAX_AGE_CONN, max_age_seconds)
+        return self.inner.maxage_conn(max_age_seconds)
 
     fn fresh_connect(mut self, enable: Bool) -> Result:
         """Force a new connection to be used.
@@ -1224,7 +1224,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_FRESH_CONNECT`.
         """
-        return self.inner.set_option(Option.FRESH_CONNECT, Int(enable))
+        return self.inner.fresh_connect(enable)
 
     fn forbid_reuse(mut self, enable: Bool) -> Result:
         """Make connection get closed at once after use.
@@ -1238,7 +1238,7 @@ struct Easy:
         By default this option is `false` and corresponds to
         `CURLOPT_FORBID_REUSE`.
         """
-        return self.inner.set_option(Option.FORBID_REUSE, Int(enable))
+        return self.inner.forbid_reuse(enable)
 
     fn connect_timeout(mut self, timeout_ms: Int) -> Result:
         """Timeout for the connect phase.
@@ -1250,7 +1250,7 @@ struct Easy:
         By default this value is 300 seconds and corresponds to
         `CURLOPT_CONNECTTIMEOUT_MS`.
         """
-        return self.inner.set_option(Option.CONNECT_TIMEOUT_MS, timeout_ms)
+        return self.inner.connect_timeout(timeout_ms)
 
     fn ip_resolve(mut self, resolve: Int) -> Result:
         """Specify which IP protocol version to use.
@@ -1261,7 +1261,7 @@ struct Easy:
 
         By default this value is "any" and corresponds to `CURLOPT_IPRESOLVE`.
         """
-        return self.inner.set_option(Option.IP_RESOLVE, resolve)
+        return self.inner.ip_resolve(resolve)
 
     # TODO: resolve - needs List type implementation
     # fn resolve(mut self, list: List) -> Result:
@@ -1285,7 +1285,7 @@ struct Easy:
         By default this value is `false` and corresponds to
         `CURLOPT_CONNECT_ONLY`.
         """
-        return self.inner.set_option(Option.CONNECT_ONLY, Int(enable))
+        return self.inner.connect_only(enable)
 
     # # Set interface to speak DNS over.
     # #
@@ -1381,7 +1381,7 @@ struct Easy:
         By default this option is "PEM" and corresponds to
         `CURLOPT_SSLCERTTYPE`.
         """
-        return self.inner.set_option(Option.SSL_CERT_TYPE, kind)
+        return self.inner.ssl_cert_type(kind)
 
     # TODO: ssl_key - needs path handling
     # fn ssl_key(mut self, key: String) -> Result:
@@ -1428,7 +1428,7 @@ struct Easy:
         By default this option is "PEM" and corresponds to
         `CURLOPT_SSLKEYTYPE`.
         """
-        return self.inner.set_option(Option.SSL_KEY_TYPE, kind)
+        return self.inner.ssl_key_type(kind)
 
     fn key_password(mut self, mut password: String) -> Result:
         """Set passphrase to private key.
@@ -1440,7 +1440,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_KEYPASSWD`.
         """
-        return self.inner.set_option(Option.KEY_PASSWD, password)
+        return self.inner.key_password(password)
 
     # TODO: ssl_cainfo_blob - needs byte array handling
     # fn ssl_cainfo_blob(mut self, blob: List[UInt8]) -> Result:
@@ -1480,7 +1480,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_SSLENGINE`.
         """
-        return self.inner.set_option(Option.SSL_ENGINE, engine)
+        return self.inner.ssl_engine(engine)
 
     fn ssl_engine_default(mut self, enable: Bool) -> Result:
         """Make this handle's SSL engine the default.
@@ -1488,7 +1488,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_SSLENGINE_DEFAULT`.
         """
-        return self.inner.set_option(Option.SSL_ENGINE_DEFAULT, Int(enable))
+        return self.inner.ssl_engine_default(enable)
 
     # # Enable TLS false start.
     # #
@@ -1508,7 +1508,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_HTTP_VERSION`.
         """
-        return self.inner.set_option(Option.HTTP_VERSION, version)
+        return self.inner.http_version(version)
 
     fn ssl_version(mut self, version: Int) -> Result:
         """Set preferred TLS/SSL version.
@@ -1516,7 +1516,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_SSLVERSION`.
         """
-        return self.inner.set_option(Option.SSL_VERSION, version)
+        return self.inner.ssl_version(version)
 
     fn proxy_ssl_version(mut self, version: Int) -> Result:
         """Set preferred TLS/SSL version when connecting to an HTTPS proxy.
@@ -1524,7 +1524,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_PROXY_SSLVERSION`.
         """
-        return self.inner.set_option(Option.PROXY_SSL_VERSION, version)
+        return self.inner.proxy_ssl_version(version)
 
     fn ssl_min_max_version(mut self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version.
@@ -1533,7 +1533,7 @@ struct Easy:
         `CURLOPT_SSLVERSION`.
         """
         var version = min_version | (max_version << 16)
-        return self.inner.set_option(Option.SSL_VERSION, version)
+        return self.inner.ssl_version(version)
 
     fn proxy_ssl_min_max_version(mut self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version
@@ -1543,7 +1543,7 @@ struct Easy:
         `CURLOPT_PROXY_SSLVERSION`.
         """
         var version = min_version | (max_version << 16)
-        return self.inner.set_option(Option.PROXY_SSL_VERSION, version)
+        return self.inner.proxy_ssl_version(version)
 
     fn ssl_verify_host(mut self, verify: Bool) -> Result:
         """Verify the certificate's name against host.
@@ -1555,7 +1555,7 @@ struct Easy:
         `CURLOPT_SSL_VERIFYHOST`.
         """
         var val = 2 if verify else 0
-        return self.inner.set_option(Option.SSL_VERIFY_HOST, val)
+        return self.inner.ssl_verify_host(val)
 
     fn proxy_ssl_verify_host(mut self, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
@@ -1567,7 +1567,7 @@ struct Easy:
         `CURLOPT_PROXY_SSL_VERIFYHOST`.
         """
         var val = 2 if verify else 0
-        return self.inner.set_option(Option.PROXY_SSL_VERIFYHOST, val)
+        return self.inner.proxy_ssl_verify_host(val)
 
     fn ssl_verify_peer(mut self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.
@@ -1578,7 +1578,7 @@ struct Easy:
         By default this option is set to `true` and corresponds to
         `CURLOPT_SSL_VERIFYPEER`.
         """
-        return self.inner.set_option(Option.SSL_VERIFYPEER, Int(verify))
+        return self.inner.ssl_verify_peer(verify)
 
     fn proxy_ssl_verify_peer(mut self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate for HTTPS proxy.
@@ -1589,7 +1589,7 @@ struct Easy:
         By default this option is set to `true` and corresponds to
         `CURLOPT_PROXY_SSL_VERIFYPEER`.
         """
-        return self.inner.set_option(Option.PROXY_SSL_VERIFYPEER, Int(verify))
+        return self.inner.proxy_ssl_verify_peer(verify)
 
     # # Verify the certificate's status.
     # #
@@ -1748,7 +1748,7 @@ struct Easy:
         By default this option is False and corresponds to
         CURLOPT_CERTINFO.
         """
-        return self.inner.set_option(Option.CERT_INFO, Int(enable))
+        return self.inner.certinfo(enable)
 
     fn pinned_public_key(mut self, mut pubkey: String) -> Result:
         """Set pinned public key.
@@ -1766,7 +1766,7 @@ struct Easy:
         By default this option is not set and corresponds to
         CURLOPT_PINNEDPUBLICKEY.
         """
-        return self.inner.set_option(Option.PINNED_PUBLIC_KEY, pubkey)
+        return self.inner.pinned_public_key(pubkey)
 
     # TODO: Specify a source for random data
     # Requires Path type support
@@ -1813,7 +1813,7 @@ struct Easy:
         By default this option is not set and corresponds to
         CURLOPT_SSL_CIPHER_LIST.
         """
-        return self.inner.set_option(Option.SSL_CIPHER_LIST, ciphers)
+        return self.inner.ssl_cipher_list(ciphers)
 
     fn proxy_ssl_cipher_list(mut self, mut ciphers: String) -> Result:
         """Specify ciphers to use for TLS for an HTTPS proxy.
@@ -1838,7 +1838,7 @@ struct Easy:
         By default this option is not set and corresponds to
         CURLOPT_PROXY_SSL_CIPHER_LIST.
         """
-        return self.inner.set_option(Option.PROXY_SSL_CIPHER_LIST, ciphers)
+        return self.inner.proxy_ssl_cipher_list(ciphers)
 
     fn ssl_sessionid_cache(mut self, enable: Bool) -> Result:
         """Enable or disable use of the SSL session-ID cache.
@@ -1850,7 +1850,7 @@ struct Easy:
 
         This corresponds to the CURLOPT_SSL_SESSIONID_CACHE option.
         """
-        return self.inner.set_option(Option.SSL_SESSIONID_CACHE, Int(enable))
+        return self.inner.ssl_sessionid_cache(enable)
 
     # TODO: Set SSL behavior options
     # Requires SslOpt type support
@@ -1905,7 +1905,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_EFFECTIVE_URL`.
         """
-        return self.inner.get_info(Info.EFFECTIVE_URL)
+        return self.inner.effective_url()
 
     fn response_code(self) raises -> c_long:
         """Get the last response code.
@@ -1913,7 +1913,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_RESPONSE_CODE`.
         """
-        return self.inner.get_info_long(Info.RESPONSE_CODE)
+        return self.inner.response_code()
 
     fn http_connectcode(self) raises -> c_long:
         """Get the CONNECT response code.
@@ -1921,7 +1921,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_HTTP_CONNECTCODE`.
         """
-        return self.inner.get_info_long(Info.HTTP_CONNECT_CODE)
+        return self.inner.http_connectcode()
 
     fn file_time(self) raises -> c_long:
         """Get the remote time of the retrieved document.
@@ -1929,7 +1929,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_FILETIME`.
         """
-        return self.inner.get_info_long(Info.FILE_TIME)
+        return self.inner.file_time()
 
     fn redirect_count(self) raises -> c_long:
         """Get the number of redirects.
@@ -1937,7 +1937,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_REDIRECT_COUNT`.
         """
-        return self.inner.get_info_long(Info.REDIRECT_COUNT)
+        return self.inner.redirect_count()
 
     fn redirect_url(self) raises -> String:
         """Get the URL a redirect would go to.
@@ -1945,7 +1945,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_REDIRECT_URL`.
         """
-        return self.inner.get_info(Info.REDIRECT_URL)
+        return self.inner.redirect_url()
 
     fn header_size(self) raises -> c_long:
         """Get the number of bytes of all headers received.
@@ -1953,7 +1953,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_HEADER_SIZE`.
         """
-        return self.inner.get_info_long(Info.HEADER_SIZE)
+        return self.inner.header_size()
 
     fn request_size(self) raises -> c_long:
         """Get the number of bytes sent in the request.
@@ -1961,7 +1961,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_REQUEST_SIZE`.
         """
-        return self.inner.get_info_long(Info.REQUEST_SIZE)
+        return self.inner.request_size()
 
     fn content_type(self) raises -> String:
         """Get the content-type of the downloaded object.
@@ -1969,7 +1969,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_CONTENT_TYPE`.
         """
-        return self.inner.get_info(Info.CONTENT_TYPE)
+        return self.inner.content_type()
 
     fn os_errno(self) raises -> c_long:
         """Get errno number from last connect failure.
@@ -1977,7 +1977,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_OS_ERRNO`.
         """
-        return self.inner.get_info_long(Info.OS_ERRNO)
+        return self.inner.os_errno()
 
     fn primary_ip(self) raises -> String:
         """Get the IP address of the most recent connection.
@@ -1985,7 +1985,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_PRIMARY_IP`.
         """
-        return self.inner.get_info(Info.PRIMARY_IP)
+        return self.inner.primary_ip()
 
     fn primary_port(self) raises -> c_long:
         """Get the destination port of the most recent connection.
@@ -1993,7 +1993,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_PRIMARY_PORT`.
         """
-        return self.inner.get_info_long(Info.PRIMARY_PORT)
+        return self.inner.primary_port()
 
     fn local_ip(self) raises -> String:
         """Get the local IP address of the most recent connection.
@@ -2001,7 +2001,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_LOCAL_IP`.
         """
-        return self.inner.get_info(Info.LOCAL_IP)
+        return self.inner.local_ip()
 
     fn local_port(self) raises -> c_long:
         """Get the local port of the most recent connection.
@@ -2009,7 +2009,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_LOCAL_PORT`.
         """
-        return self.inner.get_info_long(Info.LOCAL_PORT)
+        return self.inner.local_port()
 
     fn time_condition_unmet(self) raises -> c_long:
         """Check if a time conditional was met.
@@ -2017,7 +2017,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_CONDITION_UNMET`.
         """
-        return self.inner.get_info_long(Info.CONDITION_UNMET)
+        return self.inner.time_condition_unmet()
 
     fn download_size(self) raises -> Float64:
         """Get the content-length of the download.
@@ -2027,7 +2027,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_CONTENT_LENGTH_DOWNLOAD_T`.
         """
-        return self.inner.get_info_float(Info.CONTENT_LENGTH_DOWNLOAD)
+        return self.inner.download_size()
 
     fn upload_size(self) raises -> Float64:
         """Get the specified size of the upload.
@@ -2035,7 +2035,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_CONTENT_LENGTH_UPLOAD_T`.
         """
-        return self.inner.get_info_float(Info.CONTENT_LENGTH_UPLOAD)
+        return self.inner.upload_size()
 
     fn total_time(self) raises -> Float64:
         """Get the total time of the previous transfer in seconds.
@@ -2043,7 +2043,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_TOTAL_TIME_T`.
         """
-        return self.inner.get_info_float(Info.TOTAL_TIME)
+        return self.inner.total_time()
 
     fn namelookup_time(self) raises -> Float64:
         """Get the name lookup time in seconds.
@@ -2051,7 +2051,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_NAMELOOKUP_TIME_T`.
         """
-        return self.inner.get_info_float(Info.NAME_LOOKUP_TIME)
+        return self.inner.namelookup_time()
 
     fn connect_time(self) raises -> Float64:
         """Get the time until connect in seconds.
@@ -2059,7 +2059,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_CONNECT_TIME_T`.
         """
-        return self.inner.get_info_float(Info.CONNECT_TIME)
+        return self.inner.connect_time()
 
     fn appconnect_time(self) raises -> Float64:
         """Get the time until the SSL/SSH handshake is completed in seconds.
@@ -2067,7 +2067,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_APPCONNECT_TIME_T`.
         """
-        return self.inner.get_info_float(Info.APP_CONNECT_TIME)
+        return self.inner.appconnect_time()
 
     fn pretransfer_time(self) raises -> Float64:
         """Get the time until the file transfer start in seconds.
@@ -2075,7 +2075,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_PRETRANSFER_TIME_T`.
         """
-        return self.inner.get_info_float(Info.PRE_TRANSFER_TIME)
+        return self.inner.pretransfer_time()
 
     fn starttransfer_time(self) raises -> Float64:
         """Get the time until the first byte is received in seconds.
@@ -2083,7 +2083,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_STARTTRANSFER_TIME_T`.
         """
-        return self.inner.get_info_float(Info.START_TRANSFER_TIME)
+        return self.inner.starttransfer_time()
 
     fn redirect_time(self) raises -> Float64:
         """Get the time for all redirection steps in seconds.
@@ -2091,7 +2091,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_REDIRECT_TIME_T`.
         """
-        return self.inner.get_info_float(Info.REDIRECT_TIME)
+        return self.inner.redirect_time()
 
     fn speed_download(self) raises -> Float64:
         """Get the average download speed in bytes per second.
@@ -2099,7 +2099,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_SPEED_DOWNLOAD_T`.
         """
-        return self.inner.get_info_float(Info.SPEED_DOWNLOAD)
+        return self.inner.speed_download()
 
     fn speed_upload(self) raises -> Float64:
         """Get the average upload speed in bytes per second.
@@ -2107,7 +2107,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLINFO_SPEED_UPLOAD_T`.
         """
-        return self.inner.get_info_float(Info.SPEED_UPLOAD)
+        return self.inner.speed_upload()
 
     fn pipewait(mut self, wait: Bool) -> Result:
         """Wait for pipelining/multiplexing.
@@ -2138,7 +2138,7 @@ struct Easy:
 
         This corresponds to the CURLOPT_PIPEWAIT option.
         """
-        return self.inner.set_option(Option.PIPE_WAIT, Int(wait))
+        return self.inner.pipewait(wait)
 
     fn http_09_allowed(mut self, allow: Bool) -> Result:
         """Allow HTTP/0.9 compliant responses.
@@ -2149,7 +2149,7 @@ struct Easy:
         By default this option is not set and corresponds to
         CURLOPT_HTTP09_ALLOWED.
         """
-        return self.inner.set_option(Option.HTTP09_ALLOWED, Int(allow))
+        return self.inner.http_09_allowed(allow)
 
     # =========================================================================
     # Callback options
@@ -2182,7 +2182,7 @@ struct Easy:
         Note: In Mojo, the callback function must match the curl_write_callback
         signature defined in the bindings.
         """
-        return self.inner.set_option(Option.WRITE_FUNCTION, callback)
+        return self.inner.write_function(callback)
     
     fn write_data[origin: MutOrigin](mut self, data: OpaqueMutPointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
@@ -2190,7 +2190,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_WRITEDATA`.
         """
-        return self.inner.set_option(Option.WRITE_DATA, data)
+        return self.inner.write_data(data)
 
     fn headers(self, origin: HeaderOrigin = HeaderOrigin.HEADER) -> Dict[String, String]:
         """Move to next header set for multi-response requests.
@@ -2206,7 +2206,7 @@ struct Easy:
         return self.inner.headers(origin)
     
     fn get_scheme(self) raises -> String:
-        """Get URL scheme used in transfer
+        """Get URL scheme used in transfer.
 
         Corresponds to `CURLINFO_SCHEME`.
         """

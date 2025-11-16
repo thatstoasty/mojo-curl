@@ -1,8 +1,8 @@
 @fieldwise_init
 struct Protocol(ImplicitlyCopyable, Copyable, Movable, Writable):
     var value: UInt8
-    alias HTTP = Self(0)
-    alias HTTPS = Self(1)
+    comptime HTTP = Self(0)
+    comptime HTTPS = Self(1)
 
     fn write_to[T: Writer, //](self, mut writer: T):
         writer.write(self.value)
@@ -12,7 +12,6 @@ struct Protocol(ImplicitlyCopyable, Copyable, Movable, Writable):
         if s == "http":
             return Self.HTTP
         elif s == "https":
-            # HTTP/2 is not yet supported; default to HTTP/1.1
             return Self.HTTPS
         else:
             raise Error("Invalid protocol: ", s)
@@ -23,69 +22,69 @@ struct Protocol(ImplicitlyCopyable, Copyable, Movable, Writable):
 struct StatusCode(Copyable, EqualityComparable, Movable, Writable):
     var value: UInt16
 
-    alias CONTINUE = Self(100)
-    alias SWITCHING_PROTOCOLS = Self(101)
-    alias PROCESSING = Self(102)
-    alias EARLY_HINTS = Self(103)
+    comptime CONTINUE = Self(100)
+    comptime SWITCHING_PROTOCOLS = Self(101)
+    comptime PROCESSING = Self(102)
+    comptime EARLY_HINTS = Self(103)
 
-    alias OK = Self(200)
-    alias CREATED = Self(201)
-    alias ACCEPTED = Self(202)
-    alias NON_AUTHORITATIVE_INFORMATION = Self(203)
-    alias NO_CONTENT = Self(204)
-    alias RESET_CONTENT = Self(205)
-    alias PARTIAL_CONTENT = Self(206)
-    alias MULTI_STATUS = Self(207)
-    alias ALREADY_REPORTED = Self(208)
-    alias IM_USED = Self(226)
+    comptime OK = Self(200)
+    comptime CREATED = Self(201)
+    comptime ACCEPTED = Self(202)
+    comptime NON_AUTHORITATIVE_INFORMATION = Self(203)
+    comptime NO_CONTENT = Self(204)
+    comptime RESET_CONTENT = Self(205)
+    comptime PARTIAL_CONTENT = Self(206)
+    comptime MULTI_STATUS = Self(207)
+    comptime ALREADY_REPORTED = Self(208)
+    comptime IM_USED = Self(226)
 
-    alias MULTIPLE_CHOICES = Self(300)
-    alias MOVED_PERMANENTLY = Self(301)
-    alias FOUND = Self(302)
-    alias TEMPORARY_REDIRECT = Self(307)
-    alias PERMANENT_REDIRECT = Self(308)
+    comptime MULTIPLE_CHOICES = Self(300)
+    comptime MOVED_PERMANENTLY = Self(301)
+    comptime FOUND = Self(302)
+    comptime TEMPORARY_REDIRECT = Self(307)
+    comptime PERMANENT_REDIRECT = Self(308)
 
-    alias BAD_REQUEST = Self(400)
-    alias UNAUTHORIZED = Self(401)
-    alias PAYMENT_REQUIRED = Self(402)
-    alias FORBIDDEN = Self(403)
-    alias NOT_FOUND = Self(404)
-    alias METHOD_NOT_ALLOWED = Self(405)
-    alias NOT_ACCEPTABLE = Self(406)
-    alias PROXY_AUTHENTICATION_REQUIRED = Self(407)
-    alias REQUEST_TIMEOUT = Self(408)
-    alias CONFLICT = Self(409)
-    alias GONE = Self(410)
-    alias LENGTH_REQUIRED = Self(411)
-    alias PRECONDITION_FAILED = Self(412)
-    alias PAYLOAD_TOO_LARGE = Self(413)
-    alias URI_TOO_LONG = Self(414)
-    alias UNSUPPORTED_MEDIA_TYPE = Self(415)
-    alias RANGE_NOT_SATISFIABLE = Self(416)
-    alias EXPECTATION_FAILED = Self(417)
-    alias IM_A_TEAPOT = Self(418)
-    alias MISDIRECTED_REQUEST = Self(421)
-    alias UNPROCESSABLE_ENTITY = Self(422)
-    alias LOCKED = Self(423)
-    alias FAILED_DEPENDENCY = Self(424)
-    alias TOO_EARLY = Self(425)
-    alias UPGRADE_REQUIRED = Self(426)
-    alias PRECONDITION_REQUIRED = Self(428)
-    alias TOO_MANY_REQUESTS = Self(429)
-    alias REQUEST_HEADER_FIELDS_TOO_LARGE = Self(431)
-    alias UNAVAILABLE_FOR_LEGAL_REASONS = Self(451)
+    comptime BAD_REQUEST = Self(400)
+    comptime UNAUTHORIZED = Self(401)
+    comptime PAYMENT_REQUIRED = Self(402)
+    comptime FORBIDDEN = Self(403)
+    comptime NOT_FOUND = Self(404)
+    comptime METHOD_NOT_ALLOWED = Self(405)
+    comptime NOT_ACCEPTABLE = Self(406)
+    comptime PROXY_AUTHENTICATION_REQUIRED = Self(407)
+    comptime REQUEST_TIMEOUT = Self(408)
+    comptime CONFLICT = Self(409)
+    comptime GONE = Self(410)
+    comptime LENGTH_REQUIRED = Self(411)
+    comptime PRECONDITION_FAILED = Self(412)
+    comptime PAYLOAD_TOO_LARGE = Self(413)
+    comptime URI_TOO_LONG = Self(414)
+    comptime UNSUPPORTED_MEDIA_TYPE = Self(415)
+    comptime RANGE_NOT_SATISFIABLE = Self(416)
+    comptime EXPECTATION_FAILED = Self(417)
+    comptime IM_A_TEAPOT = Self(418)
+    comptime MISDIRECTED_REQUEST = Self(421)
+    comptime UNPROCESSABLE_ENTITY = Self(422)
+    comptime LOCKED = Self(423)
+    comptime FAILED_DEPENDENCY = Self(424)
+    comptime TOO_EARLY = Self(425)
+    comptime UPGRADE_REQUIRED = Self(426)
+    comptime PRECONDITION_REQUIRED = Self(428)
+    comptime TOO_MANY_REQUESTS = Self(429)
+    comptime REQUEST_HEADER_FIELDS_TOO_LARGE = Self(431)
+    comptime UNAVAILABLE_FOR_LEGAL_REASONS = Self(451)
 
-    alias INTERNAL_ERROR = Self(500)
-    alias NOT_IMPLEMENTED = Self(501)
-    alias BAD_GATEWAY = Self(502)
-    alias SERVICE_UNAVAILABLE = Self(503)
-    alias GATEWAY_TIMEOUT = Self(504)
-    alias HTTP_VERSION_NOT_SUPPORTED = Self(505)
-    alias VARIANT_ALSO_NEGOTIATES = Self(506)
-    alias INSUFFICIENT_STORAGE = Self(507)
-    alias LOOP_DETECTED = Self(508)
-    alias NOT_EXTENDED = Self(510)
-    alias NETWORK_AUTHENTICATION_REQUIRED = Self(511)
+    comptime INTERNAL_ERROR = Self(500)
+    comptime NOT_IMPLEMENTED = Self(501)
+    comptime BAD_GATEWAY = Self(502)
+    comptime SERVICE_UNAVAILABLE = Self(503)
+    comptime GATEWAY_TIMEOUT = Self(504)
+    comptime HTTP_VERSION_NOT_SUPPORTED = Self(505)
+    comptime VARIANT_ALSO_NEGOTIATES = Self(506)
+    comptime INSUFFICIENT_STORAGE = Self(507)
+    comptime LOOP_DETECTED = Self(508)
+    comptime NOT_EXTENDED = Self(510)
+    comptime NETWORK_AUTHENTICATION_REQUIRED = Self(511)
 
     @staticmethod
     fn from_int(code: Int) raises -> StatusCode:
@@ -97,7 +96,7 @@ struct StatusCode(Copyable, EqualityComparable, Movable, Writable):
         Returns:
             A StatusCode instance corresponding to the provided integer.
         """
-        # For every alias defined in StatusCode, check if the integer matches
+        # For every comptime defined in StatusCode, check if the integer matches
         # the value of the alias.
         if Self.OK == code:
             return Self.OK
@@ -257,13 +256,13 @@ struct StatusCode(Copyable, EqualityComparable, Movable, Writable):
 struct RequestMethod(ImplicitlyCopyable, Copyable, Movable, Writable, EqualityComparable):
     var value: UInt8
 
-    alias GET = Self(0)
-    alias POST = Self(1)
-    alias PUT = Self(2)
-    alias DELETE = Self(3)
-    alias HEAD = Self(4)
-    alias PATCH = Self(5)
-    alias OPTIONS = Self(6)
+    comptime GET = Self(0)
+    comptime POST = Self(1)
+    comptime PUT = Self(2)
+    comptime DELETE = Self(3)
+    comptime HEAD = Self(4)
+    comptime PATCH = Self(5)
+    comptime OPTIONS = Self(6)
 
     fn write_to[T: Writer, //](self, mut writer: T):
         writer.write(self.value)

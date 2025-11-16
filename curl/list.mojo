@@ -58,7 +58,6 @@ struct CurlList(Movable):
         self.raw = ptr
     
     fn free(deinit self):
-        print("freeing CurlList")
         if self.raw:
             get_curl_handle()[].slist_free_all(self.raw)
         
@@ -69,8 +68,9 @@ struct CurlList(Movable):
 
 @fieldwise_init
 struct _CurlListIterator[origin: Origin](Iterator, Iterable):
-    alias Element = StringSlice[MutAnyOrigin]
-    alias IteratorType[
+    # TODO: Not sure if it's safe to use external origin string slices?
+    comptime Element = StringSlice[MutOrigin.external]
+    comptime IteratorType[
         iterable_mut: Bool, //, iterable_origin: Origin[iterable_mut]
     ]: Iterator = Self
 

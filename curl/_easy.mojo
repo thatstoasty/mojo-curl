@@ -750,12 +750,12 @@ struct InnerEasy:
         """
         return self.set_option(Option.POST_REDIR, redirects)
 
-    fn put(mut self, enable: Bool) -> Result:
-        """Make an HTTP PUT request.
+    # fn put(mut self, enable: Bool) -> Result:
+    #     """Make an HTTP PUT request.
 
-        By default this option is `false` and corresponds to `CURLOPT_PUT`.
-        """
-        return self.set_option(Option.PUT, Int(enable))
+    #     By default this option is `false` and corresponds to `CURLOPT_PUT`.
+    #     """
+    #     return self.set_option(Option.PUT, Int(enable))
 
     fn post(mut self, enable: Bool) -> Result:
         """Make an HTTP POST request.
@@ -2060,7 +2060,7 @@ struct InnerEasy:
         By default this option is not set and corresponds to
         `CURLINFO_CONTENT_LENGTH_DOWNLOAD_T`.
         """
-        return self.get_info_float(Info.CONTENT_LENGTH_DOWNLOAD)
+        return self.get_info_float(Info.CONTENT_LENGTH_DOWNLOAD_T)
 
     fn upload_size(self) raises -> Float64:
         """Get the specified size of the upload.
@@ -2068,7 +2068,7 @@ struct InnerEasy:
         By default this option is not set and corresponds to
         `CURLINFO_CONTENT_LENGTH_UPLOAD_T`.
         """
-        return self.get_info_float(Info.CONTENT_LENGTH_UPLOAD)
+        return self.get_info_float(Info.CONTENT_LENGTH_UPLOAD_T)
 
     fn total_time(self) raises -> Float64:
         """Get the total time of the previous transfer in seconds.
@@ -2132,7 +2132,7 @@ struct InnerEasy:
         By default this option is not set and corresponds to
         `CURLINFO_SPEED_DOWNLOAD_T`.
         """
-        return self.get_info_float(Info.SPEED_DOWNLOAD)
+        return self.get_info_float(Info.SPEED_DOWNLOAD_T)
 
     fn speed_upload(self) raises -> Float64:
         """Get the average upload speed in bytes per second.
@@ -2140,7 +2140,7 @@ struct InnerEasy:
         By default this option is not set and corresponds to
         `CURLINFO_SPEED_UPLOAD_T`.
         """
-        return self.get_info_float(Info.SPEED_UPLOAD)
+        return self.get_info_float(Info.SPEED_UPLOAD_T)
 
     fn pipewait(mut self, wait: Bool) -> Result:
         """Wait for pipelining/multiplexing.
@@ -2185,7 +2185,7 @@ struct InnerEasy:
         return self.set_option(Option.HTTP09_ALLOWED, Int(allow))
     
     fn get_scheme(self) raises -> String:
-        """Get URL scheme used in transfer
+        """Get URL scheme used in transfer.
 
         Corresponds to `CURLINFO_SCHEME`.
         """
@@ -2213,3 +2213,44 @@ struct InnerEasy:
             headers[String(unsafe_from_utf8_ptr=h[].name)] = String(unsafe_from_utf8_ptr=h[].value)
 
         return headers^
+
+    # =========================================================================
+    # Callback options
+
+    fn write_function(mut self, callback: curl_write_callback) -> Result:
+        """Set callback for writing received data.
+
+        This callback function gets called by libcurl as soon as there is data
+        received that needs to be saved.
+
+        The callback function will be passed as much data as possible in all
+        invokes, but you must not make any assumptions. It may be one byte, it
+        may be thousands. If `show_header` is enabled, which makes header data
+        get passed to the write callback, you can get up to
+        `CURL_MAX_HTTP_HEADER` bytes of header data passed into it. This
+        usually means 100K.
+
+        This function may be called with zero bytes data if the transferred file
+        is empty.
+
+        The callback should return the number of bytes actually taken care of.
+        If that amount differs from the amount passed to your callback function,
+        it'll signal an error condition to the library. This will cause the
+        transfer to get aborted and the libcurl function used will return
+        an error with `is_write_error`.
+
+        By default data is sent into the void, and this corresponds to the
+        `CURLOPT_WRITEFUNCTION` option.
+
+        Note: In Mojo, the callback function must match the curl_write_callback
+        signature defined in the bindings.
+        """
+        return self.set_option(Option.WRITE_FUNCTION, callback)
+    
+    fn write_data[origin: MutOrigin](mut self, data: OpaqueMutPointer[origin]) -> Result:
+        """Set custom pointer to pass to write callback.
+
+        By default this option is not set and corresponds to
+        `CURLOPT_WRITEDATA`.
+        """
+        return self.set_option(Option.WRITE_DATA, data)

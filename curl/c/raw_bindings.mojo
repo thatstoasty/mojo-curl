@@ -6,9 +6,9 @@ from sys.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 from curl.c.types import curl_slist, CURL, ExternalImmutOpaquePointer, ExternalImmutPointer, ExternalMutPointer, curl_write_callback
 from curl.c.header import curl_header
 
-alias CURLcode = c_int
-alias CURLoption = c_int
-alias CURLINFO = c_int
+comptime CURLcode = c_int
+comptime CURLoption = c_int
+comptime CURLINFO = c_int
 
 
 @fieldwise_init
@@ -21,7 +21,7 @@ struct _curl(Movable):
     fn __init__(out self):
         """Initialize the Safe CURL binding by loading both libraries."""
         var curl_path = String(env_get_string["LIBCURL_LIB_PATH", ""]())
-        var wrapper_path = String("curl/c/libcurl_wrapper.dylib")
+        var wrapper_path = String("libcurl_wrapper.dylib")
 
         # Load curl library
         if curl_path == "":

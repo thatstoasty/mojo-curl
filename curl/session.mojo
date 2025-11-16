@@ -31,8 +31,14 @@ struct Session:
     ) raises -> HTTPResponse:
         """Sends an HTTP request and returns the corresponding response.
 
+        Params:
+            method: The HTTP method to use for the request.
+
         Args:
-            request: An `HTTPRequest` object representing the request to be sent.
+            url: The URL to which the request is sent.
+            headers: A dictionary of HTTP headers to include in the request.
+            body: An optional Body object representing the request body.
+            timeout: An optional timeout in seconds for the request.
 
         Returns:
             The received response as an `HTTPResponse` object.
@@ -97,6 +103,17 @@ struct Session:
         query_parameters: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends a GET request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            query_parameters: Query parameters to include in the request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.GET](
             url=url,
             headers=headers^,
@@ -110,6 +127,17 @@ struct Session:
         data: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends a POST request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            data: The data to include in the body of the POST request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.POST](
             url=url,
             headers=headers^,
@@ -124,6 +152,17 @@ struct Session:
         data: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends a PUT request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            data: The data to include in the body of the PUT request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.PUT](
             url=url,
             headers=headers^,
@@ -137,6 +176,16 @@ struct Session:
         var headers: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends a DELETE request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.DELETE](
             url=url,
             headers=headers^,
@@ -150,6 +199,17 @@ struct Session:
         data: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends a GET request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            data: The data to include in the body of the PATCH request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.PATCH](
             url=url,
             headers=headers^,
@@ -163,6 +223,16 @@ struct Session:
         var headers: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends a HEAD request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.HEAD](
             url=url,
             headers=headers^,
@@ -176,6 +246,17 @@ struct Session:
         data: Dict[String, String] = {},
         timeout: Optional[Int] = None,
     ) raises -> HTTPResponse:
+        """Sends an OPTIONS request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            headers: HTTP headers to include in the request.
+            data: The data to include in the body of the OPTIONS request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
         return self.send[RequestMethod.OPTIONS](
             url=url,
             headers=headers^,
