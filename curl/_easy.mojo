@@ -11,6 +11,10 @@ struct InnerEasy:
 
     fn __init__(out self):
         self.easy = get_curl_handle()[].easy_init()
+    
+    fn __del__(deinit self):
+        if self.easy:
+            get_curl_handle()[].easy_cleanup(self.easy)
 
     fn set_option(self, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
@@ -85,7 +89,7 @@ struct InnerEasy:
 
     # Behavior options
 
-    fn verbose(mut self, verbose: Bool) -> Result:
+    fn verbose(self, verbose: Bool) -> Result:
         """Configures this handle to have verbose output to help debug protocol
         information.
 
@@ -97,7 +101,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.VERBOSE, Int(verbose))
 
-    fn show_header(mut self, show: Bool) -> Result:
+    fn show_header(self, show: Bool) -> Result:
         """Indicates whether header information is streamed to the output body of
         this request.
 
@@ -113,7 +117,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.HEADER, Int(show))
 
-    fn progress(mut self, progress: Bool) -> Result:
+    fn progress(self, progress: Bool) -> Result:
         """Indicates whether a progress meter will be shown for requests done with
         this handle.
 
@@ -124,7 +128,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.NO_PROGRESS, Int(not progress))
 
-    fn signal(mut self, signal: Bool) -> Result:
+    fn signal(self, signal: Bool) -> Result:
         """Inform libcurl whether or not it should install signal handlers or
         attempt to use signals to perform library functions.
 
@@ -141,7 +145,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.NO_SIGNAL, Int(not signal))
 
-    fn wildcard_match(mut self, m: Bool) -> Result:
+    fn wildcard_match(self, m: Bool) -> Result:
         """Indicates whether multiple files will be transferred based on the file
         name pattern.
 
@@ -157,7 +161,7 @@ struct InnerEasy:
 
     # TODO: error buffer and stderr
 
-    fn fail_on_error(mut self, fail: Bool) -> Result:
+    fn fail_on_error(self, fail: Bool) -> Result:
         """Indicates whether this library will fail on HTTP response codes >= 400.
 
         This method is not fail-safe especially when authentication is involved.
@@ -170,7 +174,7 @@ struct InnerEasy:
     # =========================================================================
     # Network options
 
-    fn url(mut self, mut url: String) -> Result:
+    fn url(self, mut url: String) -> Result:
         """Provides the URL which this handle will work with.
 
         The string provided must be URL-encoded with the format:
@@ -187,7 +191,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.URL, url)
 
-    fn port(mut self, port: Int) -> Result:
+    fn port(self, port: Int) -> Result:
         """Configures the port number to connect to, instead of the one specified
         in the URL or the default of the protocol.
         """
@@ -196,7 +200,7 @@ struct InnerEasy:
     # =========================================================================
     # Connection options
 
-    fn connect_to(mut self, list: List) -> Result:
+    fn connect_to(self, list: List) -> Result:
         """Connect to a specific host and port.
 
         Each single string should be written using the format
@@ -214,7 +218,7 @@ struct InnerEasy:
         # This requires curl_slist support which needs to be added
         return Result(0)
 
-    fn path_as_is(mut self, as_is: Bool) -> Result:
+    fn path_as_is(self, as_is: Bool) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
 
         By default this option is `false` and corresponds to
@@ -222,14 +226,14 @@ struct InnerEasy:
         """
         return self.set_option(Option.PATH_AS_IS, Int(as_is))
 
-    fn proxy(mut self, mut url: String) -> Result:
+    fn proxy(self, mut url: String) -> Result:
         """Provide the URL of a proxy to use.
 
         By default this option is not set and corresponds to `CURLOPT_PROXY`.
         """
         return self.set_option(Option.PROXY, url)
 
-    fn proxy_port(mut self, port: Int) -> Result:
+    fn proxy_port(self, port: Int) -> Result:
         """Provide port number the proxy is listening on.
 
         By default this option is not set (the default port for the proxy
@@ -237,7 +241,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_PORT, port)
 
-    fn no_proxy(mut self, mut skip: String) -> Result:
+    fn no_proxy(self, mut skip: String) -> Result:
         """Provide a list of hosts that should not be proxied to.
 
         This string is a comma-separated list of hosts which should not use the
@@ -249,7 +253,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.NO_PROXY, skip)
 
-    fn http_proxy_tunnel(mut self, tunnel: Bool) -> Result:
+    fn http_proxy_tunnel(self, tunnel: Bool) -> Result:
         """Inform curl whether it should tunnel all operations through the proxy.
 
         This essentially means that a `CONNECT` is sent to the proxy for all
@@ -260,7 +264,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.HTTP_PROXY_TUNNEL, Int(tunnel))
 
-    fn interface(mut self, mut interface: String) -> Result:
+    fn interface(self, mut interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
 
         The interface name, IP address, or host name can be specified here.
@@ -270,7 +274,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.INTERFACE, interface)
 
-    fn set_local_port(mut self, port: Int) -> Result:
+    fn set_local_port(self, port: Int) -> Result:
         """Indicate which port should be bound to locally for this connection.
 
         By default this option is 0 (any port) and corresponds to
@@ -278,7 +282,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.LOCAL_PORT, port)
 
-    fn local_port_range(mut self, range: Int) -> Result:
+    fn local_port_range(self, range: Int) -> Result:
         """Indicates the number of attempts libcurl will perform to find a working
         port number.
 
@@ -287,7 +291,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.LOCAL_PORT_RANGE, range)
 
-    fn dns_servers(mut self, mut servers: String) -> Result:
+    fn dns_servers(self, mut servers: String) -> Result:
         """Sets the DNS servers that will be used.
 
         Provide a comma separated list, for example: `8.8.8.8,8.8.4.4`.
@@ -298,7 +302,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.DNS_SERVERS, servers)
 
-    fn dns_cache_timeout(mut self, seconds: Int) -> Result:
+    fn dns_cache_timeout(self, seconds: Int) -> Result:
         """Sets the timeout of how long name resolves will be kept in memory.
 
         This is distinct from DNS TTL options and is entirely speculative.
@@ -308,7 +312,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.DNS_CACHE_TIMEOUT, seconds)
 
-    fn doh_url(mut self, mut url: String) -> Result:
+    fn doh_url(self, mut url: String) -> Result:
         """Provide the DNS-over-HTTPS URL.
 
         The parameter must be URL-encoded in the following format:
@@ -331,7 +335,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.DOH_URL, url)
 
-    fn doh_ssl_verify_peer(mut self, verify: Bool) -> Result:
+    fn doh_ssl_verify_peer(self, verify: Bool) -> Result:
         """This option tells curl to verify the authenticity of the DoH
         (DNS-over-HTTPS) server's certificate. A value of `true` means curl
         verifies; `false` means it does not.
@@ -370,7 +374,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.DOH_SSL_VERIFY_PEER, Int(verify))
 
-    fn doh_ssl_verify_host(mut self, verify: Bool) -> Result:
+    fn doh_ssl_verify_host(self, verify: Bool) -> Result:
         """Tells curl to verify the DoH (DNS-over-HTTPS) server's certificate name
         fields against the host name.
 
@@ -399,7 +403,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.DOH_SSL_VERIFY_HOST, Int(2 if verify else 0))
 
-    fn proxy_cainfo(mut self, mut cainfo: String) -> Result:
+    fn proxy_cainfo(self, mut cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
 
         By default this value is not set and corresponds to
@@ -407,7 +411,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_CAINFO, cainfo)
 
-    fn proxy_capath(mut self, mut path: String) -> Result:
+    fn proxy_capath(self, mut path: String) -> Result:
         """Specify a directory holding CA certificates for proxy.
 
         The specified directory should hold multiple CA certificates to verify
@@ -420,7 +424,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_CAPATH, path)
 
-    fn proxy_sslcert(mut self, mut sslcert: String) -> Result:
+    fn proxy_sslcert(self, mut sslcert: String) -> Result:
         """Set client certificate for proxy.
 
         By default this value is not set and corresponds to
@@ -428,7 +432,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_SSL_CERT, sslcert)
 
-    fn proxy_sslcert_type(mut self, mut kind: String) -> Result:
+    fn proxy_sslcert_type(self, mut kind: String) -> Result:
         """Set the type of client certificate for proxy.
 
         By default this value is not set and corresponds to
@@ -436,7 +440,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_SSL_CERT_TYPE, kind)
 
-    fn proxy_sslkey(mut self, mut sslkey: String) -> Result:
+    fn proxy_sslkey(self, mut sslkey: String) -> Result:
         """Set private key for HTTPS proxy.
 
         By default this value is not set and corresponds to
@@ -444,7 +448,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_SSL_KEY, sslkey)
 
-    fn proxy_sslkey_type(mut self, mut kind: String) -> Result:
+    fn proxy_sslkey_type(self, mut kind: String) -> Result:
         """Set type of the private key file for HTTPS proxy.
 
         The string should be the format of your private key. Supported formats
@@ -461,7 +465,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_SSL_KEY_TYPE, kind)
 
-    fn proxy_key_password(mut self, mut password: String) -> Result:
+    fn proxy_key_password(self, mut password: String) -> Result:
         """Set passphrase to private key for HTTPS proxy.
 
         This will be used as the password required to use the `ssl_key`.
@@ -473,7 +477,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_KEYPASSWD, password)
 
-    fn proxy_type(mut self, kind: Int) -> Result:
+    fn proxy_type(self, kind: Int) -> Result:
         """Indicates the type of proxy being used.
 
         By default this option is `ProxyType::Http` and corresponds to
@@ -481,7 +485,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_TYPE, kind)
 
-    fn doh_ssl_verify_status(mut self, verify: Bool) -> Result:
+    fn doh_ssl_verify_status(self, verify: Bool) -> Result:
         """Pass a long as parameter set to 1 to enable or 0 to disable.
 
         This option determines whether libcurl verifies the status of the DoH
@@ -499,7 +503,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.DOH_SSL_VERIFY_STATUS, Int(verify))
 
-    fn buffer_size(mut self, size: Int) -> Result:
+    fn buffer_size(self, size: Int) -> Result:
         """Specify the preferred receive buffer size, in bytes.
 
         This is treated as a request, not an order, and the main point of this
@@ -511,7 +515,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.BUFFER_SIZE, size)
 
-    fn upload_buffer_size(mut self, size: Int) -> Result:
+    fn upload_buffer_size(self, size: Int) -> Result:
         """Specify the preferred send buffer size, in bytes.
 
         This is treated as a request, not an order, and the main point of this
@@ -526,10 +530,10 @@ struct InnerEasy:
     # #
     # # By default this options defaults to `false` and corresponds to
     # # `CURLOPT_TCP_FASTOPEN`
-    # fn fast_open(mut self, enable: Bool) -> Result:
+    # fn fast_open(self, enable: Bool) -> Result:
     #
 
-    fn tcp_nodelay(mut self, enable: Bool) -> Result:
+    fn tcp_nodelay(self, enable: Bool) -> Result:
         """Configures whether the TCP_NODELAY option is set, or Nagle's algorithm
         is disabled.
 
@@ -542,7 +546,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.TCP_NODELAY, Int(enable))
 
-    fn tcp_keepalive(mut self, enable: Bool) -> Result:
+    fn tcp_keepalive(self, enable: Bool) -> Result:
         """Configures whether TCP keepalive probes will be sent.
 
         The delay and frequency of these probes is controlled by `tcp_keepidle`
@@ -553,7 +557,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.TCP_KEEPALIVE, Int(enable))
 
-    fn tcp_keepidle(mut self, seconds: Int) -> Result:
+    fn tcp_keepidle(self, seconds: Int) -> Result:
         """Configures the TCP keepalive idle time wait.
 
         This is the delay, after which the connection is idle, keepalive probes
@@ -563,14 +567,14 @@ struct InnerEasy:
         """
         return self.set_option(Option.TCP_KEEPIDLE, seconds)
 
-    fn tcp_keepintvl(mut self, seconds: Int) -> Result:
+    fn tcp_keepintvl(self, seconds: Int) -> Result:
         """Configures the delay between keepalive probes.
 
         By default this corresponds to `CURLOPT_TCP_KEEPINTVL`.
         """
         return self.set_option(Option.TCP_KEEPINTVL, seconds)
 
-    fn address_scope(mut self, scope: Int) -> Result:
+    fn address_scope(self, scope: Int) -> Result:
         """Configures the scope for local IPv6 addresses.
 
         Sets the scope_id value to use when connecting to IPv6 or link-local
@@ -583,21 +587,21 @@ struct InnerEasy:
     # =========================================================================
     # Names and passwords
 
-    fn username(mut self, mut user: String) -> Result:
+    fn username(self, mut user: String) -> Result:
         """Configures the username to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_USERNAME`.
         """
         return self.set_option(Option.USERNAME, user)
 
-    fn password(mut self, mut pass_: String) -> Result:
+    fn password(self, mut pass_: String) -> Result:
         """Configures the password to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_PASSWORD`.
         """
         return self.set_option(Option.PASSWORD, pass_)
 
-    fn http_auth(mut self, auth: Int) -> Result:
+    fn http_auth(self, auth: Int) -> Result:
         """Set HTTP server authentication methods to try.
 
         If more than one method is set, libcurl will first query the site to see
@@ -612,7 +616,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.HTTP_AUTH, auth)
 
-    fn aws_sigv4(mut self, mut param: String) -> Result:
+    fn aws_sigv4(self, mut param: String) -> Result:
         """Provides AWS V4 signature authentication on HTTP(S) header.
 
         `param` is used to create outgoing authentication headers.
@@ -638,7 +642,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.AWS_SIGV4, param)
 
-    fn proxy_username(mut self, mut user: String) -> Result:
+    fn proxy_username(self, mut user: String) -> Result:
         """Configures the proxy username to pass as authentication for this
         connection.
 
@@ -647,7 +651,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_USERNAME, user)
 
-    fn proxy_password(mut self, mut pass_: String) -> Result:
+    fn proxy_password(self, mut pass_: String) -> Result:
         """Configures the proxy password to pass as authentication for this
         connection.
 
@@ -656,7 +660,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_PASSWORD, pass_)
 
-    fn proxy_auth(mut self, auth: Int) -> Result:
+    fn proxy_auth(self, auth: Int) -> Result:
         """Set HTTP proxy authentication methods to try.
 
         If more than one method is set, libcurl will first query the site to see
@@ -669,7 +673,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_AUTH, auth)
 
-    fn netrc(mut self, netrc: Int) -> Result:
+    fn netrc(self, netrc: Int) -> Result:
         """Enable .netrc parsing.
 
         By default the .netrc file is ignored and corresponds to `CURL_NETRC_IGNORED`.
@@ -679,7 +683,7 @@ struct InnerEasy:
     # =========================================================================
     # HTTP Options
 
-    fn autoreferer(mut self, enable: Bool) -> Result:
+    fn autoreferer(self, enable: Bool) -> Result:
         """Indicates whether the referer header is automatically updated.
 
         By default this option is `false` and corresponds to
@@ -687,7 +691,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.AUTO_REFERER, Int(enable))
 
-    fn accept_encoding(mut self, mut encoding: String) -> Result:
+    fn accept_encoding(self, mut encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
 
         Sets the contents of the Accept-Encoding header sent in an HTTP request.
@@ -701,7 +705,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.ACCEPT_ENCODING, encoding)
 
-    fn transfer_encoding(mut self, enable: Bool) -> Result:
+    fn transfer_encoding(self, enable: Bool) -> Result:
         """Request the HTTP Transfer Encoding.
 
         By default this option is `false` and corresponds to
@@ -709,7 +713,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.TRANSFER_ENCODING, Int(enable))
 
-    fn follow_location(mut self, enable: Bool) -> Result:
+    fn follow_location(self, enable: Bool) -> Result:
         """Follow HTTP 3xx redirects.
 
         Indicates whether any `Location` headers in the response should get
@@ -720,7 +724,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.FOLLOW_LOCATION, Int(enable))
 
-    fn unrestricted_auth(mut self, enable: Bool) -> Result:
+    fn unrestricted_auth(self, enable: Bool) -> Result:
         """Send credentials to hosts other than the first as well.
 
         Sends username/password credentials even when the host changes as part
@@ -731,7 +735,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.UNRESTRICTED_AUTH, Int(enable))
 
-    fn max_redirections(mut self, max: Int) -> Result:
+    fn max_redirections(self, max: Int) -> Result:
         """Set the maximum number of redirects allowed.
 
         A value of 0 will refuse any redirect.
@@ -741,7 +745,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.MAXREDIRS, max)
 
-    fn post_redirections(mut self, redirects: Int) -> Result:
+    fn post_redirections(self, redirects: Int) -> Result:
         """Set the policy for handling redirects to POST requests.
 
         By default a POST is changed to a GET when following a redirect. Setting any
@@ -750,14 +754,14 @@ struct InnerEasy:
         """
         return self.set_option(Option.POST_REDIR, redirects)
 
-    # fn put(mut self, enable: Bool) -> Result:
+    # fn put(self, enable: Bool) -> Result:
     #     """Make an HTTP PUT request.
 
     #     By default this option is `false` and corresponds to `CURLOPT_PUT`.
     #     """
     #     return self.set_option(Option.PUT, Int(enable))
 
-    fn post(mut self, enable: Bool) -> Result:
+    fn post(self, enable: Bool) -> Result:
         """Make an HTTP POST request.
 
         To send a zero-length (empty) POST, set `CURLOPT_POSTFIELDS` to an empty string,
@@ -773,7 +777,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.POST, Int(enable))
     
-    fn post_fields(mut self, data: Span[UInt8]) -> Result:
+    fn post_fields(self, data: Span[UInt8]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         If `CURLOPT_POSTFIELDS` is explicitly set to NULL then libcurl gets
@@ -789,7 +793,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.POST_FIELDS, data)
 
-    fn post_fields_copy(mut self, data: Span[UInt8]) -> Result:
+    fn post_fields_copy(self, data: Span[UInt8]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
     
         Note that the data is copied into this handle and if that's not desired
@@ -800,7 +804,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.COPY_POST_FIELDS, data)
 
-    fn post_field_size(mut self, size: Int) -> Result:
+    fn post_field_size(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
         POST operation.
 
@@ -814,7 +818,7 @@ struct InnerEasy:
         return self.set_option(Option.POST_FIELD_SIZE_LARGE, size)
 
     # TODO: httppost - needs Form type implementation
-    # fn httppost(mut self, form: Form) -> Result:
+    # fn httppost(self, form: Form) -> Result:
     #     """Tells libcurl you want a multipart/formdata HTTP POST to be made and you
     #     instruct what data to pass on to the server in the `form` argument.
     #
@@ -824,14 +828,14 @@ struct InnerEasy:
     #     # TODO: Implement this when Form type is available
     #     pass
 
-    fn referer(mut self, mut referer: String) -> Result:
+    fn referer(self, mut referer: String) -> Result:
         """Sets the HTTP referer header.
 
         By default this option is not set and corresponds to `CURLOPT_REFERER`.
         """
         return self.set_option(Option.REFERER, referer)
 
-    fn useragent(mut self, mut useragent: String) -> Result:
+    fn useragent(self, mut useragent: String) -> Result:
         """Sets the HTTP user-agent header.
 
         By default this option is not set and corresponds to
@@ -840,7 +844,7 @@ struct InnerEasy:
         return self.set_option(Option.USERAGENT, useragent)
 
     # TODO: http_headers - needs List type implementation
-    # fn http_headers(mut self, list: List) -> Result:
+    # fn http_headers(self, list: List) -> Result:
     #     """Add some headers to this HTTP request.
     #
     #     If you add a header that is otherwise used internally, the value here
@@ -863,10 +867,10 @@ struct InnerEasy:
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_PROXYHEADER`
-    # fn proxy_headers(mut self, list: List) -> Result:
+    # fn proxy_headers(self, list: List) -> Result:
     #     pass
 
-    fn cookie(mut self, mut cookie: String) -> Result:
+    fn cookie(self, mut cookie: String) -> Result:
         """Set the contents of the HTTP Cookie header.
 
         Pass a string of the form `name=contents` for one cookie value or
@@ -881,7 +885,7 @@ struct InnerEasy:
         return self.set_option(Option.COOKIE, cookie)
 
     # TODO: cookie_file - needs path handling
-    # fn cookie_file(mut self, file: String) -> Result:
+    # fn cookie_file(self, file: String) -> Result:
     #     """Set the file name to read cookies from.
     #
     #     The cookie data can be in either the old Netscape / Mozilla cookie data
@@ -903,7 +907,7 @@ struct InnerEasy:
     #     return self.set_option(Option.COOKIE_FILE, file)
 
     # TODO: cookie_jar - needs path handling
-    # fn cookie_jar(mut self, file: String) -> Result:
+    # fn cookie_jar(self, file: String) -> Result:
     #     """Set the file name to store cookies to.
     #
     #     This will make libcurl write all internally known cookies to the file
@@ -921,7 +925,7 @@ struct InnerEasy:
     #     """
     #     return self.set_option(Option.COOKIEJAR, file)
 
-    fn cookie_session(mut self, session: Bool) -> Result:
+    fn cookie_session(self, session: Bool) -> Result:
         """Start a new cookie session.
 
         Marks this as a new cookie "session". It will force libcurl to ignore
@@ -936,7 +940,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.COOKIE_SESSION, Int(session))
 
-    fn cookie_list(mut self, mut cookie: String) -> Result:
+    fn cookie_list(self, mut cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
 
         Such a cookie can be either a single line in Netscape / Mozilla format
@@ -965,7 +969,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.COOKIE_LIST, cookie)
 
-    fn get(mut self, enable: Bool) -> Result:
+    fn get(self, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
 
         By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
@@ -975,10 +979,10 @@ struct InnerEasy:
     # # Ask for a HTTP GET request.
     # #
     # # By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
-    # fn http_version(mut self, vers: String) -> Result:
+    # fn http_version(self, vers: String) -> Result:
     #     pass
 
-    fn ignore_content_length(mut self, ignore: Bool) -> Result:
+    fn ignore_content_length(self, ignore: Bool) -> Result:
         """Ignore the content-length header.
 
         By default this option is `false` and corresponds to
@@ -986,7 +990,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.IGNORE_CONTENT_LENGTH, Int(ignore))
 
-    fn http_content_decoding(mut self, enable: Bool) -> Result:
+    fn http_content_decoding(self, enable: Bool) -> Result:
         """Enable or disable HTTP content decoding.
 
         By default this option is `true` and corresponds to
@@ -994,7 +998,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.HTTP_CONTENT_DECODING, Int(enable))
 
-    fn http_transfer_decoding(mut self, enable: Bool) -> Result:
+    fn http_transfer_decoding(self, enable: Bool) -> Result:
         """Enable or disable HTTP transfer decoding.
 
         By default this option is `true` and corresponds to
@@ -1006,7 +1010,7 @@ struct InnerEasy:
     # #
     # # By default this option is 1s and corresponds to
     # # `CURLOPT_EXPECT_100_TIMEOUT_MS`.
-    # fn expect_100_timeout(mut self, enable: Bool) -> Result:
+    # fn expect_100_timeout(self, enable: Bool) -> Result:
     #     pass
 
     # # Wait for pipelining/multiplexing.
@@ -1033,13 +1037,13 @@ struct InnerEasy:
     # # The waiting time is as long as it takes for the connection to get up and
     # # for libcurl to get the necessary response back that informs it about its
     # # protocol and support level.
-    # fn http_pipewait(mut self, enable: Bool) -> Result:
+    # fn http_pipewait(self, enable: Bool) -> Result:
     #     pass
 
     # =========================================================================
     # Protocol Options
 
-    fn range(mut self, mut range: String) -> Result:
+    fn range(self, mut range: String) -> Result:
         """Indicates the range that this request should retrieve.
 
         The string provided should be of the form `N-M` where either `N` or `M`
@@ -1050,7 +1054,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.RANGE, range)
 
-    fn resume_from(mut self, from_byte: Int) -> Result:
+    fn resume_from(self, from_byte: Int) -> Result:
         """Set a point to resume transfer from.
 
         Specify the offset in bytes you want the transfer to start from.
@@ -1060,7 +1064,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.RESUME_FROM_LARGE, from_byte)
 
-    fn custom_request(mut self, mut request: String) -> Result:
+    fn custom_request(self, mut request: String) -> Result:
         """Set a custom request string.
 
         Specifies that a custom request will be made (e.g. a custom HTTP
@@ -1072,7 +1076,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.CUSTOM_REQUEST, request)
 
-    fn fetch_filetime(mut self, fetch: Bool) -> Result:
+    fn fetch_filetime(self, fetch: Bool) -> Result:
         """Get the modification time of the remote resource.
 
         If true, libcurl will attempt to get the modification time of the
@@ -1085,7 +1089,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.FILE_TIME, Int(fetch))
 
-    fn nobody(mut self, enable: Bool) -> Result:
+    fn nobody(self, enable: Bool) -> Result:
         """Indicate whether to download the request without getting the body.
 
         This is useful, for example, for doing a HEAD request.
@@ -1094,7 +1098,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.NO_BODY, Int(enable))
 
-    fn in_filesize(mut self, size: Int) -> Result:
+    fn in_filesize(self, size: Int) -> Result:
         """Set the size of the input file to send off.
 
         By default this option is not set and corresponds to
@@ -1102,7 +1106,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.IN_FILE_SIZE_LARGE, size)
 
-    fn upload(mut self, enable: Bool) -> Result:
+    fn upload(self, enable: Bool) -> Result:
         """Enable or disable data upload.
 
         This means that a PUT request will be made for HTTP and probably wants
@@ -1113,7 +1117,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.UPLOAD, Int(enable))
 
-    fn max_filesize(mut self, size: Int) -> Result:
+    fn max_filesize(self, size: Int) -> Result:
         """Configure the maximum file size to download.
 
         By default this option is not set and corresponds to
@@ -1121,7 +1125,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.MAX_FILE_SIZE_LARGE, size)
 
-    fn time_condition(mut self, cond: Int) -> Result:
+    fn time_condition(self, cond: Int) -> Result:
         """Selects a condition for a time request.
 
         This value indicates how the `time_value` option is interpreted.
@@ -1131,7 +1135,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.TIME_CONDITION, cond)
 
-    fn time_value(mut self, val: Int) -> Result:
+    fn time_value(self, val: Int) -> Result:
         """Sets the time value for a conditional request.
 
         The value here should be the number of seconds elapsed since January 1,
@@ -1145,7 +1149,7 @@ struct InnerEasy:
     # =========================================================================
     # Connection Options
 
-    fn timeout(mut self, timeout_ms: Int) -> Result:
+    fn timeout(self, timeout_ms: Int) -> Result:
         """Set maximum time the request is allowed to take.
 
         Normally, name lookups can take a considerable time and limiting
@@ -1170,7 +1174,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.TIMEOUT_MS, timeout_ms)
 
-    fn low_speed_limit(mut self, limit: Int) -> Result:
+    fn low_speed_limit(self, limit: Int) -> Result:
         """Set the low speed limit in bytes per second.
 
         This specifies the average transfer speed in bytes per second that the
@@ -1182,7 +1186,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.LOW_SPEED_LIMIT, limit)
 
-    fn low_speed_time(mut self, seconds: Int) -> Result:
+    fn low_speed_time(self, seconds: Int) -> Result:
         """Set the low speed time period.
 
         Specifies the window of time for which if the transfer rate is below
@@ -1193,7 +1197,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.LOW_SPEED_TIME, seconds)
 
-    fn max_send_speed(mut self, speed: Int) -> Result:
+    fn max_send_speed(self, speed: Int) -> Result:
         """Rate limit data upload speed.
 
         If an upload exceeds this speed (counted in bytes per second) on
@@ -1205,7 +1209,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.MAX_SEND_SPEED_LARGE, speed)
 
-    fn max_recv_speed(mut self, speed: Int) -> Result:
+    fn max_recv_speed(self, speed: Int) -> Result:
         """Rate limit data download speed.
 
         If a download exceeds this speed (counted in bytes per second) on
@@ -1217,7 +1221,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.MAX_RECV_SPEED_LARGE, speed)
 
-    fn max_connects(mut self, max: Int) -> Result:
+    fn max_connects(self, max: Int) -> Result:
         """Set the maximum connection cache size.
 
         The set amount will be the maximum number of simultaneously open
@@ -1235,7 +1239,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.MAX_CONNECTS, max)
 
-    fn maxage_conn(mut self, max_age_seconds: Int) -> Result:
+    fn maxage_conn(self, max_age_seconds: Int) -> Result:
         """Set the maximum idle time allowed for a connection.
 
         This configuration sets the maximum time that a connection inside of the connection cache
@@ -1246,7 +1250,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.MAX_AGE_CONN, max_age_seconds)
 
-    fn fresh_connect(mut self, enable: Bool) -> Result:
+    fn fresh_connect(self, enable: Bool) -> Result:
         """Force a new connection to be used.
 
         Makes the next transfer use a new (fresh) connection by force instead of
@@ -1259,7 +1263,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.FRESH_CONNECT, Int(enable))
 
-    fn forbid_reuse(mut self, enable: Bool) -> Result:
+    fn forbid_reuse(self, enable: Bool) -> Result:
         """Make connection get closed at once after use.
 
         Makes libcurl explicitly close the connection when done with the
@@ -1273,7 +1277,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.FORBID_REUSE, Int(enable))
 
-    fn connect_timeout(mut self, timeout_ms: Int) -> Result:
+    fn connect_timeout(self, timeout_ms: Int) -> Result:
         """Timeout for the connect phase.
 
         This is the maximum time that you allow the connection phase to the
@@ -1285,7 +1289,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.CONNECT_TIMEOUT_MS, timeout_ms)
 
-    fn ip_resolve(mut self, resolve: Int) -> Result:
+    fn ip_resolve(self, resolve: Int) -> Result:
         """Specify which IP protocol version to use.
 
         Allows an application to select what kind of IP addresses to use when
@@ -1297,7 +1301,7 @@ struct InnerEasy:
         return self.set_option(Option.IP_RESOLVE, resolve)
 
     # TODO: resolve - needs List type implementation
-    # fn resolve(mut self, list: List) -> Result:
+    # fn resolve(self, list: List) -> Result:
     #     """Specify custom host name to IP address resolves.
     #
     #     Allows specifying hostname to IP mappings to use before trying the
@@ -1306,7 +1310,7 @@ struct InnerEasy:
     #     # TODO: Implement this when List type is available
     #     pass
 
-    fn connect_only(mut self, enable: Bool) -> Result:
+    fn connect_only(self, enable: Bool) -> Result:
         """Configure whether to stop when connected to target server.
 
         When enabled it tells the library to perform all the required proxy
@@ -1327,7 +1331,7 @@ struct InnerEasy:
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_INTERFACE`.
-    # fn dns_interface(mut self, mut interface: String) -> Result:
+    # fn dns_interface(self, mut interface: String) -> Result:
     #     pass
     #
     # # IPv4 address to bind DNS resolves to
@@ -1338,7 +1342,7 @@ struct InnerEasy:
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_LOCAL_IP4`.
-    # fn dns_local_ip4(mut self, mut ip: String) -> Result:
+    # fn dns_local_ip4(self, mut ip: String) -> Result:
     #     pass
     #
     # # IPv6 address to bind DNS resolves to
@@ -1349,7 +1353,7 @@ struct InnerEasy:
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_LOCAL_IP6`.
-    # fn dns_local_ip6(mut self, mut ip: String) -> Result:
+    # fn dns_local_ip6(self, mut ip: String) -> Result:
     #     pass
     #
     # # Set preferred DNS servers.
@@ -1361,14 +1365,14 @@ struct InnerEasy:
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_SERVERS`.
-    # fn dns_servers(mut self, mut servers: String) -> Result:
+    # fn dns_servers(self, mut servers: String) -> Result:
     #     pass
 
     # =========================================================================
     # SSL/Security Options
 
     # TODO: ssl_cert - needs path handling
-    # fn ssl_cert(mut self, cert: String) -> Result:
+    # fn ssl_cert(self, cert: String) -> Result:
     #     """Sets the SSL client certificate.
     #
     #     The string should be the file name of your client certificate. The
@@ -1390,7 +1394,7 @@ struct InnerEasy:
     #     pass
 
     # TODO: ssl_cert_blob - needs byte array handling
-    # fn ssl_cert_blob(mut self, blob: List[UInt8]) -> Result:
+    # fn ssl_cert_blob(self, blob: List[UInt8]) -> Result:
     #     """Set the SSL client certificate using an in-memory blob.
     #
     #     The specified byte buffer should contain the binary content of your
@@ -1403,7 +1407,7 @@ struct InnerEasy:
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_cert_type(mut self, mut kind: String) -> Result:
+    fn ssl_cert_type(self, mut kind: String) -> Result:
         """Specify type of the client SSL certificate.
 
         The string should be the format of your certificate. Supported formats
@@ -1417,7 +1421,7 @@ struct InnerEasy:
         return self.set_option(Option.SSL_CERT_TYPE, kind)
 
     # TODO: ssl_key - needs path handling
-    # fn ssl_key(mut self, key: String) -> Result:
+    # fn ssl_key(self, key: String) -> Result:
     #     """Specify private keyfile for TLS and SSL client cert.
     #
     #     The string should be the file name of your private key. The default
@@ -1433,7 +1437,7 @@ struct InnerEasy:
     #     pass
 
     # TODO: ssl_key_blob - needs byte array handling
-    # fn ssl_key_blob(mut self, blob: List[UInt8]) -> Result:
+    # fn ssl_key_blob(self, blob: List[UInt8]) -> Result:
     #     """Specify an SSL private key using an in-memory blob.
     #
     #     The specified byte buffer should contain the binary content of your
@@ -1446,7 +1450,7 @@ struct InnerEasy:
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_key_type(mut self, mut kind: String) -> Result:
+    fn ssl_key_type(self, mut kind: String) -> Result:
         """Set type of the private key file.
 
         The string should be the format of your private key. Supported formats
@@ -1463,7 +1467,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.SSL_KEY_TYPE, kind)
 
-    fn key_password(mut self, mut password: String) -> Result:
+    fn key_password(self, mut password: String) -> Result:
         """Set passphrase to private key.
 
         This will be used as the password required to use the `ssl_key`.
@@ -1476,7 +1480,7 @@ struct InnerEasy:
         return self.set_option(Option.KEY_PASSWD, password)
 
     # TODO: ssl_cainfo_blob - needs byte array handling
-    # fn ssl_cainfo_blob(mut self, blob: List[UInt8]) -> Result:
+    # fn ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
     #     """Set the SSL Certificate Authorities using an in-memory blob.
     #
     #     The specified byte buffer should contain the binary content of one
@@ -1490,7 +1494,7 @@ struct InnerEasy:
     #     pass
 
     # TODO: proxy_ssl_cainfo_blob - needs byte array handling
-    # fn proxy_ssl_cainfo_blob(mut self, blob: List[UInt8]) -> Result:
+    # fn proxy_ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
     #     """Set the SSL Certificate Authorities for HTTPS proxies using an in-memory
     #     blob.
     #
@@ -1504,7 +1508,7 @@ struct InnerEasy:
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_engine(mut self, mut engine: String) -> Result:
+    fn ssl_engine(self, mut engine: String) -> Result:
         """Set the SSL engine identifier.
 
         This will be used as the identifier for the crypto engine you want to
@@ -1515,7 +1519,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.SSL_ENGINE, engine)
 
-    fn ssl_engine_default(mut self, enable: Bool) -> Result:
+    fn ssl_engine_default(self, enable: Bool) -> Result:
         """Make this handle's SSL engine the default.
 
         By default this option is not set and corresponds to
@@ -1532,10 +1536,10 @@ struct InnerEasy:
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_SSL_FALSESTARTE`.
-    # fn ssl_false_start(mut self, enable: Bool) -> Result:
+    # fn ssl_false_start(self, enable: Bool) -> Result:
     #     pass
 
-    fn http_version(mut self, version: Int) -> Result:
+    fn http_version(self, version: Int) -> Result:
         """Set preferred HTTP version.
 
         By default this option is not set and corresponds to
@@ -1543,7 +1547,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.HTTP_VERSION, version)
 
-    fn ssl_version(mut self, version: Int) -> Result:
+    fn ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version.
 
         By default this option is not set and corresponds to
@@ -1551,7 +1555,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.SSL_VERSION, version)
 
-    fn proxy_ssl_version(mut self, version: Int) -> Result:
+    fn proxy_ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version when connecting to an HTTPS proxy.
 
         By default this option is not set and corresponds to
@@ -1559,7 +1563,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_SSL_VERSION, version)
 
-    fn ssl_min_max_version(mut self, min_version: Int, max_version: Int) -> Result:
+    fn ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version.
 
         By default this option is not set and corresponds to
@@ -1568,7 +1572,7 @@ struct InnerEasy:
         var version = min_version | (max_version << 16)
         return self.set_option(Option.SSL_VERSION, version)
 
-    fn proxy_ssl_min_max_version(mut self, min_version: Int, max_version: Int) -> Result:
+    fn proxy_ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version
         when connecting to an HTTPS proxy.
 
@@ -1578,7 +1582,7 @@ struct InnerEasy:
         var version = min_version | (max_version << 16)
         return self.set_option(Option.PROXY_SSL_VERSION, version)
 
-    fn ssl_verify_host(mut self, verify: Bool) -> Result:
+    fn ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host.
 
         This should be disabled with great caution! It basically disables the
@@ -1590,7 +1594,7 @@ struct InnerEasy:
         var val = 2 if verify else 0
         return self.set_option(Option.SSL_VERIFY_HOST, val)
 
-    fn proxy_ssl_verify_host(mut self, verify: Bool) -> Result:
+    fn proxy_ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
 
         This should be disabled with great caution! It basically disables the
@@ -1602,7 +1606,7 @@ struct InnerEasy:
         var val = 2 if verify else 0
         return self.set_option(Option.PROXY_SSL_VERIFYHOST, val)
 
-    fn ssl_verify_peer(mut self, verify: Bool) -> Result:
+    fn ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.
 
         This should be disabled with great caution! It basically disables the
@@ -1613,7 +1617,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.SSL_VERIFYPEER, Int(verify))
 
-    fn proxy_ssl_verify_peer(mut self, verify: Bool) -> Result:
+    fn proxy_ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate for HTTPS proxy.
 
         This should be disabled with great caution! It basically disables the
@@ -1632,12 +1636,12 @@ struct InnerEasy:
     # #
     # # By default this option is set to `false` and corresponds to
     # # `CURLOPT_SSL_VERIFYSTATUS`.
-    # fn ssl_verify_status(mut self, verify: Bool) -> Result:
+    # fn ssl_verify_status(self, verify: Bool) -> Result:
     #     pass
 
     # TODO: Specify the path to Certificate Authority (CA) bundle
     # Requires Path type support
-    # fn cainfo(mut self, path: Path) -> Result:
+    # fn cainfo(self, path: Path) -> Result:
     #     """The file referenced should hold one or more certificates to verify the
     #     peer with.
     #
@@ -1654,7 +1658,7 @@ struct InnerEasy:
 
     # TODO: Set the issuer SSL certificate filename
     # Requires Path type support
-    # fn issuer_cert(mut self, path: Path) -> Result:
+    # fn issuer_cert(self, path: Path) -> Result:
     #     """Specifies a file holding a CA certificate in PEM format. If the option
     #     is set, an additional check against the peer certificate is performed to
     #     verify the issuer is indeed the one associated with the certificate
@@ -1673,7 +1677,7 @@ struct InnerEasy:
 
     # TODO: Set the issuer SSL certificate filename for HTTPS proxies
     # Requires Path type support
-    # fn proxy_issuer_cert(mut self, path: Path) -> Result:
+    # fn proxy_issuer_cert(self, path: Path) -> Result:
     #     """Specifies a file holding a CA certificate in PEM format. If the option
     #     is set, an additional check against the peer certificate is performed to
     #     verify the issuer is indeed the one associated with the certificate
@@ -1692,7 +1696,7 @@ struct InnerEasy:
 
     # TODO: Set the issuer SSL certificate using an in-memory blob
     # Requires blob/byte array type support
-    # fn issuer_cert_blob(mut self, blob: Bytes) -> Result:
+    # fn issuer_cert_blob(self, blob: Bytes) -> Result:
     #     """The specified byte buffer should contain the binary content of a CA
     #     certificate in the PEM format. The certificate will be copied into the
     #     handle.
@@ -1704,7 +1708,7 @@ struct InnerEasy:
 
     # TODO: Set the issuer SSL certificate for HTTPS proxies using an in-memory blob
     # Requires blob/byte array type support
-    # fn proxy_issuer_cert_blob(mut self, blob: Bytes) -> Result:
+    # fn proxy_issuer_cert_blob(self, blob: Bytes) -> Result:
     #     """The specified byte buffer should contain the binary content of a CA
     #     certificate in the PEM format. The certificate will be copied into the
     #     handle.
@@ -1716,7 +1720,7 @@ struct InnerEasy:
 
     # TODO: Specify directory holding CA certificates
     # Requires Path type support
-    # fn capath(mut self, path: Path) -> Result:
+    # fn capath(self, path: Path) -> Result:
     #     """Names a directory holding multiple CA certificates to verify the peer
     #     with. If libcurl is built against OpenSSL, the certificate directory
     #     must be prepared using the openssl c_rehash utility. This makes sense
@@ -1728,7 +1732,7 @@ struct InnerEasy:
 
     # TODO: Specify a Certificate Revocation List file
     # Requires Path type support
-    # fn crlfile(mut self, path: Path) -> Result:
+    # fn crlfile(self, path: Path) -> Result:
     #     """Names a file with the concatenation of CRL (in PEM format) to use in the
     #     certificate validation that occurs during the SSL exchange.
     #
@@ -1753,7 +1757,7 @@ struct InnerEasy:
 
     # TODO: Specify a Certificate Revocation List file for HTTPS proxy
     # Requires Path type support
-    # fn proxy_crlfile(mut self, path: Path) -> Result:
+    # fn proxy_crlfile(self, path: Path) -> Result:
     #     """Names a file with the concatenation of CRL (in PEM format) to use in the
     #     certificate validation that occurs during the SSL exchange.
     #
@@ -1771,7 +1775,7 @@ struct InnerEasy:
     #     """
     #     return self.set_option(Option.PROXY_CRLFILE, path)
 
-    fn certinfo(mut self, enable: Bool) -> Result:
+    fn certinfo(self, enable: Bool) -> Result:
         """Request SSL certificate information.
 
         Enable libcurl's certificate chain info gatherer. With this enabled,
@@ -1783,7 +1787,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.CERT_INFO, Int(enable))
 
-    fn pinned_public_key(mut self, mut pubkey: String) -> Result:
+    fn pinned_public_key(self, mut pubkey: String) -> Result:
         """Set pinned public key.
 
         Pass a pointer to a zero terminated string as parameter. The string can
@@ -1803,7 +1807,7 @@ struct InnerEasy:
 
     # TODO: Specify a source for random data
     # Requires Path type support
-    # fn random_file(mut self, path: Path) -> Result:
+    # fn random_file(self, path: Path) -> Result:
     #     """The file will be used to read from to seed the random engine for SSL and
     #     more.
     #
@@ -1814,7 +1818,7 @@ struct InnerEasy:
 
     # TODO: Specify EGD socket path
     # Requires Path type support
-    # fn egd_socket(mut self, path: Path) -> Result:
+    # fn egd_socket(self, path: Path) -> Result:
     #     """Indicates the path name to the Entropy Gathering Daemon socket. It will
     #     be used to seed the random engine for SSL.
     #
@@ -1823,7 +1827,7 @@ struct InnerEasy:
     #     """
     #     return self.set_option(Option.EGDSOCKET, path)
 
-    fn ssl_cipher_list(mut self, mut ciphers: String) -> Result:
+    fn ssl_cipher_list(self, mut ciphers: String) -> Result:
         """Specify ciphers to use for TLS.
 
         Holds the list of ciphers to use for the SSL connection. The list must
@@ -1848,7 +1852,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.SSL_CIPHER_LIST, ciphers)
 
-    fn proxy_ssl_cipher_list(mut self, mut ciphers: String) -> Result:
+    fn proxy_ssl_cipher_list(self, mut ciphers: String) -> Result:
         """Specify ciphers to use for TLS for an HTTPS proxy.
 
         Holds the list of ciphers to use for the SSL connection. The list must
@@ -1873,7 +1877,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PROXY_SSL_CIPHER_LIST, ciphers)
 
-    fn ssl_sessionid_cache(mut self, enable: Bool) -> Result:
+    fn ssl_sessionid_cache(self, enable: Bool) -> Result:
         """Enable or disable use of the SSL session-ID cache.
 
         By default all transfers are done using the cache enabled. While nothing
@@ -1887,7 +1891,7 @@ struct InnerEasy:
 
     # TODO: Set SSL behavior options
     # Requires SslOpt type support
-    # fn ssl_options(mut self, bits: SslOpt) -> Result:
+    # fn ssl_options(self, bits: SslOpt) -> Result:
     #     """Inform libcurl about SSL specific behaviors.
     #
     #     This corresponds to the CURLOPT_SSL_OPTIONS option.
@@ -1896,7 +1900,7 @@ struct InnerEasy:
 
     # TODO: Set SSL behavior options for proxies
     # Requires SslOpt type support
-    # fn proxy_ssl_options(mut self, bits: SslOpt) -> Result:
+    # fn proxy_ssl_options(self, bits: SslOpt) -> Result:
     #     """Inform libcurl about SSL specific behaviors.
     #
     #     This corresponds to the CURLOPT_PROXY_SSL_OPTIONS option.
@@ -1908,7 +1912,7 @@ struct InnerEasy:
 
     # TODO: Set maximum time to wait for Expect 100 request before sending body
     # Requires Duration type support
-    # fn expect_100_timeout(mut self, timeout_ms: Int) -> Result:
+    # fn expect_100_timeout(self, timeout_ms: Int) -> Result:
     #     """curl has internal heuristics that trigger the use of a Expect
     #     header for large enough request bodies where the client first sends the
     #     request header along with an Expect: 100-continue header. The server
@@ -2142,7 +2146,7 @@ struct InnerEasy:
         """
         return self.get_info_float(Info.SPEED_UPLOAD_T)
 
-    fn pipewait(mut self, wait: Bool) -> Result:
+    fn pipewait(self, wait: Bool) -> Result:
         """Wait for pipelining/multiplexing.
 
         Set wait to True to tell libcurl to prefer to wait for a connection to
@@ -2173,7 +2177,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.PIPE_WAIT, Int(wait))
 
-    fn http_09_allowed(mut self, allow: Bool) -> Result:
+    fn http_09_allowed(self, allow: Bool) -> Result:
         """Allow HTTP/0.9 compliant responses.
 
         Set allow to True to tell libcurl to allow HTTP/0.9 responses. A HTTP/0.9
@@ -2217,7 +2221,7 @@ struct InnerEasy:
     # =========================================================================
     # Callback options
 
-    fn write_function(mut self, callback: curl_write_callback) -> Result:
+    fn write_function(self, callback: curl_write_callback) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -2247,10 +2251,26 @@ struct InnerEasy:
         """
         return self.set_option(Option.WRITE_FUNCTION, callback)
     
-    fn write_data[origin: MutOrigin](mut self, data: OpaqueMutPointer[origin]) -> Result:
+    fn write_data[origin: MutOrigin](self, data: OpaqueMutPointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
         By default this option is not set and corresponds to
         `CURLOPT_WRITEDATA`.
         """
         return self.set_option(Option.WRITE_DATA, data)
+    
+    fn escape(self, mut string: String) raises -> String:
+        """URL-encode the given string.
+
+        This function returns a new string that is the URL-encoded version of
+        the input string. It is the caller's responsibility to free the returned
+        string when it is no longer needed.
+
+        By default this option is not set and corresponds to
+        `curl_easy_escape`.
+        """
+        var data = get_curl_handle()[].easy_escape(self.easy, string, 0)
+        if not data:
+            raise Error("Failed to escape string.")
+
+        return String(unsafe_from_utf8_ptr=data)

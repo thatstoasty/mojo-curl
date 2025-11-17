@@ -210,3 +210,23 @@ struct _curl(Movable):
         return self.curl_lib.get_function[
             fn (type_of(easy), type_of(origin), type_of(request), type_of(prev)) -> ExternalMutPointer[curl_header]
         ]("curl_easy_nextheader")(easy, origin, request, prev)
+
+    fn curl_easy_escape(
+        self,
+        easy: ExternalImmutOpaquePointer,
+        string: UnsafeImmutPointer[c_char],
+        length: c_int,
+    ) -> ExternalMutPointer[c_char]:
+        """URL-encode a string using curl easy handle.
+
+        Args:
+            easy: The curl easy handle.
+            string: The string to encode.
+            length: The length of the string (or 0 to calculate it automatically).
+
+        Returns:
+            A pointer to the URL-encoded string, or NULL on error.
+        """
+        return self.curl_lib.get_function[
+            fn (type_of(easy), type_of(string), type_of(length)) -> ExternalMutPointer[c_char]
+        ]("curl_easy_escape")(easy, string, length)

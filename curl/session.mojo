@@ -13,21 +13,78 @@ fn write_callback(ptr: ExternalImmutPointer[c_char], size: c_size_t, nmemb: c_si
     return size * nmemb
 
 
+fn _handle_post(easy: Easy, body: Optional[Body]) raises:
+    if body:
+        var result = easy.post_fields(body.value().as_bytes())
+        if result != Result.OK:
+            raise Error("_handle_post: Failed to set POST fields: ", easy.describe_error(result))
+    else:
+        # Set POST with zero-length body
+        var result = easy.post(True)
+        if result != Result.OK:
+            raise Error("_handle_post: Failed to set POST method: ", easy.describe_error(result))
+
+fn _handle_put(easy: Easy) raises:
+    var result = easy.upload(True)
+    if result != Result.OK:
+        raise Error("_handle_put: Failed to set PUT method: ", easy.describe_error(result))
+
+
+fn _handle_delete(easy: Easy) raises:
+    var http_method = "DELETE"
+    var result = easy.custom_request(http_method)
+    if result != Result.OK:
+        raise Error("_handle_delete: Failed to set DELETE method: ", easy.describe_error(result))
+
+
+fn _handle_patch(easy: Easy, body: Optional[Body]) raises:
+    var http_method = "PATCH"
+    var result = easy.custom_request(http_method)
+    if result != Result.OK:
+        raise Error("_handle_patch: Failed to set PATCH method: ", easy.describe_error(result))
+    
+    if body:
+        var result = easy.post_fields(body.value().as_bytes())
+        if result != Result.OK:
+            raise Error("_handle_patch: Failed to set POST fields: ", easy.describe_error(result))
+
+
+fn _handle_head(easy: Easy) raises:
+    var http_method = "HEAD"
+    var result = easy.custom_request(http_method)
+    if result != Result.OK:
+        raise Error("_handle_head: Failed to set HEAD method: ", easy.describe_error(result))
+
+
+fn _handle_options(easy: Easy) raises:
+    var http_method = "OPTIONS"
+    var result = easy.custom_request(http_method)
+    if result != Result.OK:
+        raise Error("_handle_options: Failed to set OPTIONS method: ", easy.describe_error(result))
+
+
 struct Session:
     var allow_redirects: Bool
+    var easy: Easy
 
     fn __init__(
         out self,
         allow_redirects: Bool = False,
     ):
         self.allow_redirects = allow_redirects
+        self.easy = Easy()
+    
+    fn raise_if_error(self, code: Result) raises:
+        if code != Result.OK:
+            raise Error("Session: Curl error: ", self.easy.describe_error(code))
 
     fn send[method: RequestMethod](
-        mut self,
+        self,
         mut url: String,
         var headers: Dict[String, String],
         body: Optional[Body] = None,
         timeout: Optional[Int] = None,
+        query_parameters: Dict[String, String] = {},
     ) raises -> HTTPResponse:
         """Sends an HTTP request and returns the corresponding response.
 
@@ -39,6 +96,7 @@ struct Session:
             headers: A dictionary of HTTP headers to include in the request.
             body: An optional Body object representing the request body.
             timeout: An optional timeout in seconds for the request.
+            query_parameters: An optional dictionary of query parameters to include in the URL. GET requests only.
 
         Returns:
             The received response as an `HTTPResponse` object.
@@ -46,58 +104,59 @@ struct Session:
         Raises:
             Error: If there is a failure in sending or receiving the message.
         """
-        var easy = Easy()
-
         # Set the url
-        var result = easy.url(url)
-        if result != Result.OK:
-            raise Error("Session.send: Failed to set URL: ", easy.describe_error(result))
-
+        if query_parameters:
+            # URL-encode the parameter values
+            # TODO: This is inefficient w/ string copies, but it's ok for now. I'm not sure if we can get mutable
+            # references to the values in the dictionary as we iterate rn.
+            var params: List[String] = []
+            for pair in query_parameters.items():
+                var value = pair.value
+                params.append(String(pair.key, "=", self.easy.escape(value)))
+            
+            # Append the query parameters to the URL. Thi
+            var full_url = String(url, "?", "&".join(params))
+            print("Full URL with query parameters: ", full_url)
+            self.raise_if_error(self.easy.url(full_url))
+        else:
+            self.raise_if_error(self.easy.url(url))
+        
         # Set the buffer to load the response into
         var response_body = List[UInt8]()
-        result = easy.write_data(UnsafePointer(to=response_body).bitcast[NoneType]())
-        if result != Result.OK:
-            raise Error("Session.send: Failed to set write data ptr: ", easy.describe_error(result))
-        
+        self.raise_if_error(self.easy.write_data(UnsafePointer(to=response_body).bitcast[NoneType]()))
+
         # Set the write callback to load the response data into the above buffer.
-        result = easy.write_function(write_callback)
-        if result != Result.OK:
-            raise Error("Session.send: Failed to set write function: ", easy.describe_error(result))
+        self.raise_if_error(self.easy.write_function(write_callback))
         
+        # Set method specific curl options
         @parameter
         if method == RequestMethod.POST:
-            if body:
-                result = easy.post_fields(body.value().as_bytes())
-                if result != Result.OK:
-                    raise Error("Session.send: Failed to set POST fields: ", easy.describe_error(result))
-            else:
-                # Set POST with zero-length body
-                result = easy.post(True)
-                if result != Result.OK:
-                    raise Error("Session.send: Failed to set POST method: ", easy.describe_error(result))
-        # elif method == RequestMethod.PUT:
-        #     result = easy.put(True)
-        #     if result != Result.OK:
-        #         raise Error("Session.send: Failed to set PUT method: ", easy.describe_error(result))
+            _handle_post(self.easy, body)
+        elif method == RequestMethod.PUT:
+            _handle_put(self.easy)
+        elif method == RequestMethod.DELETE:
+            _handle_delete(self.easy)
+        elif method == RequestMethod.PATCH:
+            _handle_patch(self.easy, body)
+        elif method == RequestMethod.HEAD:
+            _handle_head(self.easy)
+        elif method == RequestMethod.OPTIONS:
+            _handle_options(self.easy)
 
-        # Set headers
         var list = CurlList(headers^)
-        result = easy.http_headers(list)
-        if result != Result.OK:
+        try:
+            # Set headers
+            self.raise_if_error(self.easy.http_headers(list))
+            
+            # Perform the transfer
+            self.raise_if_error(self.easy.perform())
+        finally:
             list^.free()
-            raise Error("Session.send: Failed to set HTTP headers: ", easy.describe_error(result))
-        
-        # Perform the transfer
-        var response = easy.perform()
-        if response != Result.OK:
-            list^.free()
-            raise Error("Session.send: Failed to perform request: ", easy.describe_error(response))
 
-        list^.free()
-        return HTTPResponse.from_bytes(easy, response_body)
+        return HTTPResponse.from_bytes(self.easy, response_body)
 
     fn get(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         query_parameters: Dict[String, String] = {},
@@ -118,10 +177,11 @@ struct Session:
             url=url,
             headers=headers^,
             timeout=timeout,
+            query_parameters=query_parameters,
         )
 
     fn post(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         data: Dict[String, String] = {},
@@ -144,9 +204,34 @@ struct Session:
             body=Body(data),
             timeout=timeout,
         )
+    
+    fn post[origin: Origin](
+        self,
+        var url: String,
+        data: Span[Byte, origin],
+        var headers: Dict[String, String] = {},
+        timeout: Optional[Int] = None,
+    ) raises -> HTTPResponse:
+        """Sends a POST request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            data: The data to include in the body of the POST request.
+            headers: HTTP headers to include in the request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
+        return self.send[RequestMethod.POST](
+            url=url,
+            headers=headers^,
+            body=Body(data),
+            timeout=timeout,
+        )
 
     fn put(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         data: Dict[String, String] = {},
@@ -169,9 +254,34 @@ struct Session:
             body=Body(data),
             timeout=timeout,
         )
+    
+    fn put[origin: Origin](
+        self,
+        var url: String,
+        data: Span[Byte, origin],
+        var headers: Dict[String, String] = {},
+        timeout: Optional[Int] = None,
+    ) raises -> HTTPResponse:
+        """Sends a PUT request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            data: The data to include in the body of the PUT request.
+            headers: HTTP headers to include in the request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
+        return self.send[RequestMethod.PUT](
+            url=url,
+            headers=headers^,
+            body=Body(data),
+            timeout=timeout,
+        )
 
     fn delete(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         timeout: Optional[Int] = None,
@@ -193,7 +303,7 @@ struct Session:
         )
 
     fn patch(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         data: Dict[String, String] = {},
@@ -216,9 +326,34 @@ struct Session:
             body=Body(data),
             timeout=timeout,
         )
+    
+    fn patch[origin: Origin](
+        self,
+        var url: String,
+        data: Span[Byte, origin],
+        var headers: Dict[String, String] = {},
+        timeout: Optional[Int] = None,
+    ) raises -> HTTPResponse:
+        """Sends a GET request to the specified URL.
+
+        Args:
+            url: The URL to which the request is sent.
+            data: The data to include in the body of the PATCH request.
+            headers: HTTP headers to include in the request.
+            timeout: An optional timeout in seconds for the request.
+        
+        Returns:
+            The received response as an `HTTPResponse` object.
+        """
+        return self.send[RequestMethod.PATCH](
+            url=url,
+            headers=headers^,
+            body=Body(data),
+            timeout=timeout,
+        )
 
     fn head(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         timeout: Optional[Int] = None,
@@ -240,7 +375,7 @@ struct Session:
         )
 
     fn options(
-        mut self,
+        self,
         var url: String,
         var headers: Dict[String, String] = {},
         data: Dict[String, String] = {},

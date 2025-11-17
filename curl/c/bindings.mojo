@@ -174,3 +174,21 @@ struct curl:
             A pointer to the next header in the list, or NULL if there are no more headers.
         """
         return self.lib.curl_easy_nextheader(easy, origin, request, prev)
+
+    fn easy_escape(
+        self,
+        easy: ExternalImmutOpaquePointer,
+        mut string: String,
+        length: c_int,
+    ) -> ExternalMutPointer[c_char]:
+        """URL-encode a string using curl easy handle.
+
+        Args:
+            easy: The curl easy handle.
+            string: The string to encode.
+            length: The length of the string (or 0 to calculate it automatically).
+
+        Returns:
+            A pointer to the URL-encoded string, or NULL on error.
+        """
+        return self.lib.curl_easy_escape(easy, string.unsafe_cstr_ptr(), length)
