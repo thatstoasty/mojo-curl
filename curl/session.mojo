@@ -24,10 +24,23 @@ fn _handle_post(easy: Easy, body: Optional[Body]) raises:
         if result != Result.OK:
             raise Error("_handle_post: Failed to set POST method: ", easy.describe_error(result))
 
-fn _handle_put(easy: Easy) raises:
-    var result = easy.upload(True)
+fn _handle_put(easy: Easy, body: Optional[Body] = None) raises:
+    var http_method = "PUT"
+    var result = easy.custom_request(http_method)
     if result != Result.OK:
         raise Error("_handle_put: Failed to set PUT method: ", easy.describe_error(result))
+
+    result = easy.upload(True)
+    if result != Result.OK:
+        raise Error("_handle_put: Failed to set PUT method: ", easy.describe_error(result))
+    
+    if body:
+        result = easy.post_fields(body.value().as_bytes())
+    else:
+        # Set PUT with zero-length body
+        result = easy.post_fields(List[Byte]())
+    if result != Result.OK:
+        raise Error("_handle_put: Failed to set POST fields: ", easy.describe_error(result))
 
 
 fn _handle_delete(easy: Easy) raises:
@@ -64,19 +77,14 @@ fn _handle_options(easy: Easy) raises:
 
 
 struct Session:
-    var allow_redirects: Bool
     var easy: Easy
 
-    fn __init__(
-        out self,
-        allow_redirects: Bool = False,
-    ):
-        self.allow_redirects = allow_redirects
+    fn __init__(out self):
         self.easy = Easy()
     
-    fn raise_if_error(self, code: Result) raises:
+    fn raise_if_error(self, code: Result, message: StringSlice) raises:
         if code != Result.OK:
-            raise Error("Session: Curl error: ", self.easy.describe_error(code))
+            raise Error(message, self.easy.describe_error(code))
 
     fn send[method: RequestMethod](
         self,
@@ -116,24 +124,26 @@ struct Session:
             
             # Append the query parameters to the URL. Thi
             var full_url = String(url, "?", "&".join(params))
-            print("Full URL with query parameters: ", full_url)
-            self.raise_if_error(self.easy.url(full_url))
+            self.raise_if_error(self.easy.url(full_url), "Failed to set URL with query parameters: ")
         else:
-            self.raise_if_error(self.easy.url(url))
+            self.raise_if_error(self.easy.url(url), "Failed to set URL: ")
         
         # Set the buffer to load the response into
         var response_body = List[UInt8]()
-        self.raise_if_error(self.easy.write_data(UnsafePointer(to=response_body).bitcast[NoneType]()))
+        self.raise_if_error(
+            self.easy.write_data(UnsafePointer(to=response_body).bitcast[NoneType]()),
+            "Failed to set write data: ",
+        )
 
         # Set the write callback to load the response data into the above buffer.
-        self.raise_if_error(self.easy.write_function(write_callback))
+        self.raise_if_error(self.easy.write_function(write_callback), "Failed to set write function: ")
         
         # Set method specific curl options
         @parameter
         if method == RequestMethod.POST:
             _handle_post(self.easy, body)
         elif method == RequestMethod.PUT:
-            _handle_put(self.easy)
+            _handle_put(self.easy, body)
         elif method == RequestMethod.DELETE:
             _handle_delete(self.easy)
         elif method == RequestMethod.PATCH:
@@ -146,10 +156,10 @@ struct Session:
         var list = CurlList(headers^)
         try:
             # Set headers
-            self.raise_if_error(self.easy.http_headers(list))
+            self.raise_if_error(self.easy.http_headers(list), "Failed to set HTTP headers: ")
             
             # Perform the transfer
-            self.raise_if_error(self.easy.perform())
+            self.raise_if_error(self.easy.perform(), "Failed to perform the request: ")
         finally:
             list^.free()
 

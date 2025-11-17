@@ -23,7 +23,7 @@ examples = "python3 scripts/util.py run-examples"
 template = "python3 scripts/util.py generate-recipe"
 
 # Curl wrapper build tasks
-build-wrapper = "gcc -shared -fPIC -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl -o ./libcurl_wrapper.dylib ./curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl"
+build-wrapper = "gcc -shared -fPIC -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl -o ./libcurl_wrapper.dylib shim/curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl"
 clean-wrapper = "rm -f ./libcurl_wrapper.dylib"
 test-curl = { depends-on = ["build-wrapper"], cmd = "mojo test.mojo" }
 
