@@ -78,9 +78,17 @@ fn _handle_options(easy: Easy) raises:
 
 struct Session:
     var easy: Easy
+    var allow_redirects: Bool
+    var headers: Dict[String, String]
 
-    fn __init__(out self):
+    fn __init__(
+        out self,
+        allow_redirects: Bool = True,
+        var headers: Dict[String, String] = {},
+    ):
         self.easy = Easy()
+        self.allow_redirects = allow_redirects
+        self.headers = headers^
     
     fn raise_if_error(self, code: Result, message: StringSlice) raises:
         if code != Result.OK:
@@ -112,6 +120,9 @@ struct Session:
         Raises:
             Error: If there is a failure in sending or receiving the message.
         """
+        if self.allow_redirects:
+            self.raise_if_error(self.easy.follow_location(True), "Failed to set follow location to enable redirects: ")
+
         # Set the url
         if query_parameters:
             # URL-encode the parameter values
@@ -155,6 +166,11 @@ struct Session:
 
         var list = CurlList(headers^)
         try:
+            # If there's any headers set on the session, add them too.
+            for header in self.headers.items():
+                var h = String(header.key, ": ", header.value)
+                list.append(h)
+
             # Set headers
             self.raise_if_error(self.easy.http_headers(list), "Failed to set HTTP headers: ")
             
