@@ -1,10 +1,9 @@
 from sys.ffi import c_long
 
-from curl._easy import InnerEasy
-from curl.c.bindings import curl
-from curl.c.types import CURL, Info, Option, Result, curl_write_callback
-from curl.list import CurlList
-from curl.c.header import HeaderOrigin
+from mojo_curl._easy import InnerEasy
+from mojo_curl.list import CurlList
+from mojo_curl.c import HeaderOrigin, Info, Option, Result, curl_write_callback
+
 
 struct Easy:
     var inner: InnerEasy
@@ -114,7 +113,7 @@ struct Easy:
         that this library is threadsafe by default. See the [libcurl docs] for
         some more information.
 
-        [libcurl docs]: https://curl.haxx.se/libcurl/c/threadsafe.html
+        [libcurl docs]: https://mojo_curl.haxx.se/libcurl/c/threadsafe.html
         """
         return self.inner.signal(signal)
 
@@ -1892,7 +1891,7 @@ struct Easy:
     #     total latency since in the best case, an additional server roundtrip is required
     #     and in the worst case, the request is delayed by CURLOPT_EXPECT_100_TIMEOUT_MS.
     #
-    #     More info: https://curl.se/libcurl/c/CURLOPT_EXPECT_100_TIMEOUT_MS.html
+    #     More info: https://mojo_curl.se/libcurl/c/CURLOPT_EXPECT_100_TIMEOUT_MS.html
     #
     #     By default this option is not set and corresponds to
     #     CURLOPT_EXPECT_100_TIMEOUT_MS.

@@ -83,12 +83,20 @@ def generate_recipe() -> None:
     recipe["package"]["version"] = PROJECT_CONFIG["package"]["version"]
 
     # Populate source files
-    recipe["source"].append({"path": "src"})
+    recipe["source"].append({"path": "."})
     recipe["source"].append({"path": PROJECT_CONFIG["workspace"]["license-file"]})
 
     # Populate build script
-    recipe["build"]["script"].append(
-        f"pixi run mojo package {package_name} -o ${{PREFIX}}/lib/mojo/{package_name}.mojopkg"
+    recipe["build"]["script"].extend(
+        [
+            """if [[ $TARGET_PLATFORM == 'linux-64' ]]; then
+                gcc -shared -fPIC -o ${PREFIX}/lib/libcurl_wrapper.dylib -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl shim/curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl;
+            else
+                gcc -dynamiclib -fPIC -o ${PREFIX}/lib/libcurl_wrapper.dylib -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl shim/curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl;
+            fi
+            """,
+            f"pixi run mojo package {package_name.replace('-', '_')} -o ${{PREFIX}}/lib/mojo/{package_name.replace('-', '_')}.mojopkg",
+        ]
     )
 
     # Populate requirements

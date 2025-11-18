@@ -1,7 +1,7 @@
 from sys.ffi import c_char, c_int, c_long, c_size_t, c_uint
 
-from curl.c.raw_bindings import _curl
-from curl.c.types import (
+from mojo_curl.c.raw_bindings import _curl
+from mojo_curl.c.types import (
     CURL,
     ExternalImmutOpaquePointer,
     ExternalImmutPointer,
@@ -12,7 +12,7 @@ from curl.c.types import (
     ExternalMutPointer,
     curl_slist,
 )
-from curl.c.header import curl_header
+from mojo_curl.c.header import curl_header
 
 @fieldwise_init
 struct curl:
@@ -31,7 +31,7 @@ struct curl:
         self.lib.curl_global_cleanup()
 
     fn version(self) -> String:
-        """Return the version string of libcurl."""
+        """Return the version string of libmojo_curl."""
         # TODO: Constructing StringSlice should technically work? Seems like an issue with
         # ExternalPointer external origins. It's not an AnyOrigin,
         # so there's probably some issue there that I'm not aware of.

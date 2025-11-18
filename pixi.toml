@@ -2,8 +2,6 @@
 description = "Mojo libcurl bindings"
 authors = ["Mikhail Tavarez <miktavarez@gmail.com>"]
 channels = [
-    "https://repo.prefix.dev/mojo-community",
-    "https://repo.prefix.dev/modular-community",
     "conda-forge",
     "https://conda.modular.com/max-nightly",
     "https://prefix.dev/pixi-build-backends"
@@ -23,13 +21,13 @@ examples = "python3 scripts/util.py run-examples"
 template = "python3 scripts/util.py generate-recipe"
 
 # Curl wrapper build tasks
-build-wrapper = "gcc -shared -fPIC -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl -o ./libcurl_wrapper.dylib shim/curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl"
+build-wrapper = "gcc -shared -fPIC -I$PIXI_PROJECT_ROOT/.pixi/envs/default/include/curl shim/curl_wrapper.c -L$PIXI_PROJECT_ROOT/.pixi/envs/default/lib -lcurl"
 clean-wrapper = "rm -f ./libcurl_wrapper.dylib"
 test-curl = { depends-on = ["build-wrapper"], cmd = "mojo test.mojo" }
 
 # Linting and Formatting
 lint_docs = "python3 scripts/check-docstrings.py"
-mojo_format = "mojo format curl --line-length 120"
+mojo_format = "mojo format mojo_curl --line-length 120"
 sort_imports = "isort **/*.mojo -m 3 --line-length 120 --lines-after-imports 2 --trailing-comma"
 format = [{ task = "mojo_format" }, { task = "sort_imports" }]
 
@@ -38,34 +36,31 @@ build = { cmd = "python3 scripts/util.py build-conda-package" }
 publish = { cmd = "python3 scripts/util.py publish", env = { PREFIX_API_KEY = "$PREFIX_API_KEY" } }
 
 [package]
-name = "curl"
+name = "mojo-curl"
 version = "25.7.0"
 
 [package.build]
-backend = { name = "pixi-build-mojo", version = "*" }
+backend = { name = "pixi-build-rattler-build", version = "*" }
 
 [dependencies]
-mojo = ">=0.25.6.0,<0.25.7.0"
-libcurl = "*"
-# emberjson = { git = "https://github.com/bgreni/EmberJson.git", branch = "main", subdirectory = "." }
-emberjson = { path = "../../other/EmberJson" }
+mojo = ">=0.25.7.0.dev2025111305,<0.26.1.0"
+libcurl = ">=8.17.0,<9.0.0"
 
 [package.build-dependencies]
-mojo-compiler = ">=0.25.6.0,<0.25.7.0"
-libcurl = "*"
-emberjson = { path = "../../other/EmberJson" }
+mojo-compiler = ">=0.25.7.0.dev2025111305,<0.26.1.0"
+libcurl = ">=8.17.0,<9.0.0"
 
 [package.host-dependencies]
-mojo = ">=0.25.6.0,<0.25.7.0"
+mojo = ">=0.25.7.0.dev2025111305,<0.26.1.0"
 
 [package.run-dependencies]
-mojo = ">=0.25.6.0,<0.25.7.0"
-libcurl = "*"
-emberjson = { path = "../../other/EmberJson" }
+mojo = ">=0.25.7.0.dev2025111305,<0.26.1.0"
+libcurl = ">=8.17.0,<9.0.0"
 
 [feature.util.dependencies]
 typer = ">=0.16.0,<0.17"
 isort = ">=6.0.1,<7"
+pyyaml = ">=6.0.2,<7"
 
 [environments]
 default = { solve-group = "default" }

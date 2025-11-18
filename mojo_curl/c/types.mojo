@@ -491,7 +491,7 @@ struct Info(Copyable, Movable):
     comptime CONTENT_LENGTH_UPLOAD_T: Self = Self.OFF_T + 16
     """[CURLINFO_CONTENT_LENGTH_UPLOAD_T] Get upload size."""
     comptime START_TRANSFER_TIME: Self = Self.DOUBLE + 17
-    """[CURLINFO_STARTTRANSFER_TIME] Get time from start until first byte is received by libcurl."""
+    """[CURLINFO_STARTTRANSFER_TIME] Get time from start until first byte is received by libmojo_curl."""
     comptime CONTENT_TYPE: Self = Self.STRING + 18
     """[CURLINFO_CONTENT_TYPE] Get content type from the Content-Type: header."""
     comptime REDIRECT_TIME: Self = Self.DOUBLE + 19
@@ -663,7 +663,7 @@ struct curl_version_info_data:
 struct curl_ssl_backend:
     """CURL SSL backend information structure.
 
-    This struct represents information about a specific SSL backend used by curl.
+    This struct represents information about a specific SSL backend used by mojo_curl.
     """
 
     var value: Int

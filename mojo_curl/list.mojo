@@ -1,6 +1,6 @@
 from memory import OpaquePointer
-from curl.c.types import curl_slist, ExternalMutPointer
-from curl.c.api import get_curl_handle
+from mojo_curl.c.types import curl_slist, ExternalMutPointer
+from mojo_curl.c.api import get_curl_handle
 
 
 @explicit_destroy("CurlList must be explicitly destroyed using the `free` method.")
@@ -11,7 +11,7 @@ struct CurlList(Movable):
         self.raw = raw
     
     fn __init__(out self, headers: Dict[String, String]) raises:
-        var list = Self()
+        self.raw = ExternalMutPointer[curl_slist]()
         for pair in headers.items():
             var header = pair.key.copy()
             if len(pair.value) > 0:
@@ -21,20 +21,18 @@ struct CurlList(Movable):
                 header.write(";")
 
             try:
-                list.append(header)
-            except:
-                list^.free()
-                raise
-        
-        self = list^
-    
+                self.append(header)
+            except e:
+                self^.free()
+                raise e
+            
     fn __init__(
         out self,
         var headers: List[String],
         var values: List[String],
         __dict_literal__: (),
     ) raises:
-        var list = Self()
+        self.raw = ExternalMutPointer[curl_slist]()
         for pair in zip(headers, values):
             var header = pair[0]
             if len(pair[1]) > 0:
@@ -44,13 +42,11 @@ struct CurlList(Movable):
                 header.write(";")
 
             try:
-                list.append(header)
-            except:
-                list^.free()
-                raise
+                self.append(header)
+            except e:
+                self^.free()
+                raise e
         
-        self = list^
-
     fn append(mut self, mut data: String) raises:
         var ptr = get_curl_handle()[].slist_append(self.raw, data.unsafe_cstr_ptr())
         if not ptr:

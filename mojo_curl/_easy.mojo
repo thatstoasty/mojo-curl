@@ -1,9 +1,7 @@
 from sys.ffi import c_long, c_char
 
-from curl.c.api import get_curl_handle
-from curl.c.bindings import curl
-from curl.c.types import CURL, Info, Option, Result, curl_write_callback, ExternalMutPointer
-from curl.c.header import HeaderOrigin, curl_header
+from mojo_curl.c import get_curl_handle, curl, CURL, Info, Option, Result, curl_write_callback, HeaderOrigin, curl_header
+from mojo_curl.c.types import ExternalMutPointer
 
 
 struct InnerEasy:
@@ -141,7 +139,7 @@ struct InnerEasy:
         that this library is threadsafe by default. See the [libcurl docs] for
         some more information.
 
-        [libcurl docs]: https://curl.haxx.se/libcurl/c/threadsafe.html
+        [libcurl docs]: https://mojo_curl.haxx.se/libcurl/c/threadsafe.html
         """
         return self.set_option(Option.NO_SIGNAL, Int(not signal))
 
@@ -1929,7 +1927,7 @@ struct InnerEasy:
     #     total latency since in the best case, an additional server roundtrip is required
     #     and in the worst case, the request is delayed by CURLOPT_EXPECT_100_TIMEOUT_MS.
     #
-    #     More info: https://curl.se/libcurl/c/CURLOPT_EXPECT_100_TIMEOUT_MS.html
+    #     More info: https://mojo_curl.se/libcurl/c/CURLOPT_EXPECT_100_TIMEOUT_MS.html
     #
     #     By default this option is not set and corresponds to
     #     CURLOPT_EXPECT_100_TIMEOUT_MS.

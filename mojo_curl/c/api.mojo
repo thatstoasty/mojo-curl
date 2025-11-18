@@ -1,7 +1,7 @@
 from sys.ffi import _get_global, _Global
 
-from curl.c.bindings import curl
-from curl.c.types import CURL_GLOBAL_DEFAULT
+from mojo_curl.c.bindings import curl
+from mojo_curl.c.types import CURL_GLOBAL_DEFAULT
 
 
 fn _init_global() -> OpaquePointer[MutAnyOrigin]:

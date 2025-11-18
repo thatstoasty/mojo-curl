@@ -1,10 +1,11 @@
 import os
 import pathlib
+from pathlib import Path
 from sys import CompilationTarget, env_get_string, ffi
 from sys.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 
-from curl.c.types import curl_slist, CURL, ExternalImmutOpaquePointer, ExternalImmutPointer, ExternalMutPointer, curl_write_callback
-from curl.c.header import curl_header
+from mojo_curl.c.types import curl_slist, CURL, ExternalImmutOpaquePointer, ExternalImmutPointer, ExternalMutPointer, curl_write_callback
+from mojo_curl.c.header import curl_header
 
 comptime CURLcode = c_int
 comptime CURLoption = c_int
@@ -20,27 +21,36 @@ struct _curl(Movable):
 
     fn __init__(out self):
         """Initialize the Safe CURL binding by loading both libraries."""
-        var curl_path = String(env_get_string["LIBCURL_LIB_PATH", ""]())
-        var wrapper_path = String("libcurl_wrapper.dylib")
-
         # Load curl library
+        var curl_path = String(env_get_string["LIBCURL_LIB_PATH", ""]())
         if curl_path == "":
             curl_path = os.getenv("LIBCURL_LIB_PATH")
 
+        # Load curl library
+        var wrapper_path = Path(env_get_string["LIBCURL_LIB_PATH", ""]())
+        if String(wrapper_path) == "":
+            wrapper_path = Path(os.getenv("LIBCURL_LIB_PATH"))
+
         try:
             if curl_path == "":
-
                 @parameter
                 if CompilationTarget.is_macos():
-                    curl_path = String(pathlib.cwd() / ".pixi/envs/default/lib/libcurl.dylib")
+                    curl_path = String(pathlib.cwd() / ".pixi/envs/default/lib/libmojo_curl.dylib")
                 else:
-                    curl_path = String(pathlib.cwd() / ".pixi/envs/default/lib/libcurl.so")
+                    curl_path = String(pathlib.cwd() / ".pixi/envs/default/lib/libmojo_curl.so")
 
-            if not pathlib.Path(curl_path).exists():
+            if not Path(curl_path).exists():
                 os.abort("libcurl library not found at: " + curl_path)
 
-            if not pathlib.Path(wrapper_path).exists():
-                os.abort("curl wrapper library not found at: " + wrapper_path)
+            if String(wrapper_path) == "":
+                @parameter
+                if CompilationTarget.is_macos():
+                    wrapper_path = pathlib.cwd() / ".pixi/envs/default/lib/libcurl_wrapper.dylib"
+                else:
+                    wrapper_path = pathlib.cwd() / ".pixi/envs/default/lib/libcurl_wrapper.so"
+
+            if not wrapper_path.exists():
+                os.abort("curl wrapper library not found at: " + String(wrapper_path))
 
             self.curl_lib = ffi.OwnedDLHandle(curl_path, ffi.RTLD.LAZY)
             self.wrapper_lib = ffi.OwnedDLHandle(wrapper_path, ffi.RTLD.LAZY)
@@ -58,7 +68,7 @@ struct _curl(Movable):
         return self.curl_lib.get_function[fn () -> NoneType]("curl_global_cleanup")()
 
     fn curl_version(self) -> ExternalImmutPointer[c_char]:
-        """Return the version string of libcurl."""
+        """Return the version string of libmojo_curl."""
         return self.curl_lib.get_function[fn () -> ExternalImmutPointer[c_char]]("curl_version")()
 
     # Easy interface functions

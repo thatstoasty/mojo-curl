@@ -1,4 +1,4 @@
-from curl.c.types import ExternalMutPointer, ExternalMutOpaquePointer
+from mojo_curl.c.types import ExternalMutPointer, ExternalMutOpaquePointer
 from sys.ffi import c_size_t, c_uint, c_char, c_int
 
 
