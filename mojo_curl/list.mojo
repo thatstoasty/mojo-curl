@@ -2,7 +2,7 @@ from mojo_curl.c.types import curl_slist, ExternalMutPointer
 from mojo_curl.c.api import get_curl_handle
 
 
-@explicit_destroy("CurlList must be explicitly destroyed using the `free` method.")
+@explicit_destroy("CurlList must be explicitly destroyed using the `free` method!")
 struct CurlList(Movable):
     var raw: ExternalMutPointer[curl_slist]
 
