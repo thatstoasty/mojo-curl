@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20...3.27)
 
-project(curl_wrapper VERSION 0.1.0 C)
+project(curl_wrapper VERSION 0.1.0 LANGUAGES C)
 
 # Find the CURL package (libcurl)
 set(CURL_LIBRARY "-lcurl")
