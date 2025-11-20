@@ -1,0 +1,16 @@
+[package]
+name = "curl_wrapper"
+version = "0.1.0"
+
+[package.build.backend]
+name = "pixi-build-cmake"
+version = "0.3.*"
+channels = [
+  "https://prefix.dev/conda-forge",
+]
+
+[package.build.config]
+extra-args = ["-DCMAKE_BUILD_TYPE=Release"]
+
+[package.host-dependencies]
+libcurl = ">=8.17.0,<9.0.0"

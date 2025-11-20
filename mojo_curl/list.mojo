@@ -1,4 +1,3 @@
-from memory import OpaquePointer
 from mojo_curl.c.types import curl_slist, ExternalMutPointer
 from mojo_curl.c.api import get_curl_handle
 

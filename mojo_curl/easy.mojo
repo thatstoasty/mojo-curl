@@ -19,7 +19,7 @@ struct Easy:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option[origin: MutOrigin](self, option: Option, parameter: OpaqueMutPointer[origin]) -> Result:
+    fn set_option[origin: MutOrigin](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return self.inner.set_option(option.value, parameter)
 
@@ -2183,7 +2183,7 @@ struct Easy:
         """
         return self.inner.write_function(callback)
     
-    fn write_data[origin: MutOrigin](self, data: OpaqueMutPointer[origin]) -> Result:
+    fn write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
         By default this option is not set and corresponds to

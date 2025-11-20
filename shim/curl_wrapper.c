@@ -1,5 +1,4 @@
-#include "curl.h"
-#include "easy.h"
+#include <curl/curl.h>
 
 // Wrapper functions to handle variadic curl_easy_setopt calls safely
 // These provide type-safe wrappers around the variadic curl_easy_setopt function

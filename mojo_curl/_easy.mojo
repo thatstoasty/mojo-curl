@@ -26,7 +26,7 @@ struct InnerEasy:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option[origin: MutOrigin](self, option: Option, parameter: OpaqueMutPointer[origin]) -> Result:
+    fn set_option[origin: MutOrigin](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
 
@@ -2249,7 +2249,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.WRITE_FUNCTION, callback)
     
-    fn write_data[origin: MutOrigin](self, data: OpaqueMutPointer[origin]) -> Result:
+    fn write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
         By default this option is not set and corresponds to

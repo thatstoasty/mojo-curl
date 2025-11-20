@@ -1,15 +1,13 @@
 from sys.ffi import c_char, c_int, c_long, c_size_t, c_uint
 
-from memory import OpaquePointer, UnsafePointer
 
-
-comptime ExternalImmutPointer = UnsafeImmutPointer[origin = ImmutOrigin.external]
-comptime ExternalImmutOpaquePointer = ExternalImmutPointer[NoneType]
-comptime ExternalMutPointer = UnsafeMutPointer[origin = MutOrigin.external]
+comptime ExternalImmutPointer = ImmutUnsafePointer[origin = ImmutOrigin.external]
+comptime ExternalImmutMutOpaquePointer = ExternalImmutPointer[NoneType]
+comptime ExternalMutPointer = MutUnsafePointer[origin = MutOrigin.external]
 comptime ExternalMutOpaquePointer = ExternalMutPointer[NoneType]
 
 # Type aliases for curl
-comptime CURL = ExternalImmutOpaquePointer
+comptime CURL = ExternalImmutMutOpaquePointer
 # comptime CURLcode = c_int
 # comptime CURLoption = c_int
 
@@ -36,9 +34,9 @@ comptime curl_write_callback = fn (
     ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer
 ) -> c_size_t
 comptime curl_read_callback = fn (ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer) -> c_size_t
-comptime curl_progress_callback = fn (ExternalImmutOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
+comptime curl_progress_callback = fn (ExternalImmutMutOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
 comptime curl_debug_callback = fn (CURL, c_int, UnsafePointer[c_char], c_size_t, ExternalMutOpaquePointer) -> c_int
-comptime curl_xferinfo_callback = fn (ExternalImmutOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
+comptime curl_xferinfo_callback = fn (ExternalImmutMutOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
 in 7.32.0, avoids the use of floating point numbers and provides more
 detailed information."""
@@ -51,11 +49,11 @@ struct curl_blob[origin: MutOrigin](Movable):
     with control over whether curl should copy the data or use it directly.
     """
 
-    var data: OpaqueMutPointer[origin]
+    var data: MutOpaquePointer[origin]
     var len: c_size_t
     var flags: c_uint
 
-    fn __init__(out self, data: OpaqueMutPointer[origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
+    fn __init__(out self, data: MutOpaquePointer[origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
         """Initialize a curl_blob struct.
 
         Args:
