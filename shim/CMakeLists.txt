@@ -16,6 +16,12 @@ target_link_libraries(curl_wrapper PRIVATE CURL::libcurl)
 # Make sure curl include directories are available
 target_include_directories(curl_wrapper PRIVATE ${CURL_INCLUDE_DIRS})
 
+set_target_properties(curl_wrapper PROPERTIES
+    C_STANDARD 11
+    C_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+
 install( 
     TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}Targets
