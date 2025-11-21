@@ -9,8 +9,8 @@ channels = [
   "https://prefix.dev/conda-forge",
 ]
 
-[package.build.config]
-extra-args = ["-DCMAKE_BUILD_TYPE=Release"]
+# [package.build.config]
+# extra-args = ["-DCMAKE_BUILD_TYPE=Release"]
 
 [package.host-dependencies]
 libcurl = ">=8.17.0,<9.0.0"
