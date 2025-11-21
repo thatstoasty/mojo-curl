@@ -11,10 +11,10 @@ add_library(curl_wrapper SHARED curl_wrapper.c)
 
 # Link against the CURL library
 # Use CURL::libcurl for modern CMake, which handles include directories and library paths
-target_link_libraries(curl_wrapper PRIVATE CURL::libcurl)
+target_link_libraries(curl_wrapper PUBLIC CURL::libcurl)
 
 # Make sure curl include directories are available
-target_include_directories(curl_wrapper PRIVATE ${CURL_INCLUDE_DIRS})
+target_include_directories(curl_wrapper PUBLIC ${CURL_INCLUDE_DIRS})
 
 set_target_properties(curl_wrapper PROPERTIES
     C_STANDARD 11
