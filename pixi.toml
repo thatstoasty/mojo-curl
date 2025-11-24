@@ -36,7 +36,7 @@ build_and_publish = [{ task = "build" }, { task = "publish" }]
 
 [package]
 name = "mojo-curl"
-version = "25.7.0"
+version = "25.7.1"
 
 [package.build.backend]
 name = "pixi-build-mojo"

@@ -4,7 +4,7 @@ from pathlib import Path
 from sys import CompilationTarget, env_get_string, ffi
 from sys.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 
-from mojo_curl.c.types import curl_slist, CURL, ExternalImmutMutOpaquePointer, ExternalImmutPointer, ExternalMutPointer, curl_write_callback
+from mojo_curl.c.types import curl_slist, CURL, ExternalImmutMutOpaquePointer, ExternalImmutPointer, ExternalMutPointer, curl_rw_callback
 from mojo_curl.c.header import curl_header
 
 comptime CURLcode = c_int
@@ -100,7 +100,7 @@ struct _curl(Movable):
         )(curl, option, parameter)
 
     fn curl_easy_setopt_callback(
-        self, curl: ExternalImmutMutOpaquePointer, option: CURLoption, parameter: curl_write_callback
+        self, curl: ExternalImmutMutOpaquePointer, option: CURLoption, parameter: curl_rw_callback
     ) -> CURLcode:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return self.wrapper_lib.get_function[fn (type_of(curl), type_of(option), type_of(parameter)) -> CURLcode](

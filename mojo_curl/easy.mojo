@@ -2,7 +2,7 @@ from sys.ffi import c_long
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
-from mojo_curl.c import HeaderOrigin, Info, Option, Result, curl_write_callback
+from mojo_curl.c import HeaderOrigin, Info, Option, Result, curl_rw_callback
 
 
 struct Easy:
@@ -23,7 +23,7 @@ struct Easy:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: curl_write_callback) -> Result:
+    fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return self.inner.set_option(option, parameter)
 
@@ -749,8 +749,14 @@ struct Easy:
     fn post_fields(self, data: Span[UInt8]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
     
-        Note that the data is copied into this handle and if that's not desired
-        then the read callbacks can be used instead.
+        Pass a char pointer as parameter, pointing to the data buffer to use in an HTTP POST
+        operation or an MQTT subscribe. The data must be formatted and encoded the way you
+        want the server to receive it. libcurl does not convert or encode it in any way.
+        For example, a web server may assume that this data is URL encoded.
+        
+        The data pointed to is NOT copied by the library: as a consequence, it must be preserved
+        by the calling application until the associated transfer finishes. This behavior can be
+        changed (so libcurl does copy the data) by instead using the CURLOPT_COPYPOSTFIELDS (`post_fields_copy()`) option.
     
         By default this option is not set and corresponds to
         `CURLOPT_COPYPOSTFIELDS`.
@@ -1060,13 +1066,13 @@ struct Easy:
         """
         return self.inner.nobody(enable)
 
-    fn in_filesize(self, size: Int) -> Result:
+    fn read_file_size(self, size: Int) -> Result:
         """Set the size of the input file to send off.
 
         By default this option is not set and corresponds to
         `CURLOPT_INFILESIZE_LARGE`.
         """
-        return self.inner.in_filesize(size)
+        return self.inner.read_file_size(size)
 
     fn upload(self, enable: Bool) -> Result:
         """Enable or disable data upload.
@@ -2153,7 +2159,7 @@ struct Easy:
     # =========================================================================
     # Callback options
 
-    fn write_function(self, callback: curl_write_callback) -> Result:
+    fn write_function(self, callback: curl_rw_callback) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -2178,7 +2184,7 @@ struct Easy:
         By default data is sent into the void, and this corresponds to the
         `CURLOPT_WRITEFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the curl_write_callback
+        Note: In Mojo, the callback function must match the curl_rw_callback
         signature defined in the bindings.
         """
         return self.inner.write_function(callback)
@@ -2190,6 +2196,34 @@ struct Easy:
         `CURLOPT_WRITEDATA`.
         """
         return self.inner.write_data(data)
+    
+    fn read_function(self, callback: curl_rw_callback) -> Result:
+        """Set callback for reading data to upload.
+
+        This callback function gets called by libcurl when it needs to read
+        data to be uploaded to the remote server.
+
+        The callback should return the number of bytes actually copied into the
+        provided buffer. If that amount differs from the amount requested,
+        it'll signal an error condition to the library. This will cause the
+        transfer to get aborted and the libcurl function used will return
+        an error with `is_read_error`.
+
+        By default data is read from /dev/null, and this corresponds to the
+        `CURLOPT_READFUNCTION` option.
+
+        Note: In Mojo, the callback function must match the curl_rw_callback
+        signature defined in the bindings.
+        """
+        return self.inner.read_function(callback)
+    
+    fn read_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+        """Set custom pointer to pass to read callback.
+
+        By default this option is not set and corresponds to
+        `CURLOPT_READDATA`.
+        """
+        return self.inner.read_data(data)
 
     fn headers(self, origin: HeaderOrigin = HeaderOrigin.HEADER) -> Dict[String, String]:
         """Move to next header set for multi-response requests.

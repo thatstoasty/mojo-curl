@@ -1,6 +1,6 @@
 from sys.ffi import c_long, c_char
 
-from mojo_curl.c import get_curl_handle, curl, CURL, Info, Option, Result, curl_write_callback, HeaderOrigin, curl_header
+from mojo_curl.c import get_curl_handle, curl, CURL, Info, Option, Result, curl_rw_callback, HeaderOrigin, curl_header
 from mojo_curl.c.types import ExternalMutPointer
 
 
@@ -30,7 +30,7 @@ struct InnerEasy:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: curl_write_callback) -> Result:
+    fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
 
@@ -1096,7 +1096,7 @@ struct InnerEasy:
         """
         return self.set_option(Option.NO_BODY, Int(enable))
 
-    fn in_filesize(self, size: Int) -> Result:
+    fn read_file_size(self, size: Int) -> Result:
         """Set the size of the input file to send off.
 
         By default this option is not set and corresponds to
@@ -2219,7 +2219,7 @@ struct InnerEasy:
     # =========================================================================
     # Callback options
 
-    fn write_function(self, callback: curl_write_callback) -> Result:
+    fn write_function(self, callback: curl_rw_callback) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -2244,7 +2244,7 @@ struct InnerEasy:
         By default data is sent into the void, and this corresponds to the
         `CURLOPT_WRITEFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the curl_write_callback
+        Note: In Mojo, the callback function must match the curl_rw_callback
         signature defined in the bindings.
         """
         return self.set_option(Option.WRITE_FUNCTION, callback)
@@ -2256,6 +2256,34 @@ struct InnerEasy:
         `CURLOPT_WRITEDATA`.
         """
         return self.set_option(Option.WRITE_DATA, data)
+    
+    fn read_function(self, callback: curl_rw_callback) -> Result:
+        """Set callback for reading data to upload.
+
+        This callback function gets called by libcurl when it needs to read
+        data to be sent to the peer - for example when uploading a file to a
+        server.
+
+        The callback should return the number of bytes actually copied into
+        the provided buffer. If that amount differs from the amount requested,
+        it'll signal an error condition to the library. This will cause the
+        transfer to get aborted and the libcurl function used will return
+        an error with `is_read_error`.
+
+        By default no callback is set and this corresponds to the
+        `CURLOPT_READFUNCTION` option.
+
+        Note: In Mojo, the callback function must match the curl_read_callback
+        signature defined in the bindings.
+        """
+        return self.set_option(Option.READ_FUNCTION, callback)
+    
+    fn read_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+        """Set custom pointer to pass to read callback.
+        By default this option is not set and corresponds to
+        `CURLOPT_READDATA`.
+        """
+        return self.set_option(Option.READ_DATA, data)
     
     fn escape(self, mut string: String) raises -> String:
         """URL-encode the given string.

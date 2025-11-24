@@ -8,7 +8,7 @@ from mojo_curl.c.types import (
     Info,
     Option,
     Result,
-    curl_write_callback,
+    curl_rw_callback,
     ExternalMutPointer,
     curl_slist,
 )
@@ -65,7 +65,7 @@ struct curl:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 
-    fn easy_setopt(self, easy: ExternalImmutMutOpaquePointer, option: Option, parameter: curl_write_callback) -> Result:
+    fn easy_setopt(self, easy: ExternalImmutMutOpaquePointer, option: Option, parameter: curl_rw_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_callback(easy, option.value, parameter)
 

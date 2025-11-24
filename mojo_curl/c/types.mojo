@@ -30,8 +30,8 @@ comptime CURL_SOCKET_BAD = -1
 comptime curl_off_t = c_long
 
 # Callback function types
-comptime curl_write_callback = fn (
-    ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer
+comptime curl_rw_callback = fn (
+    ExternalMutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer
 ) -> c_size_t
 comptime curl_read_callback = fn (ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer) -> c_size_t
 comptime curl_progress_callback = fn (ExternalImmutMutOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
@@ -200,6 +200,7 @@ struct Option(Copyable, Movable):
     comptime PROXY_USER_PWD: Self = Self.OBJECT_POINT + 6
     comptime RANGE: Self = Self.OBJECT_POINT + 7
     comptime IN_FILE: Self = Self.OBJECT_POINT + 9
+    comptime READ_DATA: Self = Self.OBJECT_POINT + 9
     comptime ERROR_BUFFER: Self = Self.OBJECT_POINT + 10
     comptime WRITE_FUNCTION: Self = Self.FUNCTION_POINT + 11
     comptime READ_FUNCTION: Self = Self.FUNCTION_POINT + 12
