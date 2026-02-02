@@ -37,8 +37,6 @@ backend = { name = "pixi-build-mojo", version = "*" }
 
 [dependencies]
 mojo = ">=0.26.1.0,<0.26.2.0"
-# libcurl = ">=8.17.0,<9.0.0"
-# curl_wrapper = { path = "shim" }
 curl_wrapper = { git = "https://github.com/thatstoasty/mojo-curl.git", subdirectory = "shim", branch = "main" }
 
 [package.build-dependencies]
