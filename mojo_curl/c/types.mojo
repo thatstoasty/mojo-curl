@@ -1,13 +1,13 @@
 from sys.ffi import c_char, c_int, c_long, c_size_t, c_uint
 
 
-comptime ExternalImmutPointer = ImmutUnsafePointer[origin = ImmutOrigin.external]
-comptime ExternalImmutMutOpaquePointer = ExternalImmutPointer[NoneType]
-comptime ExternalMutPointer = MutUnsafePointer[origin = MutOrigin.external]
-comptime ExternalMutOpaquePointer = ExternalMutPointer[NoneType]
+comptime ImmutExternalPointer = ImmutUnsafePointer[origin = ImmutExternalOrigin]
+comptime ImmutExternalOpaquePointer = ImmutExternalPointer[NoneType]
+comptime MutExternalPointer = MutUnsafePointer[origin = MutExternalOrigin]
+comptime MutExternalOpaquePointer = MutExternalPointer[NoneType]
 
 # Type aliases for curl
-comptime CURL = ExternalImmutMutOpaquePointer
+comptime CURL = ImmutExternalOpaquePointer
 # comptime CURLcode = c_int
 # comptime CURLoption = c_int
 
@@ -20,8 +20,8 @@ comptime CURL = ExternalImmutMutOpaquePointer
 struct curl_slist:
     """Singly linked list structure for curl string lists."""
 
-    var data: ExternalMutPointer[c_char]
-    var next: ExternalMutPointer[curl_slist]
+    var data: MutExternalPointer[c_char]
+    var next: MutExternalPointer[curl_slist]
 
 
 comptime curl_socket_t = c_int
@@ -31,12 +31,12 @@ comptime curl_off_t = c_long
 
 # Callback function types
 comptime curl_rw_callback = fn (
-    ExternalMutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer
+    MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer
 ) -> c_size_t
-comptime curl_read_callback = fn (ExternalImmutPointer[c_char], c_size_t, c_size_t, ExternalMutOpaquePointer) -> c_size_t
-comptime curl_progress_callback = fn (ExternalImmutMutOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
-comptime curl_debug_callback = fn (CURL, c_int, UnsafePointer[c_char], c_size_t, ExternalMutOpaquePointer) -> c_int
-comptime curl_xferinfo_callback = fn (ExternalImmutMutOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
+comptime curl_read_callback = fn (ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+comptime curl_progress_callback = fn (ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
+comptime curl_debug_callback = fn (CURL, c_int, UnsafePointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
+comptime curl_xferinfo_callback = fn (ImmutExternalOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
 in 7.32.0, avoids the use of floating point numbers and provides more
 detailed information."""
@@ -49,11 +49,11 @@ struct curl_blob[origin: MutOrigin](Movable):
     with control over whether curl should copy the data or use it directly.
     """
 
-    var data: MutOpaquePointer[origin]
+    var data: MutOpaquePointer[Self.origin]
     var len: c_size_t
     var flags: c_uint
 
-    fn __init__(out self, data: MutOpaquePointer[origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
+    fn __init__(out self, data: MutOpaquePointer[Self.origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
         """Initialize a curl_blob struct.
 
         Args:
@@ -73,7 +73,7 @@ comptime CURL_BLOB_NOCOPY = 0
 
 # Common CURLcode values
 @register_passable("trivial")
-struct Result(Copyable, EqualityComparable, Movable, Writable):
+struct Result(Copyable, Equatable, Writable):
     var value: c_int
     comptime OK: Self = 0
     comptime UNSUPPORTED_PROTOCOL: Self = 1
@@ -649,14 +649,14 @@ struct curl_version_info_data:
     """Version information structure returned by curl_version_info."""
 
     var age: c_int
-    var version: ExternalImmutPointer[c_char]
+    var version: ImmutExternalPointer[c_char]
     var version_num: c_uint
-    var host: ExternalImmutPointer[c_char]
+    var host: ImmutExternalPointer[c_char]
     var features: c_int
-    var ssl_version: ExternalImmutPointer[c_char]
+    var ssl_version: ImmutExternalPointer[c_char]
     var ssl_version_num: c_long
-    var libz_version: ExternalImmutPointer[c_char]
-    var protocols: ExternalImmutPointer[ExternalImmutPointer[c_char]]
+    var libz_version: ImmutExternalPointer[c_char]
+    var protocols: ImmutExternalPointer[ImmutExternalPointer[c_char]]
 
 
 struct curl_ssl_backend:
@@ -693,63 +693,63 @@ struct curl_ssl_backend:
 
 
 comptime CURLFOLLOW_ALL: c_long = 1
-"""bits for the FOLLOWLOCATION option"""
+"""Bits for the FOLLOWLOCATION option."""
 
 comptime CURLFOLLOW_OBEYCODE: c_long = 2
 """Do not use the custom method in the follow-up request if the HTTP code instructs so (301, 302, 303)."""
 
 comptime CURLFOLLOW_FIRSTONLY: c_long = 3
-"""Only use the custom method in the first request, always reset in the next"""
+"""Only use the custom method in the first request, always reset in the next."""
 
 
 struct curl_httppost:
-    var next: ExternalMutPointer[curl_httppost]
+    var next: MutExternalPointer[curl_httppost]
     """Next entry in the list."""
-    var name: ExternalMutPointer[c_char]
+    var name: MutExternalPointer[c_char]
     """Pointer to allocated name."""
     var namelength: c_long
     """Length of name length."""
-    var contents: ExternalMutPointer[c_char]
+    var contents: MutExternalPointer[c_char]
     """Pointer to allocated data contents."""
     var contents_length: c_long
     """Length of contents field, see also CURL_HTTPPOST_LARGE."""
-    var buffer: ExternalMutPointer[c_char]
+    var buffer: MutExternalPointer[c_char]
     """Pointer to allocated buffer contents."""
     var bufferlength: c_long
     """Length of buffer field."""
-    var content_type: ExternalMutPointer[c_char]
+    var content_type: MutExternalPointer[c_char]
     """Content-Type."""
-    var content_header: ExternalMutPointer[curl_slist]
+    var content_header: MutExternalPointer[curl_slist]
     """List of extra headers for this form."""
-    var more: ExternalMutPointer[curl_httppost]
+    var more: MutExternalPointer[curl_httppost]
     """If one field name has more than one file, this link should link to following files."""
     var flags: c_long
     """As defined below."""
-    var show_file_name: ExternalMutPointer[c_char]
+    var show_file_name: MutExternalPointer[c_char]
     """The filename to show. If not set, the actual filename will be used (if this is a file part)."""
-    var user_ptr: ExternalMutOpaquePointer
+    var user_ptr: MutExternalOpaquePointer
     """Custom user pointer used for HTTPPOST_CALLBACK posts."""
     var contentlen: curl_off_t
     """Alternative length of contents field. Used if CURL_HTTPPOST_LARGE is set. Added in 7.46.0."""
 
 
 comptime CURL_HTTPPOST_FILENAME = (1 << 0)
-"""specified content is a filename."""
+"""Specified content is a filename."""
 comptime CURL_HTTPPOST_READFILE = (1 << 1)
-"""specified content is a filename."""
+"""Specified content is a filename."""
 comptime CURL_HTTPPOST_PTRNAME = (1 << 2)
-"""name is only stored pointer do not free in formfree."""
+"""Name is only stored pointer do not free in formfree."""
 comptime CURL_HTTPPOST_PTRCONTENTS = (1 << 3)
-"""contents is only stored pointer do not free in formfree."""
+"""Contents is only stored pointer do not free in formfree."""
 comptime CURL_HTTPPOST_BUFFER = (1 << 4)
-"""upload file from buffer."""
+"""Upload file from buffer."""
 comptime CURL_HTTPPOST_PTRBUFFER = (1 << 5)
-"""upload file from pointer contents."""
+"""Upload file from pointer contents."""
 comptime CURL_HTTPPOST_CALLBACK = (1 << 6)
-"""upload file contents by using the regular read callback to get the data and
+"""Upload file contents by using the regular read callback to get the data and
    pass the given pointer as custom pointer."""
 comptime CURL_HTTPPOST_LARGE = (1 << 7)
-"""use size in 'contentlen', added in 7.46.0."""
+"""Use size in 'contentlen', added in 7.46.0."""
 
 
 comptime CURL_MAX_READ_SIZE = (10 * 1024 * 1024)

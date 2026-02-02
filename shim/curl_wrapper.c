@@ -1,5 +1,6 @@
 #include <curl/curl.h>
 
+
 // Wrapper functions to handle variadic curl_easy_setopt calls safely
 // These provide type-safe wrappers around the variadic curl_easy_setopt function
 
@@ -31,5 +32,15 @@ CURLcode curl_easy_getinfo_long(CURL *curl, CURLINFO info, long *param) {
 
 // Wrapper for curl_easy_getinfo with double output
 CURLcode curl_easy_getinfo_double(CURL *curl, CURLINFO info, double *param) {
+    return curl_easy_getinfo(curl, info, param);
+}
+
+// Wrapper for curl_easy_getinfo with pointer output
+CURLcode curl_easy_getinfo_ptr(CURL *curl, CURLINFO info, void **param) {
+    return curl_easy_getinfo(curl, info, param);
+}
+ 
+// Wrapper for curl_easy_getinfo with curl_slist output
+CURLcode curl_easy_getinfo_curl_slist(CURL *curl, CURLINFO info, struct curl_slist **param) {
     return curl_easy_getinfo(curl, info, param);
 }

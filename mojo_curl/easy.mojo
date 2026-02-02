@@ -1,15 +1,24 @@
 from sys.ffi import c_long
+from pathlib import Path
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
 from mojo_curl.c import HeaderOrigin, Info, Option, Result, curl_rw_callback
 
 
-struct Easy:
+struct Easy(Movable):
     var inner: InnerEasy
 
     fn __init__(out self):
         self.inner = InnerEasy()
+    
+    fn __del__(deinit self):
+        """Destructor to ensure resources are cleaned up."""
+        self^.close()
+    
+    fn close(deinit self):
+        """Explicitly clean up the easy handle."""
+        self.inner^.close()
 
     fn set_option(self, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
@@ -26,27 +35,6 @@ struct Easy:
     fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return self.inner.set_option(option, parameter)
-
-    fn get_info(
-        self,
-        info: Info,
-    ) raises -> String:
-        """Get string info from a curl easy handle using safe wrapper."""
-        return self.inner.get_info(info)
-
-    fn get_info_long(
-        self,
-        info: Info,
-    ) raises -> c_long:
-        """Get long info from a curl easy handle using safe wrapper."""
-        return self.inner.get_info_long(info)
-
-    fn get_info_float(
-        self,
-        info: Info,
-    ) raises -> Float64:
-        """Get long info from a curl easy handle using safe wrapper."""
-        return self.inner.get_info_float(info)
 
     fn perform(self) -> Result:
         """Perform a blocking file transfer."""
@@ -813,7 +801,7 @@ struct Easy:
         """
         return self.inner.useragent(useragent)
 
-    fn http_headers(self, headers: CurlList) -> Result:
+    fn http_headers(self, mut headers: CurlList) -> Result:
         """Add some headers to this HTTP request.
     
         If you add a header that is otherwise used internally, the value here
@@ -827,7 +815,7 @@ struct Easy:
         By default this option is not set and corresponds to
         `CURLOPT_HTTPHEADER`
         """
-        return self.set_option(Option.HTTP_HEADER, headers.raw.bitcast[NoneType]())
+        return self.set_option(Option.HTTP_HEADER, headers.unsafe_ptr().bitcast[NoneType]())
 
     # # Add some headers to send to the HTTP proxy.
     # #
@@ -852,46 +840,44 @@ struct Easy:
         """
         return self.inner.cookie(cookie)
 
-    # TODO: cookie_file - needs path handling
-    # fn cookie_file(self, file: String) -> Result:
-    #     """Set the file name to read cookies from.
-    #
-    #     The cookie data can be in either the old Netscape / Mozilla cookie data
-    #     format or just regular HTTP headers (Set-Cookie style) dumped to a file.
-    #
-    #     This also enables the cookie engine, making libcurl parse and send
-    #     cookies on subsequent requests with this handle.
-    #
-    #     Given an empty or non-existing file or by passing the empty string ("")
-    #     to this option, you can enable the cookie engine without reading any
-    #     initial cookies.
-    #
-    #     If you use this option multiple times, you just add more files to read.
-    #     Subsequent files will add more cookies.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_COOKIEFILE`.
-    #     """
-    #     return self.inner.set_option(Option.COOKIE_FILE, file)
+    fn cookie_file(self, path: Optional[Path] = None) -> Result:
+        """Set the file name to read cookies from.
+    
+        The cookie data can be in either the old Netscape / Mozilla cookie data
+        format or just regular HTTP headers (Set-Cookie style) dumped to a file.
+    
+        This also enables the cookie engine, making libcurl parse and send
+        cookies on subsequent requests with this handle.
+    
+        Given an empty or non-existing file or by passing the empty string ("")
+        to this option, you can enable the cookie engine without reading any
+        initial cookies.
+    
+        If you use this option multiple times, you just add more files to read.
+        Subsequent files will add more cookies.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COOKIEFILE`.
+        """
+        return self.inner.cookie_file(path)
 
-    # TODO: cookie_jar - needs path handling
-    # fn cookie_jar(self, file: String) -> Result:
-    #     """Set the file name to store cookies to.
-    #
-    #     This will make libcurl write all internally known cookies to the file
-    #     when this handle is dropped. If no cookies are known, no file will be
-    #     created. Specify "-" as filename to instead have the cookies written to
-    #     stdout. Using this option also enables cookies for this session, so if
-    #     you for example follow a location it will make matching cookies get sent
-    #     accordingly.
-    #
-    #     Note that libcurl does not read any cookies from the cookie jar. If you
-    #     want to read cookies from a file, use `cookie_file`.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_COOKIEJAR`.
-    #     """
-    #     return self.inner.set_option(Option.COOKIEJAR, file)
+    fn cookie_jar(self, path: Optional[Path] = None) -> Result:
+        """Set the file name to store cookies to.
+    
+        This will make libcurl write all internally known cookies to the file
+        when this handle is dropped. If no cookies are known, no file will be
+        created. Specify "-" as filename to instead have the cookies written to
+        stdout. Using this option also enables cookies for this session, so if
+        you for example follow a location it will make matching cookies get sent
+        accordingly.
+    
+        Note that libcurl does not read any cookies from the cookie jar. If you
+        want to read cookies from a file, use `cookie_file`.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COOKIEJAR`.
+        """
+        return self.inner.cookie_jar(path)
 
     fn cookie_session(self, session: Bool) -> Result:
         """Start a new cookie session.
@@ -907,7 +893,7 @@ struct Easy:
         `CURLOPT_COOKIESESSION`.
         """
         return self.inner.cookie_session(session)
-
+    
     fn cookie_list(self, mut cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
 
@@ -936,6 +922,18 @@ struct Easy:
         By default this options corresponds to `CURLOPT_COOKIELIST`
         """
         return self.inner.cookie_list(cookie)
+
+    fn cookies(self) raises -> CurlList:
+        """Get all known cookies.
+
+        Returns a linked-list of all cookies cURL knows (expired ones, too).
+        Corresponds to the `CURLINFO_COOKIELIST` option and may return an error
+        if the option isn't supported.
+
+        Returns:
+            A `CurlList` containing all known cookies.
+        """
+        return self.inner.cookies()
 
     fn get(self, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
@@ -1559,8 +1557,7 @@ struct Easy:
         By default this option is set to `true` and corresponds to
         `CURLOPT_SSL_VERIFYHOST`.
         """
-        var val = 2 if verify else 0
-        return self.inner.ssl_verify_host(val)
+        return self.inner.ssl_verify_host(verify)
 
     fn proxy_ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
@@ -1571,8 +1568,7 @@ struct Easy:
         By default this option is set to `true` and corresponds to
         `CURLOPT_PROXY_SSL_VERIFYHOST`.
         """
-        var val = 2 if verify else 0
-        return self.inner.proxy_ssl_verify_host(val)
+        return self.inner.proxy_ssl_verify_host(verify)
 
     fn ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.

@@ -1,10 +1,19 @@
+[workspace]
+description = "Mojo libcurl shim."
+authors = ["Mikhail Tavarez <miktavarez@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
+homepage = "https://github.com/thatstoasty/mojo-curl"
+repository = "https://github.com/thatstoasty/mojo-curl"
+preview = ["pixi-build"]
+
 [package]
 name = "curl_wrapper"
 version = "0.1.0"
 
 [package.build.backend]
 name = "pixi-build-cmake"
-version = "0.3.*"
+version = "0.*"
 channels = [
   "https://prefix.dev/conda-forge",
 ]

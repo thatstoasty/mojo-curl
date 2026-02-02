@@ -18,6 +18,8 @@ CURLcode curl_easy_setopt_callback(CURL *curl, CURLoption option, void *callback
 CURLcode curl_easy_getinfo_string(CURL *curl, CURLINFO info, char **param);
 CURLcode curl_easy_getinfo_long(CURL *curl, CURLINFO info, long *param);
 CURLcode curl_easy_getinfo_double(CURL *curl, CURLINFO info, double *param);
+CURLcode curl_easy_getinfo_ptr(CURL *curl, CURLINFO info, void **param);
+CURLcode curl_easy_getinfo_curl_slist(CURL *curl, CURLINFO info, struct curl_slist **param);
 
 #ifdef __cplusplus
 }

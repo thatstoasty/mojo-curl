@@ -1,14 +1,14 @@
-from mojo_curl.c.types import ExternalMutPointer, ExternalMutOpaquePointer
+from mojo_curl.c.types import MutExternalPointer, MutExternalOpaquePointer
 from sys.ffi import c_size_t, c_uint, c_char, c_int
 
 
 struct curl_header:
-    var name: ExternalMutPointer[c_char]
-    var value: ExternalMutPointer[c_char]
+    var name: MutExternalPointer[c_char]
+    var value: MutExternalPointer[c_char]
     var amount: c_size_t
     var index: c_size_t
     var origin: c_uint
-    var anchor: ExternalMutOpaquePointer
+    var anchor: MutExternalOpaquePointer
 
 
 struct HeaderOrigin:
