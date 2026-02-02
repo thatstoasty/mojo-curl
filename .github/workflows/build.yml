@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-    # paths:
-    #   - mojo_curl/**
+    paths:
+      - mojo_curl/**
 
 jobs:
   build:

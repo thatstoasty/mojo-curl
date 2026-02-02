@@ -1,16 +1,37 @@
-from mojo_curl.c.types import curl_slist, ExternalMutPointer
-from mojo_curl.c.api import get_curl_handle
+from mojo_curl.c.types import curl_slist, MutExternalPointer
+from mojo_curl.c.api import curl_ffi
 
 
-@explicit_destroy("CurlList must be explicitly destroyed using the `free` method.")
-struct CurlList(Movable):
-    var raw: ExternalMutPointer[curl_slist]
+@explicit_destroy("_CurlList must be explicitly destroyed using the `free` method.")
+struct _CurlList(Movable, Boolable):
+    """Low-level `curl_slist` wrapper. Mainly just manages freeing the pointer."""
+    var data: MutExternalPointer[curl_slist]
 
-    fn __init__(out self, raw: ExternalMutPointer[curl_slist] = ExternalMutPointer[curl_slist]()):
-        self.raw = raw
+    fn __init__(out self, data: MutExternalPointer[curl_slist] = MutExternalPointer[curl_slist]()):
+        self.data = data
+
+    fn __bool__(self) -> Bool:
+        return Bool(self.data)
+    
+    fn free(deinit self):
+        if self.data:
+            curl_ffi()[].slist_free_all(self.data)
+    
+    fn append(mut self, mut header: String) raises:
+        var ptr = curl_ffi()[].slist_append(self.data, header.as_c_string_slice().unsafe_ptr())
+        if not ptr:
+            raise Error("Failed to append to curl_slist")
+        self.data = ptr
+
+
+struct CurlList(Defaultable, Movable):
+    var data: _CurlList
+
+    fn __init__(out self):
+        self.data = _CurlList()
     
     fn __init__(out self, headers: Dict[String, String]) raises:
-        self.raw = ExternalMutPointer[curl_slist]()
+        self.data = _CurlList()
         for pair in headers.items():
             var header = pair.key.copy()
             if len(pair.value) > 0:
@@ -19,11 +40,7 @@ struct CurlList(Movable):
             else:
                 header.write(";")
 
-            try:
-                self.append(header)
-            except e:
-                self^.free()
-                raise e
+            self.append(header)
             
     fn __init__(
         out self,
@@ -31,7 +48,7 @@ struct CurlList(Movable):
         var values: List[String],
         __dict_literal__: (),
     ) raises:
-        self.raw = ExternalMutPointer[curl_slist]()
+        self.data = _CurlList()
         for pair in zip(headers, values):
             var header = pair[0]
             if len(pair[1]) > 0:
@@ -40,21 +57,28 @@ struct CurlList(Movable):
             else:
                 header.write(";")
 
-            try:
-                self.append(header)
-            except e:
-                self^.free()
-                raise e
+            self.append(header)
+    
+    fn __del__(deinit self):
+        self^.free()
         
-    fn append(mut self, mut data: String) raises:
-        var ptr = get_curl_handle()[].slist_append(self.raw, data.unsafe_cstr_ptr())
-        if not ptr:
-            raise Error("Failed to append to curl_slist")
-        self.raw = ptr
+    fn append(mut self, mut header: String) raises:
+        self.data.append(header)
     
     fn free(deinit self):
-        if self.raw:
-            get_curl_handle()[].slist_free_all(self.raw)
+        self.data^.free()
+    
+    fn unsafe_ptr[
+        origin: Origin, address_space: AddressSpace, //
+    ](ref [origin, address_space]self) -> UnsafePointer[curl_slist, origin, address_space=address_space]:
+        """Retrieves a pointer to the underlying memory.
+        Parameters:
+            origin: The origin of the `SocketAddress`.
+            address_space: The `AddressSpace` of the `SocketAddress`.
+        Returns:
+            The pointer to the underlying memory.
+        """
+        return self.data.data.unsafe_mut_cast[origin.mut]().unsafe_origin_cast[origin]().address_space_cast[address_space]()
         
     @always_inline
     fn __iter__(ref self) -> _CurlListIterator[origin_of(self)]:
@@ -62,19 +86,19 @@ struct CurlList(Movable):
 
 
 @fieldwise_init
-struct _CurlListIterator[origin: Origin](Iterator, Iterable):
+struct _CurlListIterator[origin: Origin](Iterator, Iterable, Copyable):
     # TODO: Not sure if it's safe to use external origin string slices?
-    comptime Element = StringSlice[MutOrigin.external]
+    comptime Element = StringSlice[MutExternalOrigin]
     comptime IteratorType[
-        iterable_mut: Bool, //, iterable_origin: Origin[iterable_mut]
+        iterable_mut: Bool, //, iterable_origin: Origin[mut=iterable_mut]
     ]: Iterator = Self
 
-    var src: Pointer[CurlList, origin]
-    var curr: ExternalMutPointer[curl_slist]
+    var src: Pointer[CurlList, Self.origin]
+    var curr: MutExternalPointer[curl_slist]
 
-    fn __init__(out self, src: Pointer[CurlList, origin]):
+    fn __init__(out self, src: Pointer[CurlList, Self.origin]):
         self.src = src
-        self.curr = src[].raw
+        self.curr = src[].data.data
 
     fn __has_next__(self) -> Bool:
         """Checks if there are more rows available.

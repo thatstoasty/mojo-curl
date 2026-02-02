@@ -1,38 +1,41 @@
+from pathlib import Path
 from sys.ffi import c_long, c_char
 
-from mojo_curl.c import get_curl_handle, curl, CURL, Info, Option, Result, curl_rw_callback, HeaderOrigin, curl_header
-from mojo_curl.c.types import ExternalMutPointer
+from mojo_curl.c import curl_ffi, curl, CURL, Info, Option, Result, curl_rw_callback, HeaderOrigin, curl_header
+from mojo_curl.c.types import MutExternalPointer, curl_slist
 
 
-struct InnerEasy:
+@explicit_destroy("The easy handle must be explicitly destroyed by calling `close()` to free resources.")
+struct InnerEasy(Movable):
     var easy: CURL
 
     fn __init__(out self):
-        self.easy = get_curl_handle()[].easy_init()
+        self.easy = curl_ffi()[].easy_init()
     
-    fn __del__(deinit self):
+    fn close(deinit self):
+        """Explicitly clean up the easy handle."""
         if self.easy:
-            get_curl_handle()[].easy_cleanup(self.easy)
+            curl_ffi()[].easy_cleanup(self.easy)
 
     fn set_option(self, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
-        return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
+        return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
     
     fn set_option[origin: ImmutOrigin](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
-        return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
+        return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     fn set_option(self, option: Option, parameter: Int) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
-        return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
+        return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     fn set_option[origin: MutOrigin](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
-        return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
+        return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
-        return get_curl_handle()[].easy_setopt(self.easy, option.value, parameter)
+        return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     fn get_info(
         self,
@@ -40,8 +43,8 @@ struct InnerEasy:
     ) raises -> String:
         """Get string info from a curl easy handle using safe wrapper."""
         # Data is filled by data owned curl and must not be freed by the caller (this library) :)
-        var data = ExternalMutPointer[c_char]()
-        var result = get_curl_handle()[].easy_getinfo(self.easy, info, data)
+        var data = MutExternalPointer[c_char]()
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, data)
         if result.value != 0:
             raise Error("Failed to get info: ", self.describe_error(result))
 
@@ -53,7 +56,7 @@ struct InnerEasy:
     ) raises -> c_long:
         """Get long info from a curl easy handle using safe wrapper."""
         var response: c_long = 0
-        var result = get_curl_handle()[].easy_getinfo(self.easy, info, response)
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, response)
         if result.value != 0:
             raise Error("Failed to get info: ", self.describe_error(result))
 
@@ -65,25 +68,47 @@ struct InnerEasy:
     ) raises -> Float64:
         """Get long info from a curl easy handle using safe wrapper."""
         var response: Float64 = 0
-        var result = get_curl_handle()[].easy_getinfo(self.easy, info, response)
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, response)
         if result.value != 0:
             raise Error("Failed to get info: ", self.describe_error(result))
 
         return response
+    
+    fn get_info_ptr[origin: MutOrigin](
+        self,
+        info: Info,
+        mut ptr: MutOpaquePointer[origin],
+    ) raises:
+        """Get info which gets loaded into an opaque pointer."""
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, ptr)
+        if result.value != 0:
+            raise Error("Failed to get info: ", self.describe_error(result))
+    
+    fn get_info_curl_slist(
+        self,
+        info: Info,
+    ) raises -> CurlList:
+        """Get info which gets loaded into an opaque pointer."""
+        var list = CurlList()
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data.data)
+        if result.value != 0:
+            raise Error("Failed to get info: ", self.describe_error(result))
+        
+        return list^
 
     fn perform(self) -> Result:
         """Perform a blocking file transfer."""
-        return get_curl_handle()[].easy_perform(self.easy)
+        return curl_ffi()[].easy_perform(self.easy)
 
     fn cleanup(self) -> NoneType:
         """End a libcurl easy handle."""
-        return get_curl_handle()[].easy_cleanup(self.easy)
+        return curl_ffi()[].easy_cleanup(self.easy)
 
     fn describe_error(self, code: Result) -> String:
         """Return string describing error code."""
         # TODO: StringSlice crashes, probably getting skill issued by
         # pointer lifetime. Theoretically StringSlice[ImmutAnyOrigin] should work.
-        return String(unsafe_from_utf8_ptr=get_curl_handle()[].easy_strerror(code))
+        return String(unsafe_from_utf8_ptr=curl_ffi()[].easy_strerror(code))
 
     # Behavior options
 
@@ -883,45 +908,47 @@ struct InnerEasy:
         return self.set_option(Option.COOKIE, cookie)
 
     # TODO: cookie_file - needs path handling
-    # fn cookie_file(self, file: String) -> Result:
-    #     """Set the file name to read cookies from.
-    #
-    #     The cookie data can be in either the old Netscape / Mozilla cookie data
-    #     format or just regular HTTP headers (Set-Cookie style) dumped to a file.
-    #
-    #     This also enables the cookie engine, making libcurl parse and send
-    #     cookies on subsequent requests with this handle.
-    #
-    #     Given an empty or non-existing file or by passing the empty string ("")
-    #     to this option, you can enable the cookie engine without reading any
-    #     initial cookies.
-    #
-    #     If you use this option multiple times, you just add more files to read.
-    #     Subsequent files will add more cookies.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_COOKIEFILE`.
-    #     """
-    #     return self.set_option(Option.COOKIE_FILE, file)
+    fn cookie_file(self, path: Optional[Path]) -> Result:
+        """Set the file name to read cookies from.
+    
+        The cookie data can be in either the old Netscape / Mozilla cookie data
+        format or just regular HTTP headers (Set-Cookie style) dumped to a file.
+    
+        This also enables the cookie engine, making libcurl parse and send
+        cookies on subsequent requests with this handle.
+    
+        Given an empty or non-existing file or by passing the empty string ("")
+        to this option, you can enable the cookie engine without reading any
+        initial cookies.
+    
+        If you use this option multiple times, you just add more files to read.
+        Subsequent files will add more cookies.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COOKIEFILE`.
+        """
+        var file = String(path.value()) if path else ""
+        return self.set_option(Option.COOKIE_FILE, file)
 
     # TODO: cookie_jar - needs path handling
-    # fn cookie_jar(self, file: String) -> Result:
-    #     """Set the file name to store cookies to.
-    #
-    #     This will make libcurl write all internally known cookies to the file
-    #     when this handle is dropped. If no cookies are known, no file will be
-    #     created. Specify "-" as filename to instead have the cookies written to
-    #     stdout. Using this option also enables cookies for this session, so if
-    #     you for example follow a location it will make matching cookies get sent
-    #     accordingly.
-    #
-    #     Note that libcurl does not read any cookies from the cookie jar. If you
-    #     want to read cookies from a file, use `cookie_file`.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_COOKIEJAR`.
-    #     """
-    #     return self.set_option(Option.COOKIEJAR, file)
+    fn cookie_jar(self, path: Optional[Path]) -> Result:
+        """Set the file name to store cookies to.
+    
+        This will make libcurl write all internally known cookies to the file
+        when this handle is dropped. If no cookies are known, no file will be
+        created. Specify "-" as filename to instead have the cookies written to
+        stdout. Using this option also enables cookies for this session, so if
+        you for example follow a location it will make matching cookies get sent
+        accordingly.
+    
+        Note that libcurl does not read any cookies from the cookie jar. If you
+        want to read cookies from a file, use `cookie_file`.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_COOKIEJAR`.
+        """
+        var file = String(path.value()) if path else "-" # default to stdout
+        return self.set_option(Option.COOKIEJAR, file)
 
     fn cookie_session(self, session: Bool) -> Result:
         """Start a new cookie session.
@@ -937,7 +964,7 @@ struct InnerEasy:
         `CURLOPT_COOKIESESSION`.
         """
         return self.set_option(Option.COOKIE_SESSION, Int(session))
-
+    
     fn cookie_list(self, mut cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
 
@@ -966,6 +993,18 @@ struct InnerEasy:
         By default this options corresponds to `CURLOPT_COOKIELIST`
         """
         return self.set_option(Option.COOKIE_LIST, cookie)
+
+    fn cookies(self) raises -> CurlList:
+        """Get all known cookies.
+
+        Returns a linked-list of all cookies cURL knows (expired ones, too).
+        Corresponds to the `CURLINFO_COOKIELIST` option and may return an error
+        if the option isn't supported.
+
+        Returns:
+            A linked list of all known cookies.
+        """
+        return self.get_info_curl_slist(Info.COOKIE_LIST)
 
     fn get(self, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
@@ -2205,10 +2244,10 @@ struct InnerEasy:
         CURLOPT_NEXTHEADER.
         """
         var headers = Dict[String, String]()
-        var prev = ExternalMutPointer[curl_header]()
+        var prev = MutExternalPointer[curl_header]()
 
         while True:
-            var h = get_curl_handle()[].easy_nextheader(self.easy, origin.value, 0, prev)
+            var h = curl_ffi()[].easy_nextheader(self.easy, origin.value, 0, prev)
             if not h:
                 break
             prev = h
@@ -2295,7 +2334,7 @@ struct InnerEasy:
         By default this option is not set and corresponds to
         `curl_easy_escape`.
         """
-        var data = get_curl_handle()[].easy_escape(self.easy, string, 0)
+        var data = curl_ffi()[].easy_escape(self.easy, string, 0)
         if not data:
             raise Error("Failed to escape string.")
 
