@@ -90,8 +90,9 @@ struct InnerEasy(Movable):
     ) raises -> CurlList:
         """Get info which gets loaded into an opaque pointer."""
         var list = CurlList()
-        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data.data)
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data)
         if result.value != 0:
+            list^.free()
             raise Error("Failed to get info: ", self.describe_error(result))
         
         return list^
