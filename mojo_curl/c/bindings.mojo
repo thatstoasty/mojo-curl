@@ -1,15 +1,14 @@
-from sys.ffi import c_char, c_int, c_long, c_size_t, c_uint
+from sys.ffi import c_char, c_uchar, c_int, c_long, c_size_t, c_uint
 
 from mojo_curl.c.raw_bindings import _curl
 from mojo_curl.c.types import (
     CURL,
-    ImmutExternalOpaquePointer,
+    MutExternalPointer,
     ImmutExternalPointer,
     Info,
     Option,
     Result,
     curl_rw_callback,
-    MutExternalPointer,
     curl_slist,
 )
 from mojo_curl.c.header import curl_header
@@ -44,33 +43,33 @@ struct curl:
         """Start a libcurl easy session."""
         return self.lib.curl_easy_init()
 
-    fn easy_setopt(self, easy: ImmutExternalOpaquePointer, option: Option, mut parameter: String) -> Result:
+    fn easy_setopt(self, easy: CURL, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_string(easy, option.value, parameter.as_c_string_slice().unsafe_ptr())
     
     fn easy_setopt[origin: ImmutOrigin](
-        self, easy: ImmutExternalOpaquePointer, option: Option, parameter: Span[UInt8, origin]
+        self, easy: CURL, option: Option, parameter: Span[UInt8, origin]
     ) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         var ptr = parameter.unsafe_ptr().bitcast[c_char]()
         return self.lib.curl_easy_setopt_string(easy, option.value, ptr)
 
-    fn easy_setopt(self, easy: ImmutExternalOpaquePointer, option: Option, parameter: c_long) -> Result:
+    fn easy_setopt(self, easy: CURL, option: Option, parameter: c_long) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
     fn easy_setopt[origin: MutOrigin](
-        self, easy: ImmutExternalOpaquePointer, option: Option, parameter: MutOpaquePointer[origin]
+        self, easy: CURL, option: Option, parameter: MutOpaquePointer[origin]
     ) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 
-    fn easy_setopt(self, easy: ImmutExternalOpaquePointer, option: Option, parameter: curl_rw_callback) -> Result:
+    fn easy_setopt(self, easy: CURL, option: Option, parameter: curl_rw_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_setopt_callback(easy, option.value, parameter)
 
     # Safe getinfo functions using wrapper
-    fn easy_getinfo(self, easy: ImmutExternalOpaquePointer, info: Info, mut parameter: MutExternalPointer[c_char]) -> Result:
+    fn easy_getinfo(self, easy: CURL, info: Info, mut parameter: MutExternalPointer[c_char]) -> Result:
         """Get string info from a curl easy handle using safe wrapper.
         
         The pointer is NULL or points to private memory. You **must not free it**.
@@ -80,7 +79,7 @@ struct curl:
 
     fn easy_getinfo(
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         info: Info,
         mut parameter: c_long,
     ) -> Result:
@@ -89,7 +88,7 @@ struct curl:
 
     fn easy_getinfo(
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         info: Info,
         mut parameter: Float64,
     ) -> Result:
@@ -98,7 +97,7 @@ struct curl:
     
     fn easy_getinfo[origin: MutOrigin](
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         info: Info,
         mut ptr: MutOpaquePointer[origin],
     ) -> Result:
@@ -107,18 +106,18 @@ struct curl:
     
     fn easy_getinfo[origin: MutOrigin](
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         info: Info,
         mut ptr: MutUnsafePointer[curl_slist, origin],
     ) -> Result:
         """Get long info from a curl easy handle using safe wrapper."""
         return self.lib.curl_easy_getinfo_curl_slist(easy, info.value, Pointer(to=ptr))
 
-    fn easy_perform(self, easy: ImmutExternalOpaquePointer) -> Result:
+    fn easy_perform(self, easy: CURL) -> Result:
         """Perform a blocking file transfer."""
         return self.lib.curl_easy_perform(easy)
 
-    fn easy_cleanup(self, easy: ImmutExternalOpaquePointer) -> NoneType:
+    fn easy_cleanup(self, easy: CURL) -> NoneType:
         """End a libcurl easy handle."""
         return self.lib.curl_easy_cleanup(easy)
 
@@ -152,7 +151,7 @@ struct curl:
 
     fn easy_header(
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         mut name: String,
         index: c_size_t,
         origin: c_uint,
@@ -176,7 +175,7 @@ struct curl:
 
     fn easy_nextheader(
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         origin: c_uint,
         request: c_int,
         mut prev: MutExternalPointer[curl_header],
@@ -196,7 +195,7 @@ struct curl:
 
     fn easy_escape(
         self,
-        easy: ImmutExternalOpaquePointer,
+        easy: CURL,
         mut string: String,
         length: c_int,
     ) -> MutExternalPointer[c_char]:
@@ -211,3 +210,67 @@ struct curl:
             A pointer to the URL-encoded string, or NULL on error.
         """
         return self.lib.curl_easy_escape(easy, string.as_c_string_slice().unsafe_ptr(), length)
+    
+    fn easy_duphandle(self, easy: CURL) -> CURL:
+        """Creates a new curl session handle with the same options set for the handle
+        passed in. Duplicating a handle could only be a matter of cloning data and
+        options, internal state info and things like persistent connections cannot
+        be transferred. It is useful in multi-threaded applications when you can run
+        curl_easy_duphandle() for each new thread to avoid a series of identical
+        curl_easy_setopt() invokes in every thread.
+
+        Args:
+            easy: The curl easy handle to duplicate.
+
+        Returns:
+            A new curl easy handle that is a duplicate of the original, or NULL on error.
+        """
+        return self.lib.curl_easy_duphandle(easy)
+    
+    fn easy_reset(self, easy: CURL):
+        """Reset a curl easy handle to its default state."""
+        self.lib.curl_easy_reset(easy)
+    
+    fn easy_recv(self, easy: CURL, buffer: Span[mut=True, c_uchar], capacity: c_size_t) -> Tuple[Result, c_size_t]:
+        """Receive data from the connected peer.
+
+        Args:
+            easy: The curl easy handle.
+            buffer: The buffer to receive data into.
+            capacity: The capacity of the buffer.
+
+        Returns:
+            A tuple containing the CURLcode result code and the number of bytes received.
+        """
+        var bytes_received: c_size_t = 0
+        var result = self.lib.curl_easy_recv(easy, buffer.unsafe_ptr().bitcast[NoneType](), capacity, UnsafePointer(to=bytes_received))
+        return result, bytes_received
+
+    fn easy_send(self, easy: CURL, buffer: Span[c_uchar]) -> Tuple[Result, c_size_t]:
+        """Send data to the connected peer.
+
+        Args:
+            easy: The curl easy handle.
+            buffer: The buffer containing data to send.
+
+        Returns:
+            A tuple containing the CURLcode result code and the number of bytes sent.
+        """
+        var bytes_sent: c_size_t = 0
+        var result = self.lib.curl_easy_send(easy, buffer.unsafe_ptr().bitcast[NoneType](), len(buffer), UnsafePointer(to=bytes_sent))
+        return result, bytes_sent
+
+    fn easy_upkeep(self, easy: CURL) -> Result:
+        """Perform upkeep tasks for a curl easy handle.
+
+        This function is used to perform any necessary upkeep tasks for a curl easy handle,
+        such as handling timeouts or processing pending events. It should be called periodically
+        when using curl in a non-blocking manner.
+
+        Args:
+            easy: The curl easy handle.
+
+        Returns:
+            CURLcode result code.
+        """
+        return self.lib.curl_easy_upkeep(easy)

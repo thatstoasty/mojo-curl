@@ -104,6 +104,10 @@ struct InnerEasy(Movable):
     fn cleanup(self) -> NoneType:
         """End a libcurl easy handle."""
         return curl_ffi()[].easy_cleanup(self.easy)
+    
+    fn reset(self):
+        """Reset all options of this handle to their default value."""
+        curl_ffi()[].easy_reset(self.easy)
 
     fn describe_error(self, code: Result) -> String:
         """Return string describing error code."""
@@ -829,6 +833,19 @@ struct InnerEasy(Movable):
         return self.set_option(Option.COPY_POST_FIELDS, data)
 
     fn post_field_size(self, size: Int) -> Result:
+        """Configures the size of data that's going to be uploaded as part of a
+        POST operation.
+
+        This is called automatically as part of `post_fields` and should only
+        be called if data is being provided in a read callback (and even then
+        it's optional).
+
+        By default this option is not set and corresponds to
+        `CURLOPT_POSTFIELDSIZE`.
+        """
+        return self.set_option(Option.POST_FIELD_SIZE, size)
+    
+    fn post_field_size_large(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
         POST operation.
 

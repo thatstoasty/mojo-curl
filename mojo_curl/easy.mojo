@@ -43,6 +43,10 @@ struct Easy(Movable):
     fn cleanup(self) -> NoneType:
         """End a libcurl easy handle."""
         return self.inner.cleanup()
+    
+    fn reset(self):
+        """Reset all options of this handle to their default value."""
+        return self.inner.reset()
 
     fn describe_error(self, code: Result) -> String:
         """Return string describing error code."""
@@ -771,9 +775,22 @@ struct Easy(Movable):
         it's optional).
 
         By default this option is not set and corresponds to
-        `CURLOPT_POSTFIELDSIZE_LARGE`.
+        `CURLOPT_POSTFIELDSIZE`.
         """
         return self.inner.post_field_size(size)
+    
+    fn post_field_size_large(self, size: Int) -> Result:
+        """Configures the size of data that's going to be uploaded as part of a
+        POST operation.
+
+        This is called automatically as part of `post_fields` and should only
+        be called if data is being provided in a read callback (and even then
+        it's optional).
+
+        By default this option is not set and corresponds to
+        `CURLOPT_POSTFIELDSIZE_LARGE`.
+        """
+        return self.inner.post_field_size_large(size)
 
     # TODO: httppost - needs Form type implementation
     # fn httppost(self, form: Form) -> Result:

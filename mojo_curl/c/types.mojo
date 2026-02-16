@@ -7,7 +7,7 @@ comptime MutExternalPointer = MutUnsafePointer[origin = MutExternalOrigin]
 comptime MutExternalOpaquePointer = MutExternalPointer[NoneType]
 
 # Type aliases for curl
-comptime CURL = ImmutExternalOpaquePointer
+comptime CURL = MutExternalOpaquePointer
 # comptime CURLcode = c_int
 # comptime CURLoption = c_int
 
