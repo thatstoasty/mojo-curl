@@ -1,9 +1,9 @@
 from std.ffi import c_char, c_int, c_long, c_size_t, c_uint
 
 
-comptime ImmutExternalPointer = ImmutUnsafePointer[origin = ImmutExternalOrigin, ...]
+comptime ImmutExternalPointer = ImmutUnsafePointer[origin=ImmutExternalOrigin, ...]
 comptime ImmutExternalOpaquePointer = ImmutExternalPointer[NoneType]
-comptime MutExternalPointer = MutUnsafePointer[origin = MutExternalOrigin, ...]
+comptime MutExternalPointer = MutUnsafePointer[origin=MutExternalOrigin, ...]
 comptime MutExternalOpaquePointer = MutExternalPointer[NoneType]
 
 # Type aliases for curl
@@ -23,13 +23,13 @@ comptime CURL_SOCKET_BAD = -1
 comptime curl_off_t = c_long
 
 # Callback function types
-comptime curl_rw_callback = fn (
-    MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer
-) -> c_size_t
-comptime curl_read_callback = fn (ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
-comptime curl_progress_callback = fn (ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
-comptime curl_debug_callback = fn (CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
-comptime curl_xferinfo_callback = fn (ImmutExternalOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
+comptime curl_rw_callback = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+comptime curl_read_callback = fn(ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+comptime curl_progress_callback = fn(ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
+comptime curl_debug_callback = fn(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
+comptime curl_xferinfo_callback = fn(
+    ImmutExternalOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t
+) -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
 in 7.32.0, avoids the use of floating point numbers and provides more
 detailed information."""
@@ -65,7 +65,7 @@ comptime CURL_BLOB_NOCOPY = 0
 
 
 # Common CURLcode values
-struct Result(Copyable, Equatable, Writable, TrivialRegisterPassable):
+struct Result(Copyable, Equatable, TrivialRegisterPassable, Writable):
     var value: c_int
     comptime OK: Self = 0
     comptime UNSUPPORTED_PROTOCOL: Self = 1
@@ -168,7 +168,7 @@ struct Result(Copyable, Equatable, Writable, TrivialRegisterPassable):
 
     fn write_to(self, mut writer: Some[Writer]):
         """Write the error message corresponding to the CURLcode to the given writer.
-        
+
         Args:
             writer: The writer to write the error message to.
         """
@@ -425,7 +425,6 @@ struct Option(Copyable, TrivialRegisterPassable):
     comptime UPLOAD_FLAGS: Self = Self.LONG + 327
     comptime SSL_SIGNATURE_ALGORITHMS: Self = Self.OBJECT_POINT + 328
 
-
     @implicit
     fn __init__(out self, value: Int):
         self.value = c_int(value)
@@ -546,7 +545,7 @@ struct Info(Copyable, TrivialRegisterPassable):
     """[CURLINFO_SCHEME] Get the scheme used for the connection."""
     comptime TOTAL_TIME_T = Self(Self.OFF_T + 50)
     """[CURLINFO_TOTAL_TIME_T] Get total time of previous transfer in microseconds."""
-    comptime NAMELOOKUP_TIME_T = Self(Self.OFF_T + 51)  
+    comptime NAMELOOKUP_TIME_T = Self(Self.OFF_T + 51)
     """[CURLINFO_NAMELOOKUP_TIME_T] Get time from start until name resolving completed in microseconds."""
     comptime CONNECT_TIME_T = Self(Self.OFF_T + 52)
     """[CURLINFO_CONNECT_TIME_T] Get time from start until connect to remote host completed in microseconds."""
@@ -588,6 +587,7 @@ struct Info(Copyable, TrivialRegisterPassable):
     """[CURLINFO_PROXYAUTH_USED] Get used HTTP proxy authentication methods."""
     comptime LASTONE = Self(70)
     """Marker for the last valid CURLINFO option."""
+
 
 # HTTP version options
 @fieldwise_init
@@ -760,7 +760,7 @@ comptime CURL_WRITEFUNC_ERROR = 0xFFFFFFFF
    will signal an error from the callback."""
 
 
-comptime curl_resolver_start_callback = fn (OpaquePointer, OpaquePointer, OpaquePointer) -> c_int
+comptime curl_resolver_start_callback = fn(OpaquePointer, OpaquePointer, OpaquePointer) -> c_int
 """This callback will be called when a new resolver request is made."""
 
 comptime CURL_GLOBAL_SSL = (1 << 0)
