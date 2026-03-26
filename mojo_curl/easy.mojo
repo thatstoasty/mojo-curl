@@ -1,5 +1,5 @@
-from sys.ffi import c_long
-from pathlib import Path
+from std.ffi import c_long
+from std.pathlib import Path
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
@@ -21,23 +21,50 @@ struct Easy(Movable):
         self.inner^.close()
 
     fn set_option(self, option: Option, mut parameter: String) -> Result:
-        """Set a string option for a curl easy handle using safe wrapper."""
+        """Set a string option for a curl easy handle using safe wrapper.
+        
+        Args:
+            option: The option to set.
+            parameter: The string parameter to set for the option.
+        """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: Int) -> Result:
-        """Set a long/integer option for a curl easy handle using safe wrapper."""
+    fn set_option(self, option: Option, parameter: c_long) -> Result:
+        """Set a long/integer option for a curl easy handle using safe wrapper.
+        
+        Args:
+            option: The option to set.
+            parameter: The long/integer parameter to set for the option.
+        """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option[origin: MutOrigin](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
-        """Set a pointer option for a curl easy handle using safe wrapper."""
+    fn set_option[origin: MutOrigin, //](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
+        """Set a pointer option for a curl easy handle using safe wrapper.
+        
+        Args:
+            option: The option to set.
+            parameter: The pointer parameter to set for the option.
+        """
         return self.inner.set_option(option.value, parameter)
 
     fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
-        """Set a callback function for a curl easy handle using safe wrapper."""
+        """Set a callback function for a curl easy handle using safe wrapper.
+        
+        Args:
+            option: The option to set.
+            parameter: The callback function to set for the option.
+        
+        Returns:
+            Result: The result of setting the option.
+        """
         return self.inner.set_option(option, parameter)
 
     fn perform(self) -> Result:
-        """Perform a blocking file transfer."""
+        """Perform a blocking file transfer.
+        
+        Returns:
+            Result: The result of the file transfer operation.
+        """
         return self.inner.perform()
 
     fn cleanup(self) -> NoneType:
@@ -738,7 +765,7 @@ struct Easy(Movable):
         """
         return self.inner.post(enable)
     
-    fn post_fields(self, data: Span[UInt8]) -> Result:
+    fn post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
     
         Pass a char pointer as parameter, pointing to the data buffer to use in an HTTP POST
@@ -755,7 +782,7 @@ struct Easy(Movable):
         """
         return self.inner.post_fields(data)
 
-    fn post_fields_copy(self, data: Span[UInt8]) -> Result:
+    fn post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
     
         Note that the data is copied into this handle and if that's not desired

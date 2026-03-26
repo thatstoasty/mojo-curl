@@ -13,15 +13,14 @@ homepage = "https://github.com/thatstoasty/mojo-curl"
 repository = "https://github.com/thatstoasty/mojo-curl"
 preview = ["pixi-build"]
 
-[feature.util.tasks]
+[tasks]
 tests = "sh -c 'find test -name \"test_*.mojo\" -exec mojo -D ASSERT=all -I . {} \\;'"
 examples = "sh -c 'find examples -name \"*.mojo\" -exec mojo -D ASSERT=all -I . {} \\;'"
 
 # Linting and Formatting
 lint_docs = "mojo doc --Werror --diagnose-missing-doc-strings -o /dev/null ./mojo_curl"
 mojo_format = "mojo format mojo_curl --line-length 120"
-sort_imports = "isort **/*.mojo -m 3 --line-length 120 --lines-after-imports 2 --trailing-comma"
-format = [{ task = "mojo_format" }, { task = "sort_imports" }]
+format = [{ task = "mojo_format" }]
 
 # Build and publish
 build = { cmd = "pixi build -o ." }
@@ -30,31 +29,24 @@ build_and_publish = [{ task = "build" }, { task = "publish" }]
 
 [package]
 name = "mojo-curl"
-version = "0.1.0"
+version = "0.2.0"
 
 [package.build]
 backend = { name = "pixi-build-mojo", version = "*" }
 
 [dependencies]
-mojo = ">=0.26.1.0,<0.26.2.0"
+mojo = ">=0.26.2.0,<0.26.3.0"
 curl_wrapper = { git = "https://github.com/thatstoasty/mojo-curl.git", subdirectory = "shim", branch = "main" }
 
 [package.build-dependencies]
-mojo-compiler = ">=0.26.1.0,<0.26.2.0"
+mojo-compiler = ">=0.26.2.0,<0.26.3.0"
 
 [package.host-dependencies]
-mojo-compiler = ">=0.26.1.0,<0.26.2.0"
+mojo-compiler = ">=0.26.2.0,<0.26.3.0"
 libcurl = ">=8.17.0,<9.0.0"
 curl_wrapper = { path = "shim" }
 
 [package.run-dependencies]
-mojo-compiler = ">=0.26.1.0,<0.26.2.0"
+mojo-compiler = ">=0.26.2.0,<0.26.3.0"
 libcurl = ">=8.17.0,<9.0.0"
 curl_wrapper = { path = "shim" }
-
-[feature.util.dependencies]
-isort = ">=6.0.1,<7"
-
-[environments]
-default = { solve-group = "default" }
-util = { features = ["util"], solve-group = "default" }

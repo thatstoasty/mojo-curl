@@ -1,5 +1,5 @@
-from pathlib import Path
-from sys.ffi import c_long, c_char
+from std.pathlib import Path
+from std.ffi import c_long, c_char
 
 from mojo_curl.c import curl_ffi, curl, CURL, Info, Option, Result, curl_rw_callback, HeaderOrigin, curl_header
 from mojo_curl.c.types import MutExternalPointer, curl_slist
@@ -25,7 +25,7 @@ struct InnerEasy(Movable):
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: Int) -> Result:
+    fn set_option(self, option: Option, parameter: c_long) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
@@ -127,7 +127,7 @@ struct InnerEasy(Movable):
 
         By default, this option is `false`.
         """
-        return self.set_option(Option.VERBOSE, Int(verbose))
+        return self.set_option(Option.VERBOSE, c_long(Int(verbose)))
 
     fn show_header(self, show: Bool) -> Result:
         """Indicates whether header information is streamed to the output body of
@@ -143,7 +143,7 @@ struct InnerEasy(Movable):
         By default, this option is `false` and corresponds to
         `CURLOPT_HEADER`.
         """
-        return self.set_option(Option.HEADER, Int(show))
+        return self.set_option(Option.HEADER, c_long(Int(show)))
 
     fn progress(self, progress: Bool) -> Result:
         """Indicates whether a progress meter will be shown for requests done with
@@ -154,7 +154,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_NOPROGRESS`.
         """
-        return self.set_option(Option.NO_PROGRESS, Int(not progress))
+        return self.set_option(Option.NO_PROGRESS, c_long(Int(not progress)))
 
     fn signal(self, signal: Bool) -> Result:
         """Inform libcurl whether or not it should install signal handlers or
@@ -171,7 +171,7 @@ struct InnerEasy(Movable):
 
         [libcurl docs]: https://mojo_curl.haxx.se/libcurl/c/threadsafe.html
         """
-        return self.set_option(Option.NO_SIGNAL, Int(not signal))
+        return self.set_option(Option.NO_SIGNAL, c_long(Int(not signal)))
 
     fn wildcard_match(self, m: Bool) -> Result:
         """Indicates whether multiple files will be transferred based on the file
@@ -182,7 +182,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_WILDCARDMATCH`.
         """
-        return self.set_option(Option.WILDCARD_MATCH, Int(m))
+        return self.set_option(Option.WILDCARD_MATCH, c_long(Int(m)))
 
     # =========================================================================
     # Error options
@@ -197,7 +197,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_FAILONERROR`.
         """
-        return self.set_option(Option.FAIL_ON_ERROR, Int(fail))
+        return self.set_option(Option.FAIL_ON_ERROR, c_long(Int(fail)))
 
     # =========================================================================
     # Network options
@@ -223,7 +223,7 @@ struct InnerEasy(Movable):
         """Configures the port number to connect to, instead of the one specified
         in the URL or the default of the protocol.
         """
-        return self.set_option(Option.PORT, port)
+        return self.set_option(Option.PORT, c_long(port))
 
     # =========================================================================
     # Connection options
@@ -252,7 +252,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_PATH_AS_IS`.
         """
-        return self.set_option(Option.PATH_AS_IS, Int(as_is))
+        return self.set_option(Option.PATH_AS_IS, c_long(Int(as_is)))
 
     fn proxy(self, mut url: String) -> Result:
         """Provide the URL of a proxy to use.
@@ -267,7 +267,7 @@ struct InnerEasy(Movable):
         By default this option is not set (the default port for the proxy
         protocol is used) and corresponds to `CURLOPT_PROXYPORT`.
         """
-        return self.set_option(Option.PROXY_PORT, port)
+        return self.set_option(Option.PROXY_PORT, c_long(port))
 
     fn no_proxy(self, mut skip: String) -> Result:
         """Provide a list of hosts that should not be proxied to.
@@ -290,7 +290,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_HTTPPROXYTUNNEL`.
         """
-        return self.set_option(Option.HTTP_PROXY_TUNNEL, Int(tunnel))
+        return self.set_option(Option.HTTP_PROXY_TUNNEL, c_long(Int(tunnel)))
 
     fn interface(self, mut interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
@@ -308,7 +308,7 @@ struct InnerEasy(Movable):
         By default this option is 0 (any port) and corresponds to
         `CURLOPT_LOCALPORT`.
         """
-        return self.set_option(Option.LOCAL_PORT, port)
+        return self.set_option(Option.LOCAL_PORT, c_long(port))
 
     fn local_port_range(self, range: Int) -> Result:
         """Indicates the number of attempts libcurl will perform to find a working
@@ -317,7 +317,7 @@ struct InnerEasy(Movable):
         By default this option is 1 and corresponds to
         `CURLOPT_LOCALPORTRANGE`.
         """
-        return self.set_option(Option.LOCAL_PORT_RANGE, range)
+        return self.set_option(Option.LOCAL_PORT_RANGE, c_long(range))
 
     fn dns_servers(self, mut servers: String) -> Result:
         """Sets the DNS servers that will be used.
@@ -338,7 +338,7 @@ struct InnerEasy(Movable):
         By default this option is 60s and corresponds to
         `CURLOPT_DNS_CACHE_TIMEOUT`.
         """
-        return self.set_option(Option.DNS_CACHE_TIMEOUT, seconds)
+        return self.set_option(Option.DNS_CACHE_TIMEOUT, c_long(seconds))
 
     fn doh_url(self, mut url: String) -> Result:
         """Provide the DNS-over-HTTPS URL.
@@ -400,7 +400,7 @@ struct InnerEasy(Movable):
         By default this option is set to `true` and corresponds to
         `CURLOPT_DOH_SSL_VERIFYPEER`.
         """
-        return self.set_option(Option.DOH_SSL_VERIFY_PEER, Int(verify))
+        return self.set_option(Option.DOH_SSL_VERIFY_PEER, c_long(Int(verify)))
 
     fn doh_ssl_verify_host(self, verify: Bool) -> Result:
         """Tells curl to verify the DoH (DNS-over-HTTPS) server's certificate name
@@ -429,7 +429,7 @@ struct InnerEasy(Movable):
         By default this option is set to `true` and corresponds to
         `CURLOPT_DOH_SSL_VERIFYHOST`.
         """
-        return self.set_option(Option.DOH_SSL_VERIFY_HOST, Int(2 if verify else 0))
+        return self.set_option(Option.DOH_SSL_VERIFY_HOST, c_long(Int(2 if verify else 0)))
 
     fn proxy_cainfo(self, mut cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
@@ -511,7 +511,7 @@ struct InnerEasy(Movable):
         By default this option is `ProxyType::Http` and corresponds to
         `CURLOPT_PROXYTYPE`.
         """
-        return self.set_option(Option.PROXY_TYPE, kind)
+        return self.set_option(Option.PROXY_TYPE, c_long(kind))
 
     fn doh_ssl_verify_status(self, verify: Bool) -> Result:
         """Pass a long as parameter set to 1 to enable or 0 to disable.
@@ -529,7 +529,7 @@ struct InnerEasy(Movable):
         By default this option is set to `false` and corresponds to
         `CURLOPT_DOH_SSL_VERIFYSTATUS`.
         """
-        return self.set_option(Option.DOH_SSL_VERIFY_STATUS, Int(verify))
+        return self.set_option(Option.DOH_SSL_VERIFY_STATUS, c_long(Int(verify)))
 
     fn buffer_size(self, size: Int) -> Result:
         """Specify the preferred receive buffer size, in bytes.
@@ -541,7 +541,7 @@ struct InnerEasy(Movable):
         By default this option is the maximum write size and corresponds to
         `CURLOPT_BUFFERSIZE`.
         """
-        return self.set_option(Option.BUFFER_SIZE, size)
+        return self.set_option(Option.BUFFER_SIZE, c_long(size))
 
     fn upload_buffer_size(self, size: Int) -> Result:
         """Specify the preferred send buffer size, in bytes.
@@ -552,7 +552,7 @@ struct InnerEasy(Movable):
 
         The upload buffer size is by default 64 kilobytes.
         """
-        return self.set_option(Option.UPLOAD_BUFFER_SIZE, size)
+        return self.set_option(Option.UPLOAD_BUFFER_SIZE, c_long(size))
 
     # # Enable or disable TCP Fast Open
     # #
@@ -572,7 +572,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_TCP_NODELAY`.
         """
-        return self.set_option(Option.TCP_NODELAY, Int(enable))
+        return self.set_option(Option.TCP_NODELAY, c_long(Int(enable)))
 
     fn tcp_keepalive(self, enable: Bool) -> Result:
         """Configures whether TCP keepalive probes will be sent.
@@ -583,7 +583,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_TCP_KEEPALIVE`.
         """
-        return self.set_option(Option.TCP_KEEPALIVE, Int(enable))
+        return self.set_option(Option.TCP_KEEPALIVE, c_long(Int(enable)))
 
     fn tcp_keepidle(self, seconds: Int) -> Result:
         """Configures the TCP keepalive idle time wait.
@@ -593,14 +593,14 @@ struct InnerEasy(Movable):
 
         By default this corresponds to `CURLOPT_TCP_KEEPIDLE`.
         """
-        return self.set_option(Option.TCP_KEEPIDLE, seconds)
+        return self.set_option(Option.TCP_KEEPIDLE, c_long(seconds))
 
     fn tcp_keepintvl(self, seconds: Int) -> Result:
         """Configures the delay between keepalive probes.
 
         By default this corresponds to `CURLOPT_TCP_KEEPINTVL`.
         """
-        return self.set_option(Option.TCP_KEEPINTVL, seconds)
+        return self.set_option(Option.TCP_KEEPINTVL, c_long(seconds))
 
     fn address_scope(self, scope: Int) -> Result:
         """Configures the scope for local IPv6 addresses.
@@ -610,7 +610,7 @@ struct InnerEasy(Movable):
 
         By default this value is 0 and corresponds to `CURLOPT_ADDRESS_SCOPE`
         """
-        return self.set_option(Option.ADDRESS_SCOPE, scope)
+        return self.set_option(Option.ADDRESS_SCOPE, c_long(scope))
 
     # =========================================================================
     # Names and passwords
@@ -642,7 +642,7 @@ struct InnerEasy(Movable):
 
         By default this value is basic and corresponds to `CURLOPT_HTTPAUTH`.
         """
-        return self.set_option(Option.HTTP_AUTH, auth)
+        return self.set_option(Option.HTTP_AUTH, c_long(auth))
 
     fn aws_sigv4(self, mut param: String) -> Result:
         """Provides AWS V4 signature authentication on HTTP(S) header.
@@ -699,14 +699,14 @@ struct InnerEasy(Movable):
 
         By default this value is basic and corresponds to `CURLOPT_PROXYAUTH`.
         """
-        return self.set_option(Option.PROXY_AUTH, auth)
+        return self.set_option(Option.PROXY_AUTH, c_long(auth))
 
     fn netrc(self, netrc: Int) -> Result:
         """Enable .netrc parsing.
 
         By default the .netrc file is ignored and corresponds to `CURL_NETRC_IGNORED`.
         """
-        return self.set_option(Option.NETRC, netrc)
+        return self.set_option(Option.NETRC, c_long(netrc))
 
     # =========================================================================
     # HTTP Options
@@ -717,7 +717,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_AUTOREFERER`.
         """
-        return self.set_option(Option.AUTO_REFERER, Int(enable))
+        return self.set_option(Option.AUTO_REFERER, c_long(Int(enable)))
 
     fn accept_encoding(self, mut encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
@@ -739,7 +739,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_TRANSFER_ENCODING`.
         """
-        return self.set_option(Option.TRANSFER_ENCODING, Int(enable))
+        return self.set_option(Option.TRANSFER_ENCODING, c_long(Int(enable)))
 
     fn follow_location(self, enable: Bool) -> Result:
         """Follow HTTP 3xx redirects.
@@ -750,7 +750,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_FOLLOWLOCATION`.
         """
-        return self.set_option(Option.FOLLOW_LOCATION, Int(enable))
+        return self.set_option(Option.FOLLOW_LOCATION, c_long(Int(enable)))
 
     fn unrestricted_auth(self, enable: Bool) -> Result:
         """Send credentials to hosts other than the first as well.
@@ -761,7 +761,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_UNRESTRICTED_AUTH`.
         """
-        return self.set_option(Option.UNRESTRICTED_AUTH, Int(enable))
+        return self.set_option(Option.UNRESTRICTED_AUTH, c_long(Int(enable)))
 
     fn max_redirections(self, max: Int) -> Result:
         """Set the maximum number of redirects allowed.
@@ -771,7 +771,7 @@ struct InnerEasy(Movable):
         By default this option is `-1` (unlimited) and corresponds to
         `CURLOPT_MAXREDIRS`.
         """
-        return self.set_option(Option.MAXREDIRS, max)
+        return self.set_option(Option.MAXREDIRS, c_long(max))
 
     fn post_redirections(self, redirects: Int) -> Result:
         """Set the policy for handling redirects to POST requests.
@@ -780,14 +780,14 @@ struct InnerEasy(Movable):
         of the `PostRedirections` flags will preserve the POST method for the
         selected response codes.
         """
-        return self.set_option(Option.POST_REDIR, redirects)
+        return self.set_option(Option.POST_REDIR, c_long(redirects))
 
     # fn put(self, enable: Bool) -> Result:
     #     """Make an HTTP PUT request.
 
     #     By default this option is `false` and corresponds to `CURLOPT_PUT`.
     #     """
-    #     return self.set_option(Option.PUT, Int(enable))
+    #     return self.set_option(Option.PUT, c_long(Int(enable)))
 
     fn post(self, enable: Bool) -> Result:
         """Make an HTTP POST request.
@@ -803,9 +803,9 @@ struct InnerEasy(Movable):
 
         By default this option is `false` and corresponds to `CURLOPT_POST`.
         """
-        return self.set_option(Option.POST, Int(enable))
+        return self.set_option(Option.POST, c_long(Int(enable)))
     
-    fn post_fields(self, data: Span[UInt8]) -> Result:
+    fn post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         If `CURLOPT_POSTFIELDS` is explicitly set to NULL then libcurl gets
@@ -821,7 +821,7 @@ struct InnerEasy(Movable):
         """
         return self.set_option(Option.POST_FIELDS, data)
 
-    fn post_fields_copy(self, data: Span[UInt8]) -> Result:
+    fn post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
     
         Note that the data is copied into this handle and if that's not desired
@@ -843,7 +843,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_POSTFIELDSIZE`.
         """
-        return self.set_option(Option.POST_FIELD_SIZE, size)
+        return self.set_option(Option.POST_FIELD_SIZE, c_long(size))
     
     fn post_field_size_large(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
@@ -856,7 +856,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_POSTFIELDSIZE_LARGE`.
         """
-        return self.set_option(Option.POST_FIELD_SIZE_LARGE, size)
+        return self.set_option(Option.POST_FIELD_SIZE_LARGE, c_long(size))
 
     # TODO: httppost - needs Form type implementation
     # fn httppost(self, form: Form) -> Result:
@@ -981,7 +981,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_COOKIESESSION`.
         """
-        return self.set_option(Option.COOKIE_SESSION, Int(session))
+        return self.set_option(Option.COOKIE_SESSION, c_long(Int(session)))
     
     fn cookie_list(self, mut cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
@@ -1029,7 +1029,7 @@ struct InnerEasy(Movable):
 
         By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
         """
-        return self.set_option(Option.HTTPGET, Int(enable))
+        return self.set_option(Option.HTTPGET, c_long(Int(enable)))
 
     # # Ask for a HTTP GET request.
     # #
@@ -1043,7 +1043,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_IGNORE_CONTENT_LENGTH`.
         """
-        return self.set_option(Option.IGNORE_CONTENT_LENGTH, Int(ignore))
+        return self.set_option(Option.IGNORE_CONTENT_LENGTH, c_long(Int(ignore)))
 
     fn http_content_decoding(self, enable: Bool) -> Result:
         """Enable or disable HTTP content decoding.
@@ -1051,7 +1051,7 @@ struct InnerEasy(Movable):
         By default this option is `true` and corresponds to
         `CURLOPT_HTTP_CONTENT_DECODING`.
         """
-        return self.set_option(Option.HTTP_CONTENT_DECODING, Int(enable))
+        return self.set_option(Option.HTTP_CONTENT_DECODING, c_long(Int(enable)))
 
     fn http_transfer_decoding(self, enable: Bool) -> Result:
         """Enable or disable HTTP transfer decoding.
@@ -1059,7 +1059,7 @@ struct InnerEasy(Movable):
         By default this option is `true` and corresponds to
         `CURLOPT_HTTP_TRANSFER_DECODING`.
         """
-        return self.set_option(Option.HTTP_TRANSFER_DECODING, Int(enable))
+        return self.set_option(Option.HTTP_TRANSFER_DECODING, c_long(Int(enable)))
 
     # # Timeout for the Expect: 100-continue response
     # #
@@ -1117,7 +1117,7 @@ struct InnerEasy(Movable):
         By default this option is 0 and corresponds to
         `CURLOPT_RESUME_FROM_LARGE`.
         """
-        return self.set_option(Option.RESUME_FROM_LARGE, from_byte)
+        return self.set_option(Option.RESUME_FROM_LARGE, c_long(from_byte))
 
     fn custom_request(self, mut request: String) -> Result:
         """Set a custom request string.
@@ -1142,7 +1142,7 @@ struct InnerEasy(Movable):
 
         By default this option is `false` and corresponds to `CURLOPT_FILETIME`
         """
-        return self.set_option(Option.FILE_TIME, Int(fetch))
+        return self.set_option(Option.FILE_TIME, c_long(Int(fetch)))
 
     fn nobody(self, enable: Bool) -> Result:
         """Indicate whether to download the request without getting the body.
@@ -1151,7 +1151,7 @@ struct InnerEasy(Movable):
 
         By default this option is `false` and corresponds to `CURLOPT_NOBODY`.
         """
-        return self.set_option(Option.NO_BODY, Int(enable))
+        return self.set_option(Option.NO_BODY, c_long(Int(enable)))
 
     fn read_file_size(self, size: Int) -> Result:
         """Set the size of the input file to send off.
@@ -1159,7 +1159,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_INFILESIZE_LARGE`.
         """
-        return self.set_option(Option.IN_FILE_SIZE_LARGE, size)
+        return self.set_option(Option.IN_FILE_SIZE_LARGE, c_long(size))
 
     fn upload(self, enable: Bool) -> Result:
         """Enable or disable data upload.
@@ -1170,7 +1170,7 @@ struct InnerEasy(Movable):
 
         By default this option is `false` and corresponds to `CURLOPT_UPLOAD`.
         """
-        return self.set_option(Option.UPLOAD, Int(enable))
+        return self.set_option(Option.UPLOAD, c_long(Int(enable)))
 
     fn max_filesize(self, size: Int) -> Result:
         """Configure the maximum file size to download.
@@ -1178,7 +1178,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_MAXFILESIZE_LARGE`.
         """
-        return self.set_option(Option.MAX_FILE_SIZE_LARGE, size)
+        return self.set_option(Option.MAX_FILE_SIZE_LARGE, c_long(size))
 
     fn time_condition(self, cond: Int) -> Result:
         """Selects a condition for a time request.
@@ -1188,7 +1188,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_TIMECONDITION`.
         """
-        return self.set_option(Option.TIME_CONDITION, cond)
+        return self.set_option(Option.TIME_CONDITION, c_long(cond))
 
     fn time_value(self, val: Int) -> Result:
         """Sets the time value for a conditional request.
@@ -1199,7 +1199,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_TIMEVALUE`.
         """
-        return self.set_option(Option.TIME_VALUE, val)
+        return self.set_option(Option.TIME_VALUE, c_long(val))
 
     # =========================================================================
     # Connection Options
@@ -1227,7 +1227,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_TIMEOUT_MS`.
         """
-        return self.set_option(Option.TIMEOUT_MS, timeout_ms)
+        return self.set_option(Option.TIMEOUT_MS, c_long(timeout_ms))
 
     fn low_speed_limit(self, limit: Int) -> Result:
         """Set the low speed limit in bytes per second.
@@ -1239,7 +1239,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_LOW_SPEED_LIMIT`.
         """
-        return self.set_option(Option.LOW_SPEED_LIMIT, limit)
+        return self.set_option(Option.LOW_SPEED_LIMIT, c_long(limit))
 
     fn low_speed_time(self, seconds: Int) -> Result:
         """Set the low speed time period.
@@ -1250,7 +1250,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_LOW_SPEED_TIME`.
         """
-        return self.set_option(Option.LOW_SPEED_TIME, seconds)
+        return self.set_option(Option.LOW_SPEED_TIME, c_long(seconds))
 
     fn max_send_speed(self, speed: Int) -> Result:
         """Rate limit data upload speed.
@@ -1262,7 +1262,7 @@ struct InnerEasy(Movable):
         By default this option is not set (unlimited speed) and corresponds to
         `CURLOPT_MAX_SEND_SPEED_LARGE`.
         """
-        return self.set_option(Option.MAX_SEND_SPEED_LARGE, speed)
+        return self.set_option(Option.MAX_SEND_SPEED_LARGE, c_long(speed))
 
     fn max_recv_speed(self, speed: Int) -> Result:
         """Rate limit data download speed.
@@ -1274,7 +1274,7 @@ struct InnerEasy(Movable):
         By default this option is not set (unlimited speed) and corresponds to
         `CURLOPT_MAX_RECV_SPEED_LARGE`.
         """
-        return self.set_option(Option.MAX_RECV_SPEED_LARGE, speed)
+        return self.set_option(Option.MAX_RECV_SPEED_LARGE, c_long(speed))
 
     fn max_connects(self, max: Int) -> Result:
         """Set the maximum connection cache size.
@@ -1292,7 +1292,7 @@ struct InnerEasy(Movable):
         By default this option is set to 5 and corresponds to
         `CURLOPT_MAXCONNECTS`
         """
-        return self.set_option(Option.MAX_CONNECTS, max)
+        return self.set_option(Option.MAX_CONNECTS, c_long(max))
 
     fn maxage_conn(self, max_age_seconds: Int) -> Result:
         """Set the maximum idle time allowed for a connection.
@@ -1303,7 +1303,7 @@ struct InnerEasy(Movable):
 
         By default, a value of 118 seconds is used.
         """
-        return self.set_option(Option.MAX_AGE_CONN, max_age_seconds)
+        return self.set_option(Option.MAX_AGE_CONN, c_long(max_age_seconds))
 
     fn fresh_connect(self, enable: Bool) -> Result:
         """Force a new connection to be used.
@@ -1316,7 +1316,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_FRESH_CONNECT`.
         """
-        return self.set_option(Option.FRESH_CONNECT, Int(enable))
+        return self.set_option(Option.FRESH_CONNECT, c_long(Int(enable)))
 
     fn forbid_reuse(self, enable: Bool) -> Result:
         """Make connection get closed at once after use.
@@ -1330,7 +1330,7 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to
         `CURLOPT_FORBID_REUSE`.
         """
-        return self.set_option(Option.FORBID_REUSE, Int(enable))
+        return self.set_option(Option.FORBID_REUSE, c_long(Int(enable)))
 
     fn connect_timeout(self, timeout_ms: Int) -> Result:
         """Timeout for the connect phase.
@@ -1342,7 +1342,7 @@ struct InnerEasy(Movable):
         By default this value is 300 seconds and corresponds to
         `CURLOPT_CONNECTTIMEOUT_MS`.
         """
-        return self.set_option(Option.CONNECT_TIMEOUT_MS, timeout_ms)
+        return self.set_option(Option.CONNECT_TIMEOUT_MS, c_long(timeout_ms))
 
     fn ip_resolve(self, resolve: Int) -> Result:
         """Specify which IP protocol version to use.
@@ -1353,7 +1353,7 @@ struct InnerEasy(Movable):
 
         By default this value is "any" and corresponds to `CURLOPT_IPRESOLVE`.
         """
-        return self.set_option(Option.IP_RESOLVE, resolve)
+        return self.set_option(Option.IP_RESOLVE, c_long(resolve))
 
     # TODO: resolve - needs List type implementation
     # fn resolve(self, list: List) -> Result:
@@ -1377,7 +1377,7 @@ struct InnerEasy(Movable):
         By default this value is `false` and corresponds to
         `CURLOPT_CONNECT_ONLY`.
         """
-        return self.set_option(Option.CONNECT_ONLY, Int(enable))
+        return self.set_option(Option.CONNECT_ONLY, c_long(Int(enable)))
 
     # # Set interface to speak DNS over.
     # #
@@ -1580,7 +1580,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_SSLENGINE_DEFAULT`.
         """
-        return self.set_option(Option.SSL_ENGINE_DEFAULT, Int(enable))
+        return self.set_option(Option.SSL_ENGINE_DEFAULT, c_long(Int(enable)))
 
     # # Enable TLS false start.
     # #
@@ -1600,7 +1600,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_HTTP_VERSION`.
         """
-        return self.set_option(Option.HTTP_VERSION, version)
+        return self.set_option(Option.HTTP_VERSION, c_long(version))
 
     fn ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version.
@@ -1608,7 +1608,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_SSLVERSION`.
         """
-        return self.set_option(Option.SSL_VERSION, version)
+        return self.set_option(Option.SSL_VERSION, c_long(version))
 
     fn proxy_ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version when connecting to an HTTPS proxy.
@@ -1616,7 +1616,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         `CURLOPT_PROXY_SSLVERSION`.
         """
-        return self.set_option(Option.PROXY_SSL_VERSION, version)
+        return self.set_option(Option.PROXY_SSL_VERSION, c_long(version))
 
     fn ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version.
@@ -1625,7 +1625,7 @@ struct InnerEasy(Movable):
         `CURLOPT_SSLVERSION`.
         """
         var version = min_version | (max_version << 16)
-        return self.set_option(Option.SSL_VERSION, version)
+        return self.set_option(Option.SSL_VERSION, c_long(version))
 
     fn proxy_ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version
@@ -1635,7 +1635,7 @@ struct InnerEasy(Movable):
         `CURLOPT_PROXY_SSLVERSION`.
         """
         var version = min_version | (max_version << 16)
-        return self.set_option(Option.PROXY_SSL_VERSION, version)
+        return self.set_option(Option.PROXY_SSL_VERSION, c_long(version))
 
     fn ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host.
@@ -1647,7 +1647,7 @@ struct InnerEasy(Movable):
         `CURLOPT_SSL_VERIFYHOST`.
         """
         var val = 2 if verify else 0
-        return self.set_option(Option.SSL_VERIFY_HOST, val)
+        return self.set_option(Option.SSL_VERIFY_HOST, c_long(val))
 
     fn proxy_ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
@@ -1659,7 +1659,7 @@ struct InnerEasy(Movable):
         `CURLOPT_PROXY_SSL_VERIFYHOST`.
         """
         var val = 2 if verify else 0
-        return self.set_option(Option.PROXY_SSL_VERIFYHOST, val)
+        return self.set_option(Option.PROXY_SSL_VERIFYHOST, c_long(val))
 
     fn ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.
@@ -1670,7 +1670,7 @@ struct InnerEasy(Movable):
         By default this option is set to `true` and corresponds to
         `CURLOPT_SSL_VERIFYPEER`.
         """
-        return self.set_option(Option.SSL_VERIFYPEER, Int(verify))
+        return self.set_option(Option.SSL_VERIFYPEER, c_long(Int(verify)))
 
     fn proxy_ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate for HTTPS proxy.
@@ -1681,7 +1681,7 @@ struct InnerEasy(Movable):
         By default this option is set to `true` and corresponds to
         `CURLOPT_PROXY_SSL_VERIFYPEER`.
         """
-        return self.set_option(Option.PROXY_SSL_VERIFYPEER, Int(verify))
+        return self.set_option(Option.PROXY_SSL_VERIFYPEER, c_long(Int(verify)))
 
     # # Verify the certificate's status.
     # #
@@ -1840,7 +1840,7 @@ struct InnerEasy(Movable):
         By default this option is False and corresponds to
         CURLOPT_CERTINFO.
         """
-        return self.set_option(Option.CERT_INFO, Int(enable))
+        return self.set_option(Option.CERT_INFO, c_long(Int(enable)))
 
     fn pinned_public_key(self, mut pubkey: String) -> Result:
         """Set pinned public key.
@@ -1942,7 +1942,7 @@ struct InnerEasy(Movable):
 
         This corresponds to the CURLOPT_SSL_SESSIONID_CACHE option.
         """
-        return self.set_option(Option.SSL_SESSIONID_CACHE, Int(enable))
+        return self.set_option(Option.SSL_SESSIONID_CACHE, c_long(Int(enable)))
 
     # TODO: Set SSL behavior options
     # Requires SslOpt type support
@@ -2230,7 +2230,7 @@ struct InnerEasy(Movable):
 
         This corresponds to the CURLOPT_PIPEWAIT option.
         """
-        return self.set_option(Option.PIPE_WAIT, Int(wait))
+        return self.set_option(Option.PIPE_WAIT, c_long(Int(wait)))
 
     fn http_09_allowed(self, allow: Bool) -> Result:
         """Allow HTTP/0.9 compliant responses.
@@ -2241,7 +2241,7 @@ struct InnerEasy(Movable):
         By default this option is not set and corresponds to
         CURLOPT_HTTP09_ALLOWED.
         """
-        return self.set_option(Option.HTTP09_ALLOWED, Int(allow))
+        return self.set_option(Option.HTTP09_ALLOWED, c_long(Int(allow)))
     
     fn get_scheme(self) raises -> String:
         """Get URL scheme used in transfer.
