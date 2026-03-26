@@ -11,7 +11,7 @@ struct InnerEasy(Movable):
 
     fn __init__(out self):
         self.easy = curl_ffi()[].easy_init()
-    
+
     fn close(deinit self):
         """Explicitly clean up the easy handle."""
         if self.easy:
@@ -20,7 +20,7 @@ struct InnerEasy(Movable):
     fn set_option(self, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
-    
+
     fn set_option[origin: ImmutOrigin](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
@@ -73,17 +73,15 @@ struct InnerEasy(Movable):
             raise Error("Failed to get info: ", self.describe_error(result))
 
         return response
-    
-    fn get_info_ptr[origin: MutOrigin](
-        self,
-        info: Info,
-        mut ptr: MutOpaquePointer[origin],
-    ) raises:
+
+    fn get_info_ptr[
+        origin: MutOrigin
+    ](self, info: Info, mut ptr: MutOpaquePointer[origin],) raises:
         """Get info which gets loaded into an opaque pointer."""
         var result = curl_ffi()[].easy_getinfo(self.easy, info, ptr)
         if result.value != 0:
             raise Error("Failed to get info: ", self.describe_error(result))
-    
+
     fn get_info_curl_slist(
         self,
         info: Info,
@@ -94,7 +92,7 @@ struct InnerEasy(Movable):
         if result.value != 0:
             list^.free()
             raise Error("Failed to get info: ", self.describe_error(result))
-        
+
         return list^
 
     fn perform(self) -> Result:
@@ -104,7 +102,7 @@ struct InnerEasy(Movable):
     fn cleanup(self) -> NoneType:
         """End a libcurl easy handle."""
         return curl_ffi()[].easy_cleanup(self.easy)
-    
+
     fn reset(self):
         """Reset all options of this handle to their default value."""
         curl_ffi()[].easy_reset(self.easy)
@@ -804,18 +802,18 @@ struct InnerEasy(Movable):
         By default this option is `false` and corresponds to `CURLOPT_POST`.
         """
         return self.set_option(Option.POST, c_long(Int(enable)))
-    
+
     fn post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         If `CURLOPT_POSTFIELDS` is explicitly set to NULL then libcurl gets
         the POST data from the read callback.
-    
+
         The data pointed to is NOT copied by the library: as a consequence,
         it must be preserved by the calling application until the associated transfer finishes.
         This behavior can be changed (so libcurl does copy the data)
         by instead using the `CURLOPT_COPYPOSTFIELDS` option (`post_fields_copy()`).
-    
+
         By default this option is not set and corresponds to
         `CURLOPT_POSTFIELDS`.
         """
@@ -823,10 +821,10 @@ struct InnerEasy(Movable):
 
     fn post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
-    
+
         Note that the data is copied into this handle and if that's not desired
         then the read callbacks can be used instead.
-    
+
         By default this option is not set and corresponds to
         `CURLOPT_COPYPOSTFIELDS`.
         """
@@ -844,7 +842,7 @@ struct InnerEasy(Movable):
         `CURLOPT_POSTFIELDSIZE`.
         """
         return self.set_option(Option.POST_FIELD_SIZE, c_long(size))
-    
+
     fn post_field_size_large(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
         POST operation.
@@ -928,20 +926,20 @@ struct InnerEasy(Movable):
     # TODO: cookie_file - needs path handling
     fn cookie_file(self, path: Optional[Path]) -> Result:
         """Set the file name to read cookies from.
-    
+
         The cookie data can be in either the old Netscape / Mozilla cookie data
         format or just regular HTTP headers (Set-Cookie style) dumped to a file.
-    
+
         This also enables the cookie engine, making libcurl parse and send
         cookies on subsequent requests with this handle.
-    
+
         Given an empty or non-existing file or by passing the empty string ("")
         to this option, you can enable the cookie engine without reading any
         initial cookies.
-    
+
         If you use this option multiple times, you just add more files to read.
         Subsequent files will add more cookies.
-    
+
         By default this option is not set and corresponds to
         `CURLOPT_COOKIEFILE`.
         """
@@ -951,21 +949,21 @@ struct InnerEasy(Movable):
     # TODO: cookie_jar - needs path handling
     fn cookie_jar(self, path: Optional[Path]) -> Result:
         """Set the file name to store cookies to.
-    
+
         This will make libcurl write all internally known cookies to the file
         when this handle is dropped. If no cookies are known, no file will be
         created. Specify "-" as filename to instead have the cookies written to
         stdout. Using this option also enables cookies for this session, so if
         you for example follow a location it will make matching cookies get sent
         accordingly.
-    
+
         Note that libcurl does not read any cookies from the cookie jar. If you
         want to read cookies from a file, use `cookie_file`.
-    
+
         By default this option is not set and corresponds to
         `CURLOPT_COOKIEJAR`.
         """
-        var file = String(path.value()) if path else "-" # default to stdout
+        var file = String(path.value()) if path else "-"  # default to stdout
         return self.set_option(Option.COOKIEJAR, file)
 
     fn cookie_session(self, session: Bool) -> Result:
@@ -982,7 +980,7 @@ struct InnerEasy(Movable):
         `CURLOPT_COOKIESESSION`.
         """
         return self.set_option(Option.COOKIE_SESSION, c_long(Int(session)))
-    
+
     fn cookie_list(self, mut cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
 
@@ -2242,7 +2240,7 @@ struct InnerEasy(Movable):
         CURLOPT_HTTP09_ALLOWED.
         """
         return self.set_option(Option.HTTP09_ALLOWED, c_long(Int(allow)))
-    
+
     fn get_scheme(self) raises -> String:
         """Get URL scheme used in transfer.
 
@@ -2305,7 +2303,7 @@ struct InnerEasy(Movable):
         signature defined in the bindings.
         """
         return self.set_option(Option.WRITE_FUNCTION, callback)
-    
+
     fn write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
@@ -2313,7 +2311,7 @@ struct InnerEasy(Movable):
         `CURLOPT_WRITEDATA`.
         """
         return self.set_option(Option.WRITE_DATA, data)
-    
+
     fn read_function(self, callback: curl_rw_callback) -> Result:
         """Set callback for reading data to upload.
 
@@ -2334,14 +2332,14 @@ struct InnerEasy(Movable):
         signature defined in the bindings.
         """
         return self.set_option(Option.READ_FUNCTION, callback)
-    
+
     fn read_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to read callback.
         By default this option is not set and corresponds to
         `CURLOPT_READDATA`.
         """
         return self.set_option(Option.READ_DATA, data)
-    
+
     fn escape(self, mut string: String) raises -> String:
         """URL-encode the given string.
 

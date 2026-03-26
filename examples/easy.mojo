@@ -45,7 +45,7 @@ fn main() raises:
     var easy = Easy()
 
     # Set the url
-    var url: String = "https://example.com"
+    var url: String = "https://google.com"
     result = easy.url(url)
     print("URL set Result:", result)
 

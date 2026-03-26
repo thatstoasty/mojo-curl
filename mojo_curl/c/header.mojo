@@ -13,18 +13,19 @@ struct curl_header:
 
 struct HeaderOrigin:
     """CURLH origin bits."""
+
     var value: c_uint
     """[CURLH] Header origin bits for `curl_easy_nextheader`."""
 
-    comptime HEADER: Self = (1<<0)
+    comptime HEADER: Self = (1 << 0)
     """[CURLH_HEADER] Plain server header."""
-    comptime TRAILER: Self = (1<<1)
+    comptime TRAILER: Self = (1 << 1)
     """[CURLH_TRAILER] Trailers."""
-    comptime CONNECT: Self = (1<<2)
+    comptime CONNECT: Self = (1 << 2)
     """[CURLH_CONNECT] Connect response headers."""
-    comptime _1XX: Self = (1<<3)
+    comptime _1XX: Self = (1 << 3)
     """[CURLH_1XX] 1xx headers."""
-    comptime PSEUDO: Self = (1<<4)
+    comptime PSEUDO: Self = (1 << 4)
     """[CURLH_PSEUDO] Pseudo headers."""
 
     @implicit
@@ -34,6 +35,7 @@ struct HeaderOrigin:
 
 struct CurlHeaderResult:
     """CURLHcode result codes."""
+
     var value: c_int
     """[CURLHcode] Result codes for `curl_easy_nextheader`."""
 
