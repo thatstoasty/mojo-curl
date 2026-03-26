@@ -20,7 +20,7 @@ struct Easy(Movable):
         """Explicitly clean up the easy handle."""
         self.inner^.close()
 
-    fn set_option(self, option: Option, mut parameter: String) -> Result:
+    fn set_option(self, option: Option, var parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -220,7 +220,7 @@ struct Easy(Movable):
     # =========================================================================
     # Network options
 
-    fn url(self, mut url: String) -> Result:
+    fn url(self, var url: String) -> Result:
         """Provides the URL which this handle will work with.
 
         The string provided must be URL-encoded with the format:
@@ -290,7 +290,7 @@ struct Easy(Movable):
         """
         return self.inner.path_as_is(as_is)
 
-    fn proxy(self, mut url: String) -> Result:
+    fn proxy(self, var url: String) -> Result:
         """Provide the URL of a proxy to use.
 
         By default this option is not set and corresponds to `CURLOPT_PROXY`.
@@ -317,7 +317,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_port(port)
 
-    fn no_proxy(self, mut skip: String) -> Result:
+    fn no_proxy(self, var skip: String) -> Result:
         """Provide a list of hosts that should not be proxied to.
 
         This string is a comma-separated list of hosts which should not use the
@@ -352,7 +352,7 @@ struct Easy(Movable):
         """
         return self.inner.http_proxy_tunnel(tunnel)
 
-    fn interface(self, mut interface: String) -> Result:
+    fn interface(self, var interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
 
         The interface name, IP address, or host name can be specified here.
@@ -397,7 +397,7 @@ struct Easy(Movable):
         """
         return self.inner.local_port_range(range)
 
-    fn dns_servers(self, mut servers: String) -> Result:
+    fn dns_servers(self, var servers: String) -> Result:
         """Sets the DNS servers that will be used.
 
         Provide a comma separated list, for example: `8.8.8.8,8.8.4.4`.
@@ -430,7 +430,7 @@ struct Easy(Movable):
         """
         return self.inner.dns_cache_timeout(seconds)
 
-    fn doh_url(self, mut url: String) -> Result:
+    fn doh_url(self, var url: String) -> Result:
         """Provide the DNS-over-HTTPS URL.
 
         The parameter must be URL-encoded in the following format:
@@ -539,7 +539,7 @@ struct Easy(Movable):
         """
         return self.inner.doh_ssl_verify_host(verify)
 
-    fn proxy_cainfo(self, mut cainfo: String) -> Result:
+    fn proxy_cainfo(self, var cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
 
         By default this value is not set and corresponds to
@@ -553,7 +553,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_cainfo(cainfo)
 
-    fn proxy_capath(self, mut path: String) -> Result:
+    fn proxy_capath(self, var path: String) -> Result:
         """Specify a directory holding CA certificates for proxy.
 
         The specified directory should hold multiple CA certificates to verify
@@ -572,7 +572,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_capath(path)
 
-    fn proxy_sslcert(self, mut sslcert: String) -> Result:
+    fn proxy_sslcert(self, var sslcert: String) -> Result:
         """Set client certificate for proxy.
 
         By default this value is not set and corresponds to
@@ -586,7 +586,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslcert(sslcert)
 
-    fn proxy_sslcert_type(self, mut kind: String) -> Result:
+    fn proxy_sslcert_type(self, var kind: String) -> Result:
         """Set the type of client certificate for proxy.
 
         By default this value is not set and corresponds to
@@ -600,7 +600,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslcert_type(kind)
 
-    fn proxy_sslkey(self, mut sslkey: String) -> Result:
+    fn proxy_sslkey(self, var sslkey: String) -> Result:
         """Set private key for HTTPS proxy.
 
         By default this value is not set and corresponds to
@@ -614,7 +614,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslkey(sslkey)
 
-    fn proxy_sslkey_type(self, mut kind: String) -> Result:
+    fn proxy_sslkey_type(self, var kind: String) -> Result:
         """Set type of the private key file for HTTPS proxy.
 
         The string should be the format of your private key. Supported formats
@@ -637,7 +637,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslkey_type(kind)
 
-    fn proxy_key_password(self, mut password: String) -> Result:
+    fn proxy_key_password(self, var password: String) -> Result:
         """Set passphrase to private key for HTTPS proxy.
 
         This will be used as the password required to use the `ssl_key`.
@@ -832,18 +832,18 @@ struct Easy(Movable):
         """
         return self.inner.username(user)
 
-    fn password(self, mut pass_: String) -> Result:
+    fn password(self, var password: String) -> Result:
         """Configures the password to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_PASSWORD`.
 
         Args:
-            pass_: The password string.
+            password: The password string.
 
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.password(pass_)
+        return self.inner.password(password)
 
     fn http_auth(self, auth: Int) -> Result:
         """Set HTTP server authentication methods to try.
@@ -866,7 +866,7 @@ struct Easy(Movable):
         """
         return self.inner.http_auth(auth)
 
-    fn aws_sigv4(self, mut param: String) -> Result:
+    fn aws_sigv4(self, var param: String) -> Result:
         """Provides AWS V4 signature authentication on HTTP(S) header.
 
         `param` is used to create outgoing authentication headers.
@@ -898,7 +898,7 @@ struct Easy(Movable):
         """
         return self.inner.aws_sigv4(param)
 
-    fn proxy_username(self, mut user: String) -> Result:
+    fn proxy_username(self, var user: String) -> Result:
         """Configures the proxy username to pass as authentication for this
         connection.
 
@@ -913,7 +913,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_username(user)
 
-    fn proxy_password(self, mut pass_: String) -> Result:
+    fn proxy_password(self, var password: String) -> Result:
         """Configures the proxy password to pass as authentication for this
         connection.
 
@@ -921,12 +921,12 @@ struct Easy(Movable):
         `CURLOPT_PROXYPASSWORD`.
 
         Args:
-            pass_: The password string.
+            password: The password string.
 
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_password(pass_)
+        return self.inner.proxy_password(password)
 
     fn proxy_auth(self, auth: Int) -> Result:
         """Set HTTP proxy authentication methods to try.
@@ -977,7 +977,7 @@ struct Easy(Movable):
         """
         return self.inner.autoreferer(enable)
 
-    fn accept_encoding(self, mut encoding: String) -> Result:
+    fn accept_encoding(self, var encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
 
         Sets the contents of the Accept-Encoding header sent in an HTTP request.
@@ -1197,7 +1197,7 @@ struct Easy(Movable):
     #     # TODO: Implement this when Form type is available
     #     pass
 
-    fn referer(self, mut referer: String) -> Result:
+    fn referer(self, var referer: String) -> Result:
         """Sets the HTTP referer header.
 
         By default this option is not set and corresponds to `CURLOPT_REFERER`.
@@ -1210,7 +1210,7 @@ struct Easy(Movable):
         """
         return self.inner.referer(referer)
 
-    fn useragent(self, mut useragent: String) -> Result:
+    fn useragent(self, var useragent: String) -> Result:
         """Sets the HTTP user-agent header.
 
         By default this option is not set and corresponds to
@@ -1255,7 +1255,7 @@ struct Easy(Movable):
     # fn proxy_headers(self, list: List) -> Result:
     #     pass
 
-    fn cookie(self, mut cookie: String) -> Result:
+    fn cookie(self, var cookie: String) -> Result:
         """Set the contents of the HTTP Cookie header.
 
         Pass a string of the form `name=contents` for one cookie value or
@@ -1347,7 +1347,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie_session(session)
 
-    fn cookie_list(self, mut cookie: String) -> Result:
+    fn cookie_list(self, var cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
 
         Such a cookie can be either a single line in Netscape / Mozilla format
@@ -1492,7 +1492,7 @@ struct Easy(Movable):
     # =========================================================================
     # Protocol Options
 
-    fn range(self, mut range: String) -> Result:
+    fn range(self, var range: String) -> Result:
         """Indicates the range that this request should retrieve.
 
         The string provided should be of the form `N-M` where either `N` or `M`
@@ -1525,7 +1525,7 @@ struct Easy(Movable):
         """
         return self.inner.resume_from(from_byte)
 
-    fn custom_request(self, mut request: String) -> Result:
+    fn custom_request(self, var request: String) -> Result:
         """Set a custom request string.
 
         Specifies that a custom request will be made (e.g. a custom HTTP
@@ -1988,7 +1988,7 @@ struct Easy(Movable):
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_cert_type(self, mut kind: String) -> Result:
+    fn ssl_cert_type(self, var kind: String) -> Result:
         """Specify type of the client SSL certificate.
 
         The string should be the format of your certificate. Supported formats
@@ -2037,7 +2037,7 @@ struct Easy(Movable):
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_key_type(self, mut kind: String) -> Result:
+    fn ssl_key_type(self, var kind: String) -> Result:
         """Set type of the private key file.
 
         The string should be the format of your private key. Supported formats
@@ -2060,7 +2060,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_key_type(kind)
 
-    fn key_password(self, mut password: String) -> Result:
+    fn key_password(self, var password: String) -> Result:
         """Set passphrase to private key.
 
         This will be used as the password required to use the `ssl_key`.
@@ -2107,7 +2107,7 @@ struct Easy(Movable):
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_engine(self, mut engine: String) -> Result:
+    fn ssl_engine(self, var engine: String) -> Result:
         """Set the SSL engine identifier.
 
         This will be used as the identifier for the crypto engine you want to
@@ -2458,7 +2458,7 @@ struct Easy(Movable):
         """
         return self.inner.certinfo(enable)
 
-    fn pinned_public_key(self, mut pubkey: String) -> Result:
+    fn pinned_public_key(self, var pubkey: String) -> Result:
         """Set pinned public key.
 
         Pass a pointer to a zero terminated string as parameter. The string can
@@ -2504,7 +2504,7 @@ struct Easy(Movable):
     #     """
     #     return self.inner.set_option(Option.EGDSOCKET, path)
 
-    fn ssl_cipher_list(self, mut ciphers: String) -> Result:
+    fn ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS.
 
         Holds the list of ciphers to use for the SSL connection. The list must
@@ -2535,7 +2535,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_cipher_list(ciphers)
 
-    fn proxy_ssl_cipher_list(self, mut ciphers: String) -> Result:
+    fn proxy_ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS for an HTTPS proxy.
 
         Holds the list of ciphers to use for the SSL connection. The list must
@@ -3101,7 +3101,7 @@ struct Easy(Movable):
         """
         return self.inner.get_scheme()
 
-    fn escape(self, mut string: String) raises -> String:
+    fn escape(self, var string: String) raises -> String:
         """URL-encode the given string.
 
         This function returns a new string that is the URL-encoded version of
