@@ -1,6 +1,6 @@
 from std import os, pathlib, ffi
 from std.pathlib import Path
-from std.sys import CompilationTarget, env_get_string
+from std.sys import CompilationTarget
 from std.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 from std.sys import get_defined_string
 
