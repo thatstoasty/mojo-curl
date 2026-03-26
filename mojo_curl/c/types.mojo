@@ -1,23 +1,16 @@
-from sys.ffi import c_char, c_int, c_long, c_size_t, c_uint
+from std.ffi import c_char, c_int, c_long, c_size_t, c_uint
 
 
-comptime ImmutExternalPointer = ImmutUnsafePointer[origin = ImmutExternalOrigin]
+comptime ImmutExternalPointer = ImmutUnsafePointer[origin = ImmutExternalOrigin, ...]
 comptime ImmutExternalOpaquePointer = ImmutExternalPointer[NoneType]
-comptime MutExternalPointer = MutUnsafePointer[origin = MutExternalOrigin]
+comptime MutExternalPointer = MutUnsafePointer[origin = MutExternalOrigin, ...]
 comptime MutExternalOpaquePointer = MutExternalPointer[NoneType]
 
 # Type aliases for curl
 comptime CURL = MutExternalOpaquePointer
-# comptime CURLcode = c_int
-# comptime CURLoption = c_int
-
-# comptime CURLMcode = c_int
-# comptime CURLM = OpaquePointer
-# comptime CURLMsg = OpaquePointer
 
 
-@register_passable("trivial")
-struct curl_slist:
+struct curl_slist(TrivialRegisterPassable):
     """Singly linked list structure for curl string lists."""
 
     var data: MutExternalPointer[c_char]
@@ -35,7 +28,7 @@ comptime curl_rw_callback = fn (
 ) -> c_size_t
 comptime curl_read_callback = fn (ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
 comptime curl_progress_callback = fn (ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
-comptime curl_debug_callback = fn (CURL, c_int, UnsafePointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
+comptime curl_debug_callback = fn (CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
 comptime curl_xferinfo_callback = fn (ImmutExternalOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
 in 7.32.0, avoids the use of floating point numbers and provides more
@@ -72,8 +65,7 @@ comptime CURL_BLOB_NOCOPY = 0
 
 
 # Common CURLcode values
-@register_passable("trivial")
-struct Result(Copyable, Equatable, Writable):
+struct Result(Copyable, Equatable, Writable, TrivialRegisterPassable):
     var value: c_int
     comptime OK: Self = 0
     comptime UNSUPPORTED_PROTOCOL: Self = 1
@@ -165,7 +157,7 @@ struct Result(Copyable, Equatable, Writable):
 
     @implicit
     fn __init__(out self, value: Int):
-        self.value = value
+        self.value = c_int(value)
 
     @implicit
     fn __init__(out self, value: Int32):
@@ -174,14 +166,17 @@ struct Result(Copyable, Equatable, Writable):
     fn __eq__(self, other: Self) -> Bool:
         return self.value == other.value
 
-    fn write_to[W: Writer, //](self, mut writer: W):
-        """Write the error message corresponding to the CURLcode to the given writer."""
+    fn write_to(self, mut writer: Some[Writer]):
+        """Write the error message corresponding to the CURLcode to the given writer.
+        
+        Args:
+            writer: The writer to write the error message to.
+        """
         writer.write("Result(", self.value, ")")
 
 
 # CURLOPT options (commonly used ones)
-@register_passable("trivial")
-struct Option(Copyable, Movable):
+struct Option(Copyable, TrivialRegisterPassable):
     var value: c_int
 
     comptime LONG = 0
@@ -433,7 +428,7 @@ struct Option(Copyable, Movable):
 
     @implicit
     fn __init__(out self, value: Int):
-        self.value = value
+        self.value = c_int(value)
 
     @implicit
     fn __init__(out self, value: c_int):
@@ -441,8 +436,8 @@ struct Option(Copyable, Movable):
 
 
 # Info options (commonly used ones)
-@register_passable("trivial")
-struct Info(Copyable, Movable):
+@fieldwise_init
+struct Info(Copyable, TrivialRegisterPassable):
     """CURLINFO options for retrieving information from a CURL handle."""
 
     var value: c_int
@@ -457,176 +452,161 @@ struct Info(Copyable, Movable):
     comptime MASK = 0x0FFFFF
     comptime TYPE_MASK = 0xF00000
 
-    comptime EFFECTIVE_URL: Self = Self.STRING + 1
+    comptime EFFECTIVE_URL = Self(Self.STRING + 1)
     """[CURLINFO_EFFECTIVE_URL] Get the last used effective URL."""
-    comptime RESPONSE_CODE: Self = Self.LONG + 2
+    comptime RESPONSE_CODE = Self(Self.LONG + 2)
     """[CURLINFO_RESPONSE_CODE] Get the last received response code."""
-    comptime TOTAL_TIME: Self = Self.DOUBLE + 3
+    comptime TOTAL_TIME = Self(Self.DOUBLE + 3)
     """[CURLINFO_TOTAL_TIME] Get total time of previous transfer."""
-    comptime NAME_LOOKUP_TIME: Self = Self.DOUBLE + 4
+    comptime NAME_LOOKUP_TIME = Self(Self.DOUBLE + 4)
     """[CURLINFO_NAME_LOOKUP_TIME] Get time from start until name resolving completed."""
-    comptime CONNECT_TIME: Self = Self.DOUBLE + 5
+    comptime CONNECT_TIME = Self(Self.DOUBLE + 5)
     """[CURLINFO_CONNECT_TIME] Get time from start until connect to remote host completed."""
-    comptime PRE_TRANSFER_TIME: Self = Self.DOUBLE + 6
+    comptime PRE_TRANSFER_TIME = Self(Self.DOUBLE + 6)
     """[CURLINFO_PRETRANSFER_TIME] Get time from start until file transfer is just about to begin."""
-    comptime SIZE_UPLOAD_T: Self = Self.OFF_T + 7
+    comptime SIZE_UPLOAD_T = Self(Self.OFF_T + 7)
     """[CURLINFO_SIZE_UPLOAD_T] Get number of bytes uploaded."""
-    comptime SIZE_DOWNLOAD_T: Self = Self.OFF_T + 8
+    comptime SIZE_DOWNLOAD_T = Self(Self.OFF_T + 8)
     """[CURLINFO_SIZE_DOWNLOAD_T] Get number of bytes downloaded."""
-    comptime SPEED_DOWNLOAD_T: Self = Self.OFF_T + 9
+    comptime SPEED_DOWNLOAD_T = Self(Self.OFF_T + 9)
     """[CURLINFO_SPEED_DOWNLOAD_T] Get average download speed in number of bytes per second."""
-    comptime SPEED_UPLOAD_T: Self = Self.OFF_T + 10
+    comptime SPEED_UPLOAD_T = Self(Self.OFF_T + 10)
     """[CURLINFO_SPEED_UPLOAD_T] Get average upload speed in number of bytes per second."""
-    comptime HEADER_SIZE: Self = Self.LONG + 11
+    comptime HEADER_SIZE = Self(Self.LONG + 11)
     """[CURLINFO_HEADER_SIZE] Get number of bytes of all headers received."""
-    comptime REQUEST_SIZE: Self = Self.LONG + 12
+    comptime REQUEST_SIZE = Self(Self.LONG + 12)
     """[CURLINFO_REQUEST_SIZE] Get number of bytes sent in the issued HTTP requests."""
-    comptime SSL_VERIFY_RESULT: Self = Self.LONG + 13
+    comptime SSL_VERIFY_RESULT = Self(Self.LONG + 13)
     """[CURLINFO_SSL_VERIFY_RESULT] Get certificate verification result."""
-    comptime FILE_TIME: Self = Self.LONG + 14
+    comptime FILE_TIME = Self(Self.LONG + 14)
     """[CURLINFO_FILE_TIME] Get remote time of the retrieved document."""
-    comptime CONTENT_LENGTH_DOWNLOAD_T: Self = Self.OFF_T + 15
+    comptime CONTENT_LENGTH_DOWNLOAD_T = Self(Self.OFF_T + 15)
     """[CURLINFO_CONTENT_LENGTH_DOWNLOAD_T] Get content length from the Content-Length header."""
-    comptime CONTENT_LENGTH_UPLOAD_T: Self = Self.OFF_T + 16
+    comptime CONTENT_LENGTH_UPLOAD_T = Self(Self.OFF_T + 16)
     """[CURLINFO_CONTENT_LENGTH_UPLOAD_T] Get upload size."""
-    comptime START_TRANSFER_TIME: Self = Self.DOUBLE + 17
+    comptime START_TRANSFER_TIME = Self(Self.DOUBLE + 17)
     """[CURLINFO_STARTTRANSFER_TIME] Get time from start until first byte is received by libmojo_curl."""
-    comptime CONTENT_TYPE: Self = Self.STRING + 18
+    comptime CONTENT_TYPE = Self(Self.STRING + 18)
     """[CURLINFO_CONTENT_TYPE] Get content type from the Content-Type: header."""
-    comptime REDIRECT_TIME: Self = Self.DOUBLE + 19
+    comptime REDIRECT_TIME = Self(Self.DOUBLE + 19)
     """[CURLINFO_REDIRECT_TIME] Get time for all redirection steps before final transaction started."""
-    comptime REDIRECT_COUNT: Self = Self.LONG + 20
+    comptime REDIRECT_COUNT = Self(Self.LONG + 20)
     """[CURLINFO_REDIRECT_COUNT] Get total number of redirects that were followed."""
-    comptime PRIVATE: Self = Self.STRING + 21
+    comptime PRIVATE = Self(Self.STRING + 21)
     """[CURLINFO_PRIVATE] Get user's private data pointer."""
-    comptime HTTP_CONNECT_CODE: Self = Self.LONG + 22
+    comptime HTTP_CONNECT_CODE = Self(Self.LONG + 22)
     """[CURLINFO_HTTP_CONNECTCODE] Get last proxy CONNECT response code."""
-    comptime HTTP_AUTH_AVAIL: Self = Self.LONG + 23
+    comptime HTTP_AUTH_AVAIL = Self(Self.LONG + 23)
     """[CURLINFO_HTTPAUTH_AVAIL] Get available HTTP authentication methods."""
-    comptime PROXY_AUTH_AVAIL: Self = Self.LONG + 24
+    comptime PROXY_AUTH_AVAIL = Self(Self.LONG + 24)
     """[CURLINFO_PROXYAUTH_AVAIL] Get available HTTP proxy authentication methods."""
-    comptime OS_ERRNO: Self = Self.LONG + 25
+    comptime OS_ERRNO = Self(Self.LONG + 25)
     """[CURLINFO_OS_ERRNO] Get the errno from the last failure to connect."""
-    comptime NUM_CONNECTS: Self = Self.LONG + 26
+    comptime NUM_CONNECTS = Self(Self.LONG + 26)
     """[CURLINFO_NUM_CONNECTS] Get number of new successful connections used for previous transfer."""
-    comptime SSL_ENGINES: Self = Self.SLIST + 27
+    comptime SSL_ENGINES = Self(Self.SLIST + 27)
     """[CURLINFO_SSL_ENGINES] Get a list of OpenSSL crypto engines."""
-    comptime COOKIE_LIST: Self = Self.SLIST + 28
+    comptime COOKIE_LIST = Self(Self.SLIST + 28)
     """[CURLINFO_COOKIELIST] Get list of all known cookies."""
-    comptime FTP_ENTRY_PATH: Self = Self.STRING + 30
+    comptime FTP_ENTRY_PATH = Self(Self.STRING + 30)
     """[CURLINFO_FTP_ENTRY_PATH] Get the entry path after logging in to an FTP server."""
-    comptime REDIRECT_URL: Self = Self.STRING + 31
+    comptime REDIRECT_URL = Self(Self.STRING + 31)
     """[CURLINFO_REDIRECT_URL] Get URL a redirect would take you to, had you enabled redirects."""
-    comptime PRIMARY_IP: Self = Self.STRING + 32
+    comptime PRIMARY_IP = Self(Self.STRING + 32)
     """[CURLINFO_PRIMARY_IP] Get destination IP address of the last connection."""
-    comptime APP_CONNECT_TIME: Self = Self.DOUBLE + 33
+    comptime APP_CONNECT_TIME = Self(Self.DOUBLE + 33)
     """[CURLINFO_APPCONNECT_TIME] Get time from start until SSL connect/handshake completed."""
-    comptime CERTINFO: Self = Self.SLIST + 34
+    comptime CERTINFO = Self(Self.SLIST + 34)
     """[CURLINFO_CERTINFO] Get certificate chain."""
-    comptime CONDITION_UNMET: Self = Self.LONG + 35
+    comptime CONDITION_UNMET = Self(Self.LONG + 35)
     """[CURLINFO_CONDITION_UNMET] Get whether or not a time conditional was met or 304 HTTP response."""
-    comptime RTSP_SESSION_ID: Self = Self.STRING + 36
+    comptime RTSP_SESSION_ID = Self(Self.STRING + 36)
     """[CURLINFO_RTSP_SESSION_ID] Get RTSP session ID."""
-    comptime RTSP_CLIENT_CSEQ: Self = Self.LONG + 37
+    comptime RTSP_CLIENT_CSEQ = Self(Self.LONG + 37)
     """[CURLINFO_RTSP_CLIENT_CSEQ] Get the RTSP client CSeq that is expected next."""
-    comptime RTSP_SERVER_CSEQ: Self = Self.LONG + 38
+    comptime RTSP_SERVER_CSEQ = Self(Self.LONG + 38)
     """[CURLINFO_RTSP_SERVER_CSEQ] Get the RTSP server CSeq that is expected next."""
-    comptime RTSP_CSEQ_RECV: Self = Self.LONG + 39
+    comptime RTSP_CSEQ_RECV = Self(Self.LONG + 39)
     """[CURLINFO_RTSP_CSEQ_RECV] Get RTSP CSeq last received."""
-    comptime PRIMARY_PORT: Self = Self.LONG + 40
+    comptime PRIMARY_PORT = Self(Self.LONG + 40)
     """[CURLINFO_PRIMARY_PORT] Get destination port of the last connection."""
-    comptime LOCAL_IP: Self = Self.STRING + 41
+    comptime LOCAL_IP = Self(Self.STRING + 41)
     """[CURLINFO_LOCAL_IP] Get source IP address of the last connection."""
-    comptime LOCAL_PORT: Self = Self.LONG + 42
+    comptime LOCAL_PORT = Self(Self.LONG + 42)
     """[CURLINFO_LOCAL_PORT] Get source port number of the last connection."""
-    comptime ACTIVE_SOCKET: Self = Self.SOCKET + 44
+    comptime ACTIVE_SOCKET = Self(Self.SOCKET + 44)
     """[CURLINFO_ACTIVESOCKET] Get the session's active socket."""
-    comptime TLS_SSL_PTR: Self = Self.PTR + 45
+    comptime TLS_SSL_PTR = Self(Self.PTR + 45)
     """[CURLINFO_TLS_SSL_PTR] Get TLS session info that can be used for further processing."""
-    comptime HTTP_VERSION: Self = Self.LONG + 46
+    comptime HTTP_VERSION = Self(Self.LONG + 46)
     """[CURLINFO_HTTP_VERSION] Get the http version used in the connection."""
-    comptime PROXY_SSL_VERIFYRESULT: Self = Self.LONG + 47
+    comptime PROXY_SSL_VERIFYRESULT = Self(Self.LONG + 47)
     """[CURLINFO_PROXY_SSL_VERIFYRESULT] Get proxy certificate verification result."""
-    comptime SCHEME: Self = Self.STRING + 49
+    comptime SCHEME = Self(Self.STRING + 49)
     """[CURLINFO_SCHEME] Get the scheme used for the connection."""
-    comptime TOTAL_TIME_T: Self = Self.OFF_T + 50
+    comptime TOTAL_TIME_T = Self(Self.OFF_T + 50)
     """[CURLINFO_TOTAL_TIME_T] Get total time of previous transfer in microseconds."""
-    comptime NAMELOOKUP_TIME_T: Self = Self.OFF_T + 51
+    comptime NAMELOOKUP_TIME_T = Self(Self.OFF_T + 51)  
     """[CURLINFO_NAMELOOKUP_TIME_T] Get time from start until name resolving completed in microseconds."""
-    comptime CONNECT_TIME_T: Self = Self.OFF_T + 52
+    comptime CONNECT_TIME_T = Self(Self.OFF_T + 52)
     """[CURLINFO_CONNECT_TIME_T] Get time from start until connect to remote host completed in microseconds."""
-    comptime PRETRANSFER_TIME_T: Self = Self.OFF_T + 53
+    comptime PRETRANSFER_TIME_T = Self(Self.OFF_T + 53)
     """[CURLINFO_PRETRANSFER_TIME_T] Get time from start until file transfer is just about to begin in microseconds."""
-    comptime STARTTRANSFER_TIME_T: Self = Self.OFF_T + 54
+    comptime STARTTRANSFER_TIME_T = Self(Self.OFF_T + 54)
     """[CURLINFO_STARTTRANSFER_TIME_T] Get time from start until first byte is received by libcurl in microseconds."""
-    comptime REDIRECT_TIME_T: Self = Self.OFF_T + 55
+    comptime REDIRECT_TIME_T = Self(Self.OFF_T + 55)
     """[CURLINFO_REDIRECT_TIME_T] Get time for all redirection steps before final transaction started in microseconds."""
-    comptime APPCONNECT_TIME_T: Self = Self.OFF_T + 56
+    comptime APPCONNECT_TIME_T = Self(Self.OFF_T + 56)
     """[CURLINFO_APPCONNECT_TIME_T] Get time from start until SSL connect/handshake completed in microseconds."""
-    comptime RETRY_AFTER: Self = Self.OFF_T + 57
+    comptime RETRY_AFTER = Self(Self.OFF_T + 57)
     """[CURLINFO_RETRY_AFTER] Get the value from the Retry-After header."""
-    comptime EFFECTIVE_METHOD: Self = Self.STRING + 58
+    comptime EFFECTIVE_METHOD = Self(Self.STRING + 58)
     """[CURLINFO_EFFECTIVE_METHOD] Get last used HTTP method."""
-    comptime PROXY_ERROR: Self = Self.LONG + 59
+    comptime PROXY_ERROR = Self(Self.LONG + 59)
     """[CURLINFO_PROXY_ERROR] Get detailed proxy error."""
-    comptime REFERER: Self = Self.STRING + 60
+    comptime REFERER = Self(Self.STRING + 60)
     """[CURLINFO_REFERER] Get referrer header."""
-    comptime CAINFO: Self = Self.STRING + 61
+    comptime CAINFO = Self(Self.STRING + 61)
     """[CURLINFO_CAINFO] Get the default value for CURLOPT_CAINFO."""
-    comptime CAPATH: Self = Self.STRING + 62
+    comptime CAPATH = Self(Self.STRING + 62)
     """[CURLINFO_CAPATH] Get the default value for CURLOPT_CAPATH."""
-    comptime XFER_ID: Self = Self.OFF_T + 63
+    comptime XFER_ID = Self(Self.OFF_T + 63)
     """[CURLINFO_XFER_ID] Get the ID of the transfer."""
-    comptime CONN_ID: Self = Self.OFF_T + 64
+    comptime CONN_ID = Self(Self.OFF_T + 64)
     """[CURLINFO_CONN_ID] Get the ID of the last connection used by the transfer."""
-    comptime QUEUE_TIME_T: Self = Self.OFF_T + 65
+    comptime QUEUE_TIME_T = Self(Self.OFF_T + 65)
     """[CURLINFO_QUEUE_TIME_T] Get the time the transfer was held in a waiting queue before it could start in microseconds."""
-    comptime USED_PROXY: Self = Self.LONG + 66
+    comptime USED_PROXY = Self(Self.LONG + 66)
     """[CURLINFO_USED_PROXY] Get whether the proxy was used."""
-    comptime POSTTRANSFER_TIME_T: Self = Self.OFF_T + 67
+    comptime POSTTRANSFER_TIME_T = Self(Self.OFF_T + 67)
     """[CURLINFO_POSTTRANSFER_TIME_T] Get the time from start until the last byte is sent by libcurl in microseconds."""
-    comptime EARLYDATA_SENT_T: Self = Self.OFF_T + 68
+    comptime EARLYDATA_SENT_T = Self(Self.OFF_T + 68)
     """[CURLINFO_EARLYDATA_SENT_T] Get amount of TLS early data sent in number of bytes."""
-    comptime HTTPAUTH_USED: Self = Self.LONG + 69
+    comptime HTTPAUTH_USED = Self(Self.LONG + 69)
     """[CURLINFO_HTTPAUTH_USED] Get used HTTP authentication method."""
-    comptime PROXYAUTH_USED: Self = Self.LONG + 70
+    comptime PROXYAUTH_USED = Self(Self.LONG + 70)
     """[CURLINFO_PROXYAUTH_USED] Get used HTTP proxy authentication methods."""
-    comptime LASTONE: Self = 70
+    comptime LASTONE = Self(70)
     """Marker for the last valid CURLINFO option."""
-
-    @implicit
-    fn __init__(out self, value: Int):
-        self.value = value
-
-    @implicit
-    fn __init__(out self, value: Int32):
-        self.value = value
-
 
 # HTTP version options
 @fieldwise_init
-@register_passable("trivial")
-struct HTTPVersion(Copyable, Movable):
+struct HTTPVersion(Copyable, TrivialRegisterPassable):
     """CURL HTTP version options for setting HTTP versions."""
 
     var value: c_int
-    comptime NONE: Self = 0
-    comptime V1_0: Self = 1
-    comptime V1_1: Self = 2
-    comptime V2_0: Self = 3
-    comptime V2_TLS: Self = 4
-    comptime V2_PRIOR_KNOWLEDGE: Self = 5
-    comptime V3: Self = 30
-
-    @implicit
-    fn __init__(out self, value: Int):
-        self.value = value
+    comptime NONE = Self(0)
+    comptime V1_0 = Self(1)
+    comptime V1_1 = Self(2)
+    comptime V2_0 = Self(3)
+    comptime V2_TLS = Self(4)
+    comptime V2_PRIOR_KNOWLEDGE = Self(5)
+    comptime V3 = Self(30)
 
 
 # SSL version options
 @fieldwise_init
-@register_passable("trivial")
-struct SSLVersion(Copyable, Movable):
+struct SSLVersion(Copyable, TrivialRegisterPassable):
     """CURL SSL version options for setting SSL/TLS versions."""
 
     var value: c_int
@@ -641,7 +621,7 @@ struct SSLVersion(Copyable, Movable):
 
     @implicit
     fn __init__(out self, value: Int):
-        self.value = value
+        self.value = c_int(value)
 
 
 @fieldwise_init

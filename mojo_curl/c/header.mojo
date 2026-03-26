@@ -1,5 +1,5 @@
 from mojo_curl.c.types import MutExternalPointer, MutExternalOpaquePointer
-from sys.ffi import c_size_t, c_uint, c_char, c_int
+from std.ffi import c_size_t, c_uint, c_char, c_int
 
 
 struct curl_header:
@@ -29,7 +29,7 @@ struct HeaderOrigin:
 
     @implicit
     fn __init__(out self, value: Int):
-        self.value = value
+        self.value = c_uint(value)
 
 
 struct CurlHeaderResult:
@@ -56,4 +56,4 @@ struct CurlHeaderResult:
 
     @implicit
     fn __init__(out self, value: Int):
-        self.value = value
+        self.value = c_int(value)

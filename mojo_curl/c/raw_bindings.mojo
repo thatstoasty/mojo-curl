@@ -1,8 +1,8 @@
-import os
-import pathlib
-from pathlib import Path
-from sys import CompilationTarget, env_get_string, ffi
-from sys.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
+from std import os, pathlib, ffi
+from std.pathlib import Path
+from std.sys import CompilationTarget, env_get_string
+from std.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
+from std.sys import get_defined_string
 
 from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, curl_rw_callback
 from mojo_curl.c.header import curl_header
@@ -22,19 +22,18 @@ struct _curl(Movable):
     fn __init__(out self):
         """Initialize the Safe CURL binding by loading both libraries."""
         # Load curl library
-        var curl_path = String(env_get_string["LIBCURL_LIB_PATH", ""]())
+        var curl_path = String(get_defined_string["LIBCURL_LIB_PATH", ""]())
         if curl_path == "":
             curl_path = os.getenv("LIBCURL_LIB_PATH")
 
         # Load curl library
-        var wrapper_path = Path(env_get_string["LIBCURL_LIB_PATH", ""]())
+        var wrapper_path = Path(get_defined_string["LIBCURL_LIB_PATH", ""]())
         if String(wrapper_path) == "":
             wrapper_path = Path(os.getenv("LIBCURL_LIB_PATH"))
 
         try:
             if curl_path == "":
-                @parameter
-                if CompilationTarget.is_macos():
+                comptime if CompilationTarget.is_macos():
                     curl_path = String(pathlib.cwd() / ".pixi/envs/default/lib/libcurl.dylib")
                 else:
                     curl_path = String(pathlib.cwd() / ".pixi/envs/default/lib/libcurl.so")
@@ -43,8 +42,7 @@ struct _curl(Movable):
                 os.abort("libcurl library not found at: " + curl_path)
 
             if String(wrapper_path) == "":
-                @parameter
-                if CompilationTarget.is_macos():
+                comptime if CompilationTarget.is_macos():
                     wrapper_path = pathlib.cwd() / ".pixi/envs/default/lib/libcurl_wrapper.dylib"
                 else:
                     wrapper_path = pathlib.cwd() / ".pixi/envs/default/lib/libcurl_wrapper.so"
@@ -77,24 +75,57 @@ struct _curl(Movable):
         return self.curl_lib.get_function[fn () -> CURL]("curl_easy_init")()
 
     # Safe setopt functions using wrapper
-    fn curl_easy_setopt_string(
-        self, easy: CURL, option: CURLoption, parameter: ImmutUnsafePointer[c_char]
+    fn curl_easy_setopt_string[origin: ImmutOrigin, //](
+        self, easy: CURL, option: CURLoption, parameter: ImmutUnsafePointer[c_char, origin]
     ) -> CURLcode:
-        """Set a string option for a curl easy handle using safe wrapper."""
+        """Set a string option for a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `parameter` string to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            option: The option to set.
+            parameter: The string parameter to set.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(option), type_of(parameter)) -> CURLcode](
             "curl_easy_setopt_string"
         )(easy, option, parameter)
 
     fn curl_easy_setopt_long(self, easy: CURL, option: CURLoption, parameter: c_long) -> CURLcode:
-        """Set a long/integer option for a curl easy handle using safe wrapper."""
+        """Set a long/integer option for a curl easy handle using safe wrapper.
+        
+        Args:
+            easy: The curl easy handle.
+            option: The option to set.
+            parameter: The long/integer parameter to set.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(option), type_of(parameter)) -> CURLcode](
             "curl_easy_setopt_long"
         )(easy, option, parameter)
 
     fn curl_easy_setopt_pointer[
-        origin: MutOrigin
+        origin: MutOrigin, //
     ](self, easy: CURL, option: CURLoption, parameter: MutOpaquePointer[origin]) -> CURLcode:
-        """Set a pointer option for a curl easy handle using safe wrapper."""
+        """Set a pointer option for a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `parameter` pointer to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            option: The option to set.
+            parameter: The pointer parameter to set.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(option), type_of(parameter)) -> CURLcode](
             "curl_easy_setopt_pointer"
         )(easy, option, parameter)
@@ -102,7 +133,16 @@ struct _curl(Movable):
     fn curl_easy_setopt_callback(
         self, easy: CURL, option: CURLoption, parameter: curl_rw_callback
     ) -> CURLcode:
-        """Set a callback function for a curl easy handle using safe wrapper."""
+        """Set a callback function for a curl easy handle using safe wrapper.
+        
+        Args:
+            easy: The curl easy handle.
+            option: The option to set (must be a callback option).
+            parameter: The callback function to set.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(option), type_of(parameter)) -> CURLcode](
             "curl_easy_setopt_callback"
         )(easy, option, parameter)
@@ -114,7 +154,19 @@ struct _curl(Movable):
         info: CURLINFO,
         parameter: Pointer[MutExternalPointer[c_char], origin],
     ) -> CURLcode:
-        """Get string info from a curl easy handle using safe wrapper."""
+        """Get string info from a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `parameter` pointer to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            info: The info to get.
+            parameter: Pointer to store the retrieved string info.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(info), type_of(parameter)) -> CURLcode](
             "curl_easy_getinfo_string"
         )(easy, info, parameter)
@@ -122,7 +174,19 @@ struct _curl(Movable):
     fn curl_easy_getinfo_long[
         origin: MutOrigin
     ](self, easy: CURL, info: CURLINFO, parameter: Pointer[c_long, origin]) -> CURLcode:
-        """Get long info from a curl easy handle using safe wrapper."""
+        """Get long info from a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `parameter` pointer to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            info: The info to get.
+            parameter: Pointer to store the retrieved long info.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(info), type_of(parameter)) -> CURLcode](
             "curl_easy_getinfo_long"
         )(easy, info, parameter)
@@ -130,7 +194,19 @@ struct _curl(Movable):
     fn curl_easy_getinfo_float[
         origin: MutOrigin
     ](self, easy: CURL, info: CURLINFO, parameter: Pointer[Float64, origin]) -> CURLcode:
-        """Get long info from a curl easy handle using safe wrapper."""
+        """Get float info from a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `parameter` pointer to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            info: The info to get.
+            parameter: Pointer to store the retrieved float info.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(info), type_of(parameter)) -> CURLcode](
             "curl_easy_getinfo_float"
         )(easy, info, parameter)
@@ -139,7 +215,20 @@ struct _curl(Movable):
         origin: MutOrigin,
         ptr_origin: MutOrigin,
     ](self, easy: CURL, info: CURLINFO, ptr: Pointer[MutUnsafePointer[NoneType, origin], ptr_origin]) -> CURLcode:
-        """Get long info from a curl easy handle using safe wrapper."""
+        """Get long info from a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `ptr` pointer to ensure safe memory access.
+            ptr_origin: The origin of the inner pointer that `ptr` points to, to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            info: The info to get.
+            ptr: Pointer to store the retrieved pointer info.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(info), type_of(ptr)) -> CURLcode](
             "curl_easy_getinfo_ptr"
         )(easy, info, ptr)
@@ -148,28 +237,62 @@ struct _curl(Movable):
         origin: MutOrigin,
         ptr_origin: MutOrigin,
     ](self, easy: CURL, info: CURLINFO, ptr: Pointer[MutUnsafePointer[curl_slist, origin], ptr_origin]) -> CURLcode:
-        """Get long info from a curl easy handle using safe wrapper."""
+        """Get long info from a curl easy handle using safe wrapper.
+        
+        Parameters:
+            origin: The origin of the `ptr` pointer to ensure safe memory access.
+            ptr_origin: The origin of the inner pointer that `ptr` points to, to ensure safe memory access.
+        
+        Args:
+            easy: The curl easy handle.
+            info: The info to get.
+            ptr: Pointer to store the retrieved curl_slist pointer info.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.wrapper_lib.get_function[fn (type_of(easy), type_of(info), type_of(ptr)) -> CURLcode](
             "curl_easy_getinfo_curl_slist"
         )(easy, info, ptr)
 
     fn curl_easy_perform(self, easy: CURL) -> CURLcode:
-        """Perform a blocking file transfer."""
+        """Perform a blocking file transfer.
+        
+        Args:
+            easy: The curl easy handle.
+        
+        Returns:
+            CURLcode result code.
+        """
         return self.curl_lib.get_function[fn (type_of(easy)) -> CURLcode]("curl_easy_perform")(easy)
 
-    fn curl_easy_cleanup(self, easy: CURL) -> NoneType:
-        """End a libcurl easy handle."""
-        return self.curl_lib.get_function[fn (type_of(easy)) -> NoneType]("curl_easy_cleanup")(easy)
+    fn curl_easy_cleanup(self, easy: CURL):
+        """End a libcurl easy handle.
+        
+        Args:
+            easy: The curl easy handle to clean up.
+        """
+        self.curl_lib.get_function[fn (type_of(easy)) -> NoneType]("curl_easy_cleanup")(easy)
 
     fn curl_easy_strerror(self, code: CURLcode) -> ImmutExternalPointer[c_char]:
-        """Return string describing error code."""
+        """Return string describing error code.
+        
+        Args:
+            code: The CURLcode error code to get the string for.
+        
+        Returns:
+            A pointer to a string describing the error code.
+        """
         return self.curl_lib.get_function[fn (type_of(code)) -> ImmutExternalPointer[c_char]]("curl_easy_strerror")(
             code
         )
 
     # String list functions
-    fn curl_slist_append(self, list: MutExternalPointer[curl_slist], string: ImmutUnsafePointer[c_char]) -> MutExternalPointer[curl_slist]:
+    fn curl_slist_append[origin: ImmutOrigin, //](self, list: MutExternalPointer[curl_slist], string: ImmutUnsafePointer[c_char, origin]) -> MutExternalPointer[curl_slist]:
         """Append a string to a curl string list.
+
+        Parameters:
+            origin: The origin of the `string` data.
 
         Args:
             list: The existing string list (can be NULL).
@@ -190,16 +313,20 @@ struct _curl(Movable):
         """
         self.curl_lib.get_function[fn (type_of(list)) -> NoneType]("curl_slist_free_all")(list)
 
-    fn curl_easy_header(
+    fn curl_easy_header[name_origin: ImmutOrigin, out_origin: MutOrigin, //](
         self,
         easy: CURL,
-        name: ImmutUnsafePointer[c_char],
+        name: ImmutUnsafePointer[c_char, name_origin],
         index: c_size_t,
         origin: c_uint,
         request: c_int,
-        hout: MutUnsafePointer[MutExternalPointer[curl_header]],
+        hout: MutUnsafePointer[MutExternalPointer[curl_header], out_origin],
     ) -> c_int:
         """Get a specific header from a curl easy handle.
+
+        Parameters:
+            name_origin: The origin of the `name` string.
+            out_origin: The origin of the `hout` pointer.
         
         Args:
             easy: The curl easy handle.
@@ -239,13 +366,16 @@ struct _curl(Movable):
             fn (type_of(easy), type_of(origin), type_of(request), type_of(prev)) -> MutExternalPointer[curl_header]
         ]("curl_easy_nextheader")(easy, origin, request, prev)
 
-    fn curl_easy_escape(
+    fn curl_easy_escape[origin: ImmutOrigin, //](
         self,
         easy: CURL,
-        string: ImmutUnsafePointer[c_char],
+        string: ImmutUnsafePointer[c_char, origin],
         length: c_int,
     ) -> MutExternalPointer[c_char]:
         """URL-encode a string using curl easy handle.
+
+        Parameters:
+            origin: The origin of the string data.
 
         Args:
             easy: The curl easy handle.
@@ -289,15 +419,19 @@ struct _curl(Movable):
             fn (type_of(easy)) -> NoneType
         ]("curl_easy_reset")(easy)
     
-    fn curl_easy_recv(
+    fn curl_easy_recv[origin: MutOrigin, n_origin: MutOrigin, //](
         self,
         easy: CURL,
-        buffer: MutUnsafePointer[NoneType],
+        buffer: MutUnsafePointer[NoneType, origin],
         buflen: c_size_t,
-        n: MutUnsafePointer[c_size_t]
+        n: MutUnsafePointer[c_size_t, n_origin]
     ) -> CURLcode:
         """Receives data from the connected socket.
         Use after successful curl_easy_perform() with `CURLOPT_CONNECT_ONLY` option.
+
+        Parameters:
+            origin: The origin of the buffer data (e.g. which thread or component owns it) to ensure safe memory access.
+            n_origin: The origin of the `n` pointer to ensure safe memory access.
 
         Args:
             easy: The curl easy handle.
@@ -312,26 +446,30 @@ struct _curl(Movable):
             fn (type_of(easy), type_of(buffer), type_of(buflen), type_of(n)) -> CURLcode
         ]("curl_easy_recv")(easy, buffer, buflen, n)
     
-    fn curl_easy_send(
+    fn curl_easy_send[origin: ImmutOrigin, n_origin: MutOrigin, //](
         self,
         easy: CURL,
-        buffer: ImmutUnsafePointer[NoneType],
+        buffer: ImmutUnsafePointer[NoneType, origin],
         buflen: c_size_t,
-        n: MutUnsafePointer[c_size_t]
+        n: MutUnsafePointer[c_size_t, n_origin]
     ) -> CURLcode:
-         """Sends data over the connected socket.
-         Use after successful curl_easy_perform() with `CURLOPT_CONNECT_ONLY` option.
+        """Sends data over the connected socket.
+        Use after successful curl_easy_perform() with `CURLOPT_CONNECT_ONLY` option.
 
-         Args:
-             easy: The curl easy handle.
-             buffer: Pointer to the data to send.
-             buflen: The size of the data to send.
-             n: Pointer to store the number of bytes sent.
+        Parameters:
+            origin: The origin of the buffer data (e.g. which thread or component owns it).
+            n_origin: The origin of the `n` pointer.
 
-         Returns:
-             CURLcode result code.
-         """
-         return self.curl_lib.get_function[
+        Args:
+            easy: The curl easy handle.
+            buffer: Pointer to the data to send.
+            buflen: The size of the data to send.
+            n: Pointer to store the number of bytes sent.
+
+        Returns:
+            CURLcode result code.
+        """
+        return self.curl_lib.get_function[
             fn (type_of(easy), type_of(buffer), type_of(buflen), type_of(n)) -> CURLcode
         ]("curl_easy_send")(easy, buffer, buflen, n)
     
