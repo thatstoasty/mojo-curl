@@ -27,9 +27,9 @@ struct _curl(Movable):
             curl_path = os.getenv("LIBCURL_LIB_PATH")
 
         # Load curl library
-        var wrapper_path = Path(get_defined_string["LIBCURL_LIB_PATH", ""]())
+        var wrapper_path = Path(get_defined_string["CURL_WRAPPER_LIB_PATH", ""]())
         if String(wrapper_path) == "":
-            wrapper_path = Path(os.getenv("LIBCURL_LIB_PATH"))
+            wrapper_path = Path(os.getenv("CURL_WRAPPER_LIB_PATH"))
 
         try:
             if curl_path == "":
