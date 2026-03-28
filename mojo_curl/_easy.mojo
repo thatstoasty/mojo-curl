@@ -2328,8 +2328,10 @@ struct InnerEasy(Movable):
         By default no callback is set and this corresponds to the
         `CURLOPT_READFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the ReadCallbackFn
-        signature defined in the bindings.
+        Note: In Mojo, the callback function must match the ReadWriteCallbackFn
+        signature defined in the bindings, which corresponds to libcurl's
+        read callback taking a writable buffer and returning the number of
+        bytes provided.
         """
         return self.set_option(Option.READ_FUNCTION, callback)
 
