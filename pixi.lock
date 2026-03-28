@@ -23,7 +23,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.19.0-hcf29cc6_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20250104-pl5321h7949ede_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.7.4-hecca717_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.7.5-hecca717_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libffi-3.5.2-h3435931_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcc-15.2.0-he0feb66_18.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libgcc-ng-15.2.0-h69a702a_18.conda
@@ -40,7 +40,7 @@ environments:
       - conda: https://conda.modular.com/max/noarch/mblack-26.2.0-release.conda
       - conda: https://conda.modular.com/max/linux-64/mojo-0.26.2.0-release.conda
       - conda: https://conda.modular.com/max/linux-64/mojo-compiler-0.26.2.0-release.conda
-      - conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#8b1c63a455e761d74d2effa47338592ee693c704
+      - conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#e06c552d9baadabba865b85655a628634fe16a89
         build: hb0f4dca_0
       - conda: https://conda.modular.com/max/noarch/mojo-python-0.26.2.0-release.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mypy_extensions-1.1.0-pyha770c72_0.conda
@@ -82,7 +82,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libcurl-8.19.0-hc57f145_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libedit-3.1.20250104-pl5321h976ea20_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libev-4.33-h31becfc_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libexpat-2.7.4-hfae3067_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libexpat-2.7.5-hfae3067_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libffi-3.5.2-h376a255_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgcc-15.2.0-h8acb6b2_18.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libgcc-ng-15.2.0-he9431aa_18.conda
@@ -99,7 +99,7 @@ environments:
       - conda: https://conda.modular.com/max/noarch/mblack-26.2.0-release.conda
       - conda: https://conda.modular.com/max/linux-aarch64/mojo-0.26.2.0-release.conda
       - conda: https://conda.modular.com/max/linux-aarch64/mojo-compiler-0.26.2.0-release.conda
-      - conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#8b1c63a455e761d74d2effa47338592ee693c704
+      - conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#e06c552d9baadabba865b85655a628634fe16a89
         build: he8cfe8b_0
       - conda: https://conda.modular.com/max/noarch/mojo-python-0.26.2.0-release.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mypy_extensions-1.1.0-pyha770c72_0.conda
@@ -139,7 +139,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-22.1.2-h55c6f16_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20250104-pl5321hafb1f1b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libev-4.33-h93a5062_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.7.4-hf6b4638_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.7.5-hf6b4638_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.5.2-hcf2aa1b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/liblzma-5.8.2-h8088a28_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libmpdec-4.0.0-h84a0fba_1.conda
@@ -151,7 +151,7 @@ environments:
       - conda: https://conda.modular.com/max/noarch/mblack-26.2.0-release.conda
       - conda: https://conda.modular.com/max/osx-arm64/mojo-0.26.2.0-release.conda
       - conda: https://conda.modular.com/max/osx-arm64/mojo-compiler-0.26.2.0-release.conda
-      - conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#8b1c63a455e761d74d2effa47338592ee693c704
+      - conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#e06c552d9baadabba865b85655a628634fe16a89
         build: h60d57d3_0
       - conda: https://conda.modular.com/max/noarch/mojo-python-0.26.2.0-release.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mypy_extensions-1.1.0-pyha770c72_0.conda
@@ -296,7 +296,7 @@ packages:
   license: Python-2.0
   size: 50078
   timestamp: 1770674447292
-- conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#8b1c63a455e761d74d2effa47338592ee693c704
+- conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#e06c552d9baadabba865b85655a628634fe16a89
   name: curl_wrapper
   version: 0.1.0
   build: h60d57d3_0
@@ -305,7 +305,7 @@ packages:
   - libcxx >=22
   - libcurl >=8.19.0,<9.0a0
   channel: null
-- conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#8b1c63a455e761d74d2effa47338592ee693c704
+- conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#e06c552d9baadabba865b85655a628634fe16a89
   name: curl_wrapper
   version: 0.1.0
   build: hb0f4dca_0
@@ -315,7 +315,7 @@ packages:
   - libgcc >=15
   - libcurl >=8.19.0,<9.0a0
   channel: null
-- conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#8b1c63a455e761d74d2effa47338592ee693c704
+- conda: git+https://github.com/thatstoasty/mojo-curl?subdirectory=shim&branch=main#e06c552d9baadabba865b85655a628634fe16a89
   name: curl_wrapper
   version: 0.1.0
   build: he8cfe8b_0
@@ -593,40 +593,40 @@ packages:
   license_family: BSD
   size: 107458
   timestamp: 1702146414478
-- conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.7.4-hecca717_0.conda
-  sha256: d78f1d3bea8c031d2f032b760f36676d87929b18146351c4464c66b0869df3f5
-  md5: e7f7ce06ec24cfcfb9e36d28cf82ba57
+- conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.7.5-hecca717_0.conda
+  sha256: e8c2b57f6aacabdf2f1b0924bd4831ce5071ba080baa4a9e8c0d720588b6794c
+  md5: 49f570f3bc4c874a06ea69b7225753af
   depends:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=14
   constrains:
-  - expat 2.7.4.*
+  - expat 2.7.5.*
   license: MIT
   license_family: MIT
-  size: 76798
-  timestamp: 1771259418166
-- conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libexpat-2.7.4-hfae3067_0.conda
-  sha256: 995ce3ad96d0f4b5ed6296b051a0d7b6377718f325bc0e792fbb96b0e369dad7
-  md5: 57f3b3da02a50a1be2a6fe847515417d
+  size: 76624
+  timestamp: 1774719175983
+- conda: https://conda.anaconda.org/conda-forge/linux-aarch64/libexpat-2.7.5-hfae3067_0.conda
+  sha256: 6d438fc0bfdb263c24654fe49c09b31f06ec78eb709eb386392d2499af105f85
+  md5: 05d1e0b30acd816a192c03dc6e164f4d
   depends:
   - libgcc >=14
   constrains:
-  - expat 2.7.4.*
+  - expat 2.7.5.*
   license: MIT
   license_family: MIT
-  size: 76564
-  timestamp: 1771259530958
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.7.4-hf6b4638_0.conda
-  sha256: 03887d8080d6a8fe02d75b80929271b39697ecca7628f0657d7afaea87761edf
-  md5: a92e310ae8dfc206ff449f362fc4217f
+  size: 76523
+  timestamp: 1774719129371
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.7.5-hf6b4638_0.conda
+  sha256: 06780dec91dd25770c8cf01e158e1062fbf7c576b1406427475ce69a8af75b7e
+  md5: a32123f93e168eaa4080d87b0fb5da8a
   depends:
   - __osx >=11.0
   constrains:
-  - expat 2.7.4.*
+  - expat 2.7.5.*
   license: MIT
   license_family: MIT
-  size: 68199
-  timestamp: 1771260020767
+  size: 68192
+  timestamp: 1774719211725
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libffi-3.5.2-h3435931_0.conda
   sha256: 31f19b6a88ce40ebc0d5a992c131f57d919f73c0b92cd1617a5bec83f6e961e6
   md5: a360c33a5abe61c07959e449fa1453eb

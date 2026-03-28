@@ -8,26 +8,34 @@ comptime MutExternalOpaquePointer = MutExternalPointer[NoneType]
 
 # Type aliases for curl
 comptime CURL = MutExternalOpaquePointer
-
+"""Opaque pointer type for CURL easy handles."""
 
 struct curl_slist(TrivialRegisterPassable):
     """Singly linked list structure for curl string lists."""
 
     var data: MutExternalPointer[c_char]
+    """Pointer to the data string for this node."""
     var next: MutExternalPointer[curl_slist]
+    """Pointer to the next node in the list."""
 
 
 comptime curl_socket_t = c_int
+"""Type alias for curl socket type. Note that on some platforms this may be defined as an unsigned type, but we use c_int for simplicity and compatibility."""
 comptime CURL_SOCKET_BAD = -1
-
+"""Constant representing an invalid socket in curl."""
 comptime curl_off_t = c_long
+"""Type alias for curl offset type, used for file sizes and offsets."""
 
 # Callback function types
-comptime curl_rw_callback = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
-comptime curl_read_callback = fn(ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
-comptime curl_progress_callback = fn(ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
-comptime curl_debug_callback = fn(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
-comptime curl_xferinfo_callback = fn(
+comptime ReadWriteCallbackFn = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+"""This is the prototype for the read and write callback functions used by curl. The same prototype is used for both `CURLOPT_READFUNCTION` and `CURLOPT_WRITEFUNCTION`."""
+comptime ReadCallbackFn = fn(ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+"""This is the prototype for the read callback function used by curl. It is used for `CURLOPT_READFUNCTION`."""
+comptime ProgressCallbackFn = fn(ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
+"""This is the prototype for the progress callback function used by curl. It was deprecated in favor of `TransferInfoCallbackFn` but is still supported for backward compatibility."""
+comptime DebugCallbackFn = fn(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
+"""This is the prototype for the debug callback function used by curl. It is used for `CURLOPT_DEBUGFUNCTION`."""
+comptime TransferInfoCallbackFn = fn(
     ImmutExternalOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t
 ) -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
@@ -35,7 +43,7 @@ in 7.32.0, avoids the use of floating point numbers and provides more
 detailed information."""
 
 
-struct curl_blob[origin: MutOrigin](Movable):
+struct curl_blob[origin: MutOrigin, //](Movable):
     """CURL blob struct for binary data transfer.
 
     This struct represents binary data that can be passed to curl,
@@ -43,8 +51,11 @@ struct curl_blob[origin: MutOrigin](Movable):
     """
 
     var data: MutOpaquePointer[Self.origin]
+    """Pointer to the binary data."""
     var len: c_size_t
+    """Length of the binary data."""
     var flags: c_uint
+    """Control flags for the blob."""
 
     fn __init__(out self, data: MutOpaquePointer[Self.origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
         """Initialize a curl_blob struct.
@@ -61,12 +72,16 @@ struct curl_blob[origin: MutOrigin](Movable):
 
 # Flag bits for curl_blob struct
 comptime CURL_BLOB_COPY = 1
+"""Flag indicating that curl should copy the data from the blob. This is the default behavior if no flags are set."""
 comptime CURL_BLOB_NOCOPY = 0
+"""Flag indicating that curl should use the data from the blob directly without copying. The caller must ensure that the data remains valid for the duration of the curl operation."""
 
 
 # Common CURLcode values
 struct Result(Copyable, Equatable, TrivialRegisterPassable, Writable):
+    """CURLcode result codes."""
     var value: c_int
+    """Internal enum value."""
     comptime OK: Self = 0
     comptime UNSUPPORTED_PROTOCOL: Self = 1
     comptime FAILED_INIT: Self = 2
@@ -177,7 +192,9 @@ struct Result(Copyable, Equatable, TrivialRegisterPassable, Writable):
 
 # CURLOPT options (commonly used ones)
 struct Option(Copyable, TrivialRegisterPassable):
+    """CURLoption values for setting options on CURL easy handles."""
     var value: c_int
+    """Internal enum value."""
 
     comptime LONG = 0
     comptime OBJECT_POINT = 10_000
@@ -440,6 +457,7 @@ struct Info(Copyable, TrivialRegisterPassable):
     """CURLINFO options for retrieving information from a CURL handle."""
 
     var value: c_int
+    """Internal enum value."""
 
     comptime STRING = 0x100000
     comptime LONG = 0x200000
@@ -646,6 +664,7 @@ struct curl_ssl_backend:
     """
 
     var value: Int
+    """Internal enum value representing the SSL backend."""
 
     comptime NONE: Self = 0
     comptime OPEN_SSL: Self = 1
@@ -683,6 +702,7 @@ comptime CURLFOLLOW_FIRSTONLY: c_long = 3
 
 
 struct curl_httppost:
+    """Struct used in curl_formadd to build up a linked list of HTTP POST data."""
     var next: MutExternalPointer[curl_httppost]
     """Next entry in the list."""
     var name: MutExternalPointer[c_char]

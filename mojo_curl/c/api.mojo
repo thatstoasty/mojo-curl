@@ -1,9 +1,7 @@
 from std.ffi import _get_global, _Global
 
 from mojo_curl.c.bindings import curl
-from mojo_curl.c.types import CURL_GLOBAL_DEFAULT
-
-comptime MutExternalOpaquePointer = UnsafePointer[NoneType, MutExternalOrigin]
+from mojo_curl.c.types import CURL_GLOBAL_DEFAULT, MutExternalOpaquePointer
 
 
 fn _init_global() -> MutExternalOpaquePointer:

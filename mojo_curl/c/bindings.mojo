@@ -8,7 +8,7 @@ from mojo_curl.c.types import (
     Info,
     Option,
     Result,
-    curl_rw_callback,
+    ReadWriteCallbackFn,
     curl_slist,
 )
 from mojo_curl.c.header import curl_header
@@ -16,7 +16,9 @@ from mojo_curl.c.header import curl_header
 
 @fieldwise_init
 struct curl:
+    """Struct representing the libcurl library and its functions."""
     var lib: _curl
+    """The raw libcurl bindings. DO NOT USE THIS DIRECTLY. Use the safe wrapper functions instead."""
 
     fn __init__(out self):
         self.lib = _curl()
@@ -102,8 +104,8 @@ struct curl:
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
     fn easy_setopt[
-        origin: MutOrigin, //
-    ](self, easy: CURL, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
+        origin: ImmutOrigin, //
+    ](self, easy: CURL, option: Option, parameter: ImmutOpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -119,7 +121,7 @@ struct curl:
         """
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 
-    fn easy_setopt(self, easy: CURL, option: Option, parameter: curl_rw_callback) -> Result:
+    fn easy_setopt(self, easy: CURL, option: Option, parameter: ReadWriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -187,7 +189,7 @@ struct curl:
 
     fn easy_getinfo[
         origin: MutOrigin, //
-    ](self, easy: CURL, info: Info, mut ptr: MutOpaquePointer[origin],) -> Result:
+    ](self, easy: CURL, info: Info, mut ptr: MutOpaquePointer[origin]) -> Result:
         """Get long info from a curl easy handle using safe wrapper.
 
         Parameters:
@@ -305,7 +307,7 @@ struct curl:
             CURLHcode result code.
         """
         return self.lib.curl_easy_header(
-            easy, name.as_c_string_slice().unsafe_ptr(), index, origin, request, UnsafePointer(to=hout)
+            easy, name.as_c_string_slice().unsafe_ptr(), index, origin, request, Pointer(to=hout)
         )
 
     fn easy_nextheader(
@@ -363,11 +365,15 @@ struct curl:
         return self.lib.curl_easy_duphandle(easy)
 
     fn easy_reset(self, easy: CURL):
-        """Reset a curl easy handle to its default state."""
+        """Reset a curl easy handle to its default state.
+        
+        Args:
+            easy: The curl easy handle to reset.
+        """
         self.lib.curl_easy_reset(easy)
 
     fn easy_recv[
-        origin: MutOrigin
+        origin: MutOrigin, //
     ](self, easy: CURL, buffer: Span[c_uchar, origin], capacity: c_size_t) -> Tuple[Result, c_size_t]:
         """Receive data from the connected peer.
 
@@ -381,11 +387,11 @@ struct curl:
         """
         var bytes_received: c_size_t = 0
         var result = self.lib.curl_easy_recv(
-            easy, buffer.unsafe_ptr().bitcast[NoneType](), capacity, UnsafePointer(to=bytes_received)
+            easy, buffer.unsafe_ptr().bitcast[NoneType](), capacity, Pointer(to=bytes_received)
         )
         return result, bytes_received
 
-    fn easy_send[origin: ImmutOrigin](self, easy: CURL, buffer: Span[c_uchar, origin]) -> Tuple[Result, c_size_t]:
+    fn easy_send[origin: ImmutOrigin, //](self, easy: CURL, buffer: Span[c_uchar, origin]) -> Tuple[Result, c_size_t]:
         """Send data to the connected peer.
 
         Args:
@@ -397,7 +403,7 @@ struct curl:
         """
         var bytes_sent: c_size_t = 0
         var result = self.lib.curl_easy_send(
-            easy, buffer.unsafe_ptr().bitcast[NoneType](), UInt(len(buffer)), UnsafePointer(to=bytes_sent)
+            easy, buffer.unsafe_ptr().bitcast[NoneType](), UInt(len(buffer)), Pointer(to=bytes_sent)
         )
         return result, bytes_sent
 

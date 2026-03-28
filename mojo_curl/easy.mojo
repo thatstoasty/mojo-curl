@@ -3,7 +3,7 @@ from std.pathlib import Path
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
-from mojo_curl.c import HeaderOrigin, Info, Option, Result, curl_rw_callback
+from mojo_curl.c import HeaderOrigin, Info, Option, Result, ReadWriteCallbackFn
 
 
 struct Easy(Movable):
@@ -44,7 +44,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option[origin: MutOrigin, //](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
+    fn set_option[origin: ImmutOrigin, //](self, option: Option, parameter: ImmutOpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -59,7 +59,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
+    fn set_option(self, option: Option, parameter: ReadWriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -819,7 +819,7 @@ struct Easy(Movable):
     # =========================================================================
     # Names and passwords
 
-    fn username(self, mut user: String) -> Result:
+    fn username(self, var user: String) -> Result:
         """Configures the username to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_USERNAME`.
@@ -2976,7 +2976,7 @@ struct Easy(Movable):
     # =========================================================================
     # Callback options
 
-    fn write_function(self, callback: curl_rw_callback) -> Result:
+    fn write_function(self, callback: ReadWriteCallbackFn) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -3001,7 +3001,7 @@ struct Easy(Movable):
         By default data is sent into the void, and this corresponds to the
         `CURLOPT_WRITEFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the curl_rw_callback
+        Note: In Mojo, the callback function must match the ReadWriteCallbackFn
         signature defined in the bindings.
 
         Args:
@@ -3029,7 +3029,7 @@ struct Easy(Movable):
         """
         return self.inner.write_data(data)
 
-    fn read_function(self, callback: curl_rw_callback) -> Result:
+    fn read_function(self, callback: ReadWriteCallbackFn) -> Result:
         """Set callback for reading data to upload.
 
         This callback function gets called by libcurl when it needs to read
@@ -3044,7 +3044,7 @@ struct Easy(Movable):
         By default data is read from /dev/null, and this corresponds to the
         `CURLOPT_READFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the curl_rw_callback
+        Note: In Mojo, the callback function must match the ReadWriteCallbackFn
         signature defined in the bindings.
 
         Args:
@@ -3055,7 +3055,7 @@ struct Easy(Movable):
         """
         return self.inner.read_function(callback)
 
-    fn read_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+    fn read_data[origin: ImmutOrigin, //](self, data: ImmutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to read callback.
 
         By default this option is not set and corresponds to

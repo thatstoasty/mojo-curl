@@ -3,8 +3,9 @@ from std.pathlib import Path
 from std.sys import CompilationTarget
 from std.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 from std.sys import get_defined_string
+from std.memory import MutPointer, ImmutPointer
 
-from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, curl_rw_callback
+from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, ReadWriteCallbackFn
 from mojo_curl.c.header import curl_header
 
 comptime CURLcode = c_int
@@ -111,8 +112,8 @@ struct _curl(Movable):
         )(easy, option, parameter)
 
     fn curl_easy_setopt_pointer[
-        origin: MutOrigin, //
-    ](self, easy: CURL, option: CURLoption, parameter: MutOpaquePointer[origin]) -> CURLcode:
+        origin: ImmutOrigin, //
+    ](self, easy: CURL, option: CURLoption, parameter: ImmutOpaquePointer[origin]) -> CURLcode:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -130,7 +131,7 @@ struct _curl(Movable):
             "curl_easy_setopt_pointer"
         )(easy, option, parameter)
 
-    fn curl_easy_setopt_callback(self, easy: CURL, option: CURLoption, parameter: curl_rw_callback) -> CURLcode:
+    fn curl_easy_setopt_callback(self, easy: CURL, option: CURLoption, parameter: ReadWriteCallbackFn) -> CURLcode:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -148,7 +149,7 @@ struct _curl(Movable):
     # Safe getinfo functions using wrapper
     fn curl_easy_getinfo_string[
         origin: MutOrigin
-    ](self, easy: CURL, info: CURLINFO, parameter: Pointer[MutExternalPointer[c_char], origin],) -> CURLcode:
+    ](self, easy: CURL, info: CURLINFO, parameter: Pointer[MutExternalPointer[c_char], origin]) -> CURLcode:
         """Get string info from a curl easy handle using safe wrapper.
 
         Parameters:
@@ -319,7 +320,7 @@ struct _curl(Movable):
         index: c_size_t,
         origin: c_uint,
         request: c_int,
-        hout: MutUnsafePointer[MutExternalPointer[curl_header], out_origin],
+        hout: MutPointer[MutExternalPointer[curl_header], out_origin],
     ) -> c_int:
         """Get a specific header from a curl easy handle.
 
@@ -419,7 +420,7 @@ struct _curl(Movable):
         easy: CURL,
         buffer: MutUnsafePointer[NoneType, origin],
         buflen: c_size_t,
-        n: MutUnsafePointer[c_size_t, n_origin],
+        n: MutPointer[c_size_t, n_origin],
     ) -> CURLcode:
         """Receives data from the connected socket.
         Use after successful curl_easy_perform() with `CURLOPT_CONNECT_ONLY` option.
@@ -448,7 +449,7 @@ struct _curl(Movable):
         easy: CURL,
         buffer: ImmutUnsafePointer[NoneType, origin],
         buflen: c_size_t,
-        n: MutUnsafePointer[c_size_t, n_origin],
+        n: MutPointer[c_size_t, n_origin],
     ) -> CURLcode:
         """Sends data over the connected socket.
         Use after successful curl_easy_perform() with `CURLOPT_CONNECT_ONLY` option.
