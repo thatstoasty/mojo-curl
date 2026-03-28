@@ -44,7 +44,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option[origin: ImmutOrigin, //](self, option: Option, parameter: ImmutOpaquePointer[origin]) -> Result:
+    fn set_option[origin: Origin, //](self, option: Option, parameter: OpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:

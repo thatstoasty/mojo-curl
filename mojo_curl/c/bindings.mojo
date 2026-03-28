@@ -104,8 +104,8 @@ struct curl:
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
     fn easy_setopt[
-        origin: ImmutOrigin, //
-    ](self, easy: CURL, option: Option, parameter: ImmutOpaquePointer[origin]) -> Result:
+        origin: Origin, //
+    ](self, easy: CURL, option: Option, parameter: OpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:

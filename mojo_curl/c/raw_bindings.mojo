@@ -111,9 +111,7 @@ struct _curl(Movable):
             "curl_easy_setopt_long"
         )(easy, option, parameter)
 
-    fn curl_easy_setopt_pointer[
-        origin: ImmutOrigin, //
-    ](self, easy: CURL, option: CURLoption, parameter: ImmutOpaquePointer[origin]) -> CURLcode:
+    fn curl_easy_setopt_pointer[origin: Origin, //](self, easy: CURL, option: CURLoption, parameter: OpaquePointer[origin]) -> CURLcode:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -130,7 +128,7 @@ struct _curl(Movable):
         return self.wrapper_lib.get_function[fn(type_of(easy), type_of(option), type_of(parameter)) -> CURLcode](
             "curl_easy_setopt_pointer"
         )(easy, option, parameter)
-
+    
     fn curl_easy_setopt_callback(self, easy: CURL, option: CURLoption, parameter: ReadWriteCallbackFn) -> CURLcode:
         """Set a callback function for a curl easy handle using safe wrapper.
 

@@ -21,7 +21,7 @@ struct InnerEasy(Movable):
         """Set a string option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option[origin: ImmutOrigin, //](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
+    fn set_option[origin: Origin, //](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
@@ -29,7 +29,7 @@ struct InnerEasy(Movable):
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option[origin: ImmutOrigin, //](self, option: Option, parameter: ImmutOpaquePointer[origin]) -> Result:
+    fn set_option[origin: Origin, //](self, option: Option, parameter: OpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
