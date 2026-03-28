@@ -11,42 +11,11 @@ fn write_callback(ptr: MutExternalPointer[c_char], size: c_size_t, nmemb: c_size
     return size * nmemb
 
 
-# fn post_request():
-#     var easy = Easy()
-
-#     # Set the url
-#     var url: String = "http://jsonplaceholder.typicode.com/todos"
-#     var result = easy.url(url)
-#     print("URL set Result:", result)
-
-#     # Set the callback function to handle received data
-#     result = easy.write_function(write_callback)
-#     print("Write callback set result:", result)
-
-#     # Set the POST data
-#     var post_data: String = "field1=value1&field2=value2"
-#     result = easy.post_fields(post_data)
-#     print("POST fields set result:", result)
-
-#     # Perform the transfer. The response will be sent to standard output by default.
-#     result = easy.perform()
-#     print("curl_easy_perform() result:", result)
-
-#     # Check for errors
-#     if result != Result.OK:
-#         print("curl_easy_perform() failed with error code:", result)
-#         print("Error message:", easy.describe_error(result))
-#     else:
-#         print("Request completed successfully!")
-
-#     easy.cleanup()
-
 fn main() raises:
     var easy = Easy()
 
     # Set the url
-    var url: String = "https://google.com"
-    result = easy.url(url)
+    result = easy.url("https://google.com")
     print("URL set Result:", result)
 
     # Set the callback function to handle received data

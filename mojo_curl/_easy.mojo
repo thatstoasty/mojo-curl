@@ -1,7 +1,7 @@
 from std.pathlib import Path
 from std.ffi import c_long, c_char
 
-from mojo_curl.c import curl_ffi, curl, CURL, Info, Option, Result, curl_rw_callback, HeaderOrigin, curl_header
+from mojo_curl.c import curl_ffi, curl, CURL, Info, Option, Result, ReadWriteCallbackFn, HeaderOrigin, curl_header
 from mojo_curl.c.types import MutExternalPointer, curl_slist
 
 
@@ -21,7 +21,7 @@ struct InnerEasy(Movable):
         """Set a string option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option[origin: ImmutOrigin](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
+    fn set_option[origin: ImmutOrigin, //](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
@@ -29,11 +29,11 @@ struct InnerEasy(Movable):
         """Set a long/integer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option[origin: MutOrigin](self, option: Option, parameter: MutOpaquePointer[origin]) -> Result:
+    fn set_option[origin: ImmutOrigin, //](self, option: Option, parameter: ImmutOpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: curl_rw_callback) -> Result:
+    fn set_option(self, option: Option, parameter: ReadWriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper."""
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
@@ -75,8 +75,8 @@ struct InnerEasy(Movable):
         return response
 
     fn get_info_ptr[
-        origin: MutOrigin
-    ](self, info: Info, mut ptr: MutOpaquePointer[origin],) raises:
+        origin: MutOrigin, //
+    ](self, info: Info, mut ptr: MutOpaquePointer[origin]) raises:
         """Get info which gets loaded into an opaque pointer."""
         var result = curl_ffi()[].easy_getinfo(self.easy, info, ptr)
         if result.value != 0:
@@ -2274,7 +2274,7 @@ struct InnerEasy(Movable):
     # =========================================================================
     # Callback options
 
-    fn write_function(self, callback: curl_rw_callback) -> Result:
+    fn write_function(self, callback: ReadWriteCallbackFn) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -2299,12 +2299,12 @@ struct InnerEasy(Movable):
         By default data is sent into the void, and this corresponds to the
         `CURLOPT_WRITEFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the curl_rw_callback
+        Note: In Mojo, the callback function must match the ReadWriteCallbackFn
         signature defined in the bindings.
         """
         return self.set_option(Option.WRITE_FUNCTION, callback)
 
-    fn write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+    fn write_data[origin: MutOrigin, //](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
         By default this option is not set and corresponds to
@@ -2312,7 +2312,7 @@ struct InnerEasy(Movable):
         """
         return self.set_option(Option.WRITE_DATA, data)
 
-    fn read_function(self, callback: curl_rw_callback) -> Result:
+    fn read_function(self, callback: ReadWriteCallbackFn) -> Result:
         """Set callback for reading data to upload.
 
         This callback function gets called by libcurl when it needs to read
@@ -2328,12 +2328,12 @@ struct InnerEasy(Movable):
         By default no callback is set and this corresponds to the
         `CURLOPT_READFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the curl_read_callback
+        Note: In Mojo, the callback function must match the ReadCallbackFn
         signature defined in the bindings.
         """
         return self.set_option(Option.READ_FUNCTION, callback)
 
-    fn read_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+    fn read_data[origin: ImmutOrigin, //](self, data: ImmutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to read callback.
         By default this option is not set and corresponds to
         `CURLOPT_READDATA`.
