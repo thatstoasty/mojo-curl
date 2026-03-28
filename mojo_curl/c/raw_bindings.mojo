@@ -3,7 +3,7 @@ from std.pathlib import Path
 from std.sys import CompilationTarget
 from std.ffi import OwnedDLHandle, c_char, c_int, c_long, c_uint, c_size_t
 from std.sys import get_defined_string
-from std.memory import MutPointer, ImmutPointer
+from std.memory import MutPointer
 
 from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, ReadWriteCallbackFn
 from mojo_curl.c.header import curl_header
