@@ -28,9 +28,9 @@ comptime curl_off_t = c_long
 
 # Callback function types
 comptime ReadWriteCallbackFn = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
-"""This is the prototype for the read and write callback functions used by curl. The same prototype is used for both `CURLOPT_READFUNCTION` and `CURLOPT_WRITEFUNCTION`."""
-comptime ReadCallbackFn = fn(ImmutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
-"""This is the prototype for the read callback function used by curl. It is used for `CURLOPT_READFUNCTION`."""
+"""This is the prototype for the write callback function used by curl. It matches the `CURLOPT_WRITEFUNCTION` prototype and can also be used where a generic read/write signature is needed."""
+comptime ReadCallbackFn = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+"""This is the prototype for the read callback function used by curl. It matches the `CURLOPT_READFUNCTION` prototype, where the first argument is a writable buffer that the callback must fill."""
 comptime ProgressCallbackFn = fn(ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
 """This is the prototype for the progress callback function used by curl. It was deprecated in favor of `TransferInfoCallbackFn` but is still supported for backward compatibility."""
 comptime DebugCallbackFn = fn(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
