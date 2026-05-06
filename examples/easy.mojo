@@ -5,13 +5,13 @@ from mojo_curl.easy import Easy
 from mojo_curl.list import CurlList
 
 
-fn write_callback(ptr: MutExternalPointer[c_char], size: c_size_t, nmemb: c_size_t, userdata: MutExternalOpaquePointer) -> c_size_t:
+def write_callback(ptr: MutExternalPointer[c_char], size: c_size_t, nmemb: c_size_t, userdata: MutExternalOpaquePointer) -> c_size_t:
     print("write callback called with size:", size * nmemb)
     print(StringSlice(unsafe_from_utf8_ptr=ptr))
     return size * nmemb
 
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     # Set the url

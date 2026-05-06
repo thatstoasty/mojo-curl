@@ -1,7 +1,7 @@
 from mojo_curl import Easy
 from mojo_curl.c.types import Result
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://httpbin.org/post")

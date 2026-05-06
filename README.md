@@ -102,7 +102,7 @@ Compile-time defines take priority over environment variables. If neither is set
 from mojo_curl import Easy
 from mojo_curl.c.types import Result
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     # Set the URL to request
@@ -125,7 +125,7 @@ from std.ffi import c_char, c_size_t
 from mojo_curl import Easy
 from mojo_curl.c.types import MutExternalOpaquePointer, MutExternalPointer, Result
 
-fn write_callback(
+def write_callback(
     ptr: MutExternalPointer[c_char],
     size: c_size_t,
     nmemb: c_size_t,
@@ -134,7 +134,7 @@ fn write_callback(
     print(StringSlice(unsafe_from_utf8_ptr=ptr))
     return size * nmemb
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
     _ = easy.url("https://httpbin.org/get")
     _ = easy.write_function(write_callback)
@@ -151,7 +151,7 @@ Use `CurlList` to attach headers to your request:
 from mojo_curl import Easy, CurlList
 from mojo_curl.c.types import Result
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://httpbin.org/get")
@@ -179,7 +179,7 @@ After performing a request, you can read the response headers:
 from mojo_curl import Easy
 from mojo_curl.c.types import Result
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://httpbin.org/get")
@@ -198,7 +198,7 @@ fn main() raises:
 from mojo_curl import Easy
 from mojo_curl.c.types import Result
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://httpbin.org/post")
@@ -217,7 +217,7 @@ Useful for debugging requests and seeing the full protocol exchange:
 from mojo_curl import Easy
 from mojo_curl.c.types import Result
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://httpbin.org/get")

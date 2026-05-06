@@ -9,18 +9,18 @@ from mojo_curl.c import HeaderOrigin, Info, Option, Result, ReadWriteCallbackFn
 struct Easy(Movable):
     var inner: InnerEasy
 
-    fn __init__(out self):
+    def __init__(out self):
         self.inner = InnerEasy()
 
-    fn __del__(deinit self):
+    def __del__(deinit self):
         """Destructor to ensure resources are cleaned up."""
         self^.close()
 
-    fn close(deinit self):
+    def close(deinit self):
         """Explicitly clean up the easy handle."""
         self.inner^.close()
 
-    fn set_option(self, option: Option, var parameter: String) -> Result:
+    def set_option(self, option: Option, var parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -32,7 +32,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: c_long) -> Result:
+    def set_option(self, option: Option, parameter: c_long) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper.
 
         Args:
@@ -44,7 +44,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option[origin: Origin, //](self, option: Option, parameter: OpaquePointer[origin]) -> Result:
+    def set_option[origin: Origin, //](self, option: Option, parameter: OpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -59,7 +59,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    fn set_option(self, option: Option, parameter: ReadWriteCallbackFn) -> Result:
+    def set_option(self, option: Option, parameter: ReadWriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -71,7 +71,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option, parameter)
 
-    fn perform(self) -> Result:
+    def perform(self) -> Result:
         """Perform a blocking file transfer.
 
         Returns:
@@ -79,15 +79,15 @@ struct Easy(Movable):
         """
         return self.inner.perform()
 
-    fn cleanup(self) -> NoneType:
+    def cleanup(self) -> NoneType:
         """End a libcurl easy handle."""
         return self.inner.cleanup()
 
-    fn reset(self):
+    def reset(self):
         """Reset all options of this handle to their default value."""
         return self.inner.reset()
 
-    fn describe_error(self, code: Result) -> String:
+    def describe_error(self, code: Result) -> String:
         """Return string describing error code.
 
         Args:
@@ -99,7 +99,7 @@ struct Easy(Movable):
         return self.inner.describe_error(code)
 
     # Behavior options
-    fn verbose(self, verbose: Bool) -> Result:
+    def verbose(self, verbose: Bool) -> Result:
         """Configures this handle to have verbose output to help debug protocol
         information.
 
@@ -117,7 +117,7 @@ struct Easy(Movable):
         """
         return self.inner.verbose(verbose)
 
-    fn show_header(self, show: Bool) -> Result:
+    def show_header(self, show: Bool) -> Result:
         """Indicates whether header information is streamed to the output body of
         this request.
 
@@ -139,7 +139,7 @@ struct Easy(Movable):
         """
         return self.inner.show_header(show)
 
-    fn progress(self, progress: Bool) -> Result:
+    def progress(self, progress: Bool) -> Result:
         """Indicates whether a progress meter will be shown for requests done with
         this handle.
 
@@ -156,7 +156,7 @@ struct Easy(Movable):
         """
         return self.inner.progress(progress)
 
-    fn signal(self, signal: Bool) -> Result:
+    def signal(self, signal: Bool) -> Result:
         """Inform libcurl whether or not it should install signal handlers or
         attempt to use signals to perform library functions.
 
@@ -179,7 +179,7 @@ struct Easy(Movable):
         """
         return self.inner.signal(signal)
 
-    fn wildcard_match(self, m: Bool) -> Result:
+    def wildcard_match(self, m: Bool) -> Result:
         """Indicates whether multiple files will be transferred based on the file
         name pattern.
 
@@ -201,7 +201,7 @@ struct Easy(Movable):
 
     # TODO: error buffer and stderr
 
-    fn fail_on_error(self, fail: Bool) -> Result:
+    def fail_on_error(self, fail: Bool) -> Result:
         """Indicates whether this library will fail on HTTP response codes >= 400.
 
         This method is not fail-safe especially when authentication is involved.
@@ -220,7 +220,7 @@ struct Easy(Movable):
     # =========================================================================
     # Network options
 
-    fn url(self, var url: String) -> Result:
+    def url(self, var url: String) -> Result:
         """Provides the URL which this handle will work with.
 
         The string provided must be URL-encoded with the format:
@@ -243,7 +243,7 @@ struct Easy(Movable):
         """
         return self.inner.url(url)
 
-    fn port(self, port: Int) -> Result:
+    def port(self, port: Int) -> Result:
         """Configures the port number to connect to, instead of the one specified
         in the URL or the default of the protocol.
 
@@ -258,7 +258,7 @@ struct Easy(Movable):
     # =========================================================================
     # Connection options
 
-    # fn connect_to(self, list: List) -> Result:
+    # def connect_to(self, list: List) -> Result:
     #     """Connect to a specific host and port.
 
     #     Each single string should be written using the format
@@ -276,7 +276,7 @@ struct Easy(Movable):
     #     # This requires curl_slist support which needs to be added
     #     return Result(0)
 
-    fn path_as_is(self, as_is: Bool) -> Result:
+    def path_as_is(self, as_is: Bool) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
 
         By default this option is `false` and corresponds to
@@ -290,7 +290,7 @@ struct Easy(Movable):
         """
         return self.inner.path_as_is(as_is)
 
-    fn proxy(self, var url: String) -> Result:
+    def proxy(self, var url: String) -> Result:
         """Provide the URL of a proxy to use.
 
         By default this option is not set and corresponds to `CURLOPT_PROXY`.
@@ -303,7 +303,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy(url)
 
-    fn proxy_port(self, port: Int) -> Result:
+    def proxy_port(self, port: Int) -> Result:
         """Provide port number the proxy is listening on.
 
         By default this option is not set (the default port for the proxy
@@ -317,7 +317,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_port(port)
 
-    fn no_proxy(self, var skip: String) -> Result:
+    def no_proxy(self, var skip: String) -> Result:
         """Provide a list of hosts that should not be proxied to.
 
         This string is a comma-separated list of hosts which should not use the
@@ -335,7 +335,7 @@ struct Easy(Movable):
         """
         return self.inner.no_proxy(skip)
 
-    fn http_proxy_tunnel(self, tunnel: Bool) -> Result:
+    def http_proxy_tunnel(self, tunnel: Bool) -> Result:
         """Inform curl whether it should tunnel all operations through the proxy.
 
         This essentially means that a `CONNECT` is sent to the proxy for all
@@ -352,7 +352,7 @@ struct Easy(Movable):
         """
         return self.inner.http_proxy_tunnel(tunnel)
 
-    fn interface(self, var interface: String) -> Result:
+    def interface(self, var interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
 
         The interface name, IP address, or host name can be specified here.
@@ -368,7 +368,7 @@ struct Easy(Movable):
         """
         return self.inner.interface(interface)
 
-    fn set_local_port(self, port: Int) -> Result:
+    def set_local_port(self, port: Int) -> Result:
         """Indicate which port should be bound to locally for this connection.
 
         By default this option is 0 (any port) and corresponds to
@@ -382,7 +382,7 @@ struct Easy(Movable):
         """
         return self.inner.set_local_port(port)
 
-    fn local_port_range(self, range: Int) -> Result:
+    def local_port_range(self, range: Int) -> Result:
         """Indicates the number of attempts libcurl will perform to find a working
         port number.
 
@@ -397,7 +397,7 @@ struct Easy(Movable):
         """
         return self.inner.local_port_range(range)
 
-    fn dns_servers(self, var servers: String) -> Result:
+    def dns_servers(self, var servers: String) -> Result:
         """Sets the DNS servers that will be used.
 
         Provide a comma separated list, for example: `8.8.8.8,8.8.4.4`.
@@ -414,7 +414,7 @@ struct Easy(Movable):
         """
         return self.inner.dns_servers(servers)
 
-    fn dns_cache_timeout(self, seconds: Int) -> Result:
+    def dns_cache_timeout(self, seconds: Int) -> Result:
         """Sets the timeout of how long name resolves will be kept in memory.
 
         This is distinct from DNS TTL options and is entirely speculative.
@@ -430,7 +430,7 @@ struct Easy(Movable):
         """
         return self.inner.dns_cache_timeout(seconds)
 
-    fn doh_url(self, var url: String) -> Result:
+    def doh_url(self, var url: String) -> Result:
         """Provide the DNS-over-HTTPS URL.
 
         The parameter must be URL-encoded in the following format:
@@ -459,7 +459,7 @@ struct Easy(Movable):
         """
         return self.inner.doh_url(url)
 
-    fn doh_ssl_verify_peer(self, verify: Bool) -> Result:
+    def doh_ssl_verify_peer(self, verify: Bool) -> Result:
         """This option tells curl to verify the authenticity of the DoH
         (DNS-over-HTTPS) server's certificate. A value of `true` means curl
         verifies; `false` means it does not.
@@ -504,7 +504,7 @@ struct Easy(Movable):
         """
         return self.inner.doh_ssl_verify_peer(verify)
 
-    fn doh_ssl_verify_host(self, verify: Bool) -> Result:
+    def doh_ssl_verify_host(self, verify: Bool) -> Result:
         """Tells curl to verify the DoH (DNS-over-HTTPS) server's certificate name
         fields against the host name.
 
@@ -539,7 +539,7 @@ struct Easy(Movable):
         """
         return self.inner.doh_ssl_verify_host(verify)
 
-    fn proxy_cainfo(self, var cainfo: String) -> Result:
+    def proxy_cainfo(self, var cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
 
         By default this value is not set and corresponds to
@@ -553,7 +553,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_cainfo(cainfo)
 
-    fn proxy_capath(self, var path: String) -> Result:
+    def proxy_capath(self, var path: String) -> Result:
         """Specify a directory holding CA certificates for proxy.
 
         The specified directory should hold multiple CA certificates to verify
@@ -572,7 +572,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_capath(path)
 
-    fn proxy_sslcert(self, var sslcert: String) -> Result:
+    def proxy_sslcert(self, var sslcert: String) -> Result:
         """Set client certificate for proxy.
 
         By default this value is not set and corresponds to
@@ -586,7 +586,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslcert(sslcert)
 
-    fn proxy_sslcert_type(self, var kind: String) -> Result:
+    def proxy_sslcert_type(self, var kind: String) -> Result:
         """Set the type of client certificate for proxy.
 
         By default this value is not set and corresponds to
@@ -600,7 +600,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslcert_type(kind)
 
-    fn proxy_sslkey(self, var sslkey: String) -> Result:
+    def proxy_sslkey(self, var sslkey: String) -> Result:
         """Set private key for HTTPS proxy.
 
         By default this value is not set and corresponds to
@@ -614,7 +614,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslkey(sslkey)
 
-    fn proxy_sslkey_type(self, var kind: String) -> Result:
+    def proxy_sslkey_type(self, var kind: String) -> Result:
         """Set type of the private key file for HTTPS proxy.
 
         The string should be the format of your private key. Supported formats
@@ -637,7 +637,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_sslkey_type(kind)
 
-    fn proxy_key_password(self, var password: String) -> Result:
+    def proxy_key_password(self, var password: String) -> Result:
         """Set passphrase to private key for HTTPS proxy.
 
         This will be used as the password required to use the `ssl_key`.
@@ -655,7 +655,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_key_password(password)
 
-    fn proxy_type(self, kind: Int) -> Result:
+    def proxy_type(self, kind: Int) -> Result:
         """Indicates the type of proxy being used.
 
         By default this option is `ProxyType::Http` and corresponds to
@@ -669,7 +669,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_type(kind)
 
-    fn doh_ssl_verify_status(self, verify: Bool) -> Result:
+    def doh_ssl_verify_status(self, verify: Bool) -> Result:
         """Pass a long as parameter set to 1 to enable or 0 to disable.
 
         This option determines whether libcurl verifies the status of the DoH
@@ -693,7 +693,7 @@ struct Easy(Movable):
         """
         return self.inner.doh_ssl_verify_status(verify)
 
-    fn buffer_size(self, size: Int) -> Result:
+    def buffer_size(self, size: Int) -> Result:
         """Specify the preferred receive buffer size, in bytes.
 
         This is treated as a request, not an order, and the main point of this
@@ -711,7 +711,7 @@ struct Easy(Movable):
         """
         return self.inner.buffer_size(size)
 
-    fn upload_buffer_size(self, size: Int) -> Result:
+    def upload_buffer_size(self, size: Int) -> Result:
         """Specify the preferred send buffer size, in bytes.
 
         This is treated as a request, not an order, and the main point of this
@@ -732,10 +732,10 @@ struct Easy(Movable):
     # #
     # # By default this options defaults to `false` and corresponds to
     # # `CURLOPT_TCP_FASTOPEN`
-    # fn fast_open(self, enable: Bool) -> Result:
+    # def fast_open(self, enable: Bool) -> Result:
     #
 
-    fn tcp_nodelay(self, enable: Bool) -> Result:
+    def tcp_nodelay(self, enable: Bool) -> Result:
         """Configures whether the TCP_NODELAY option is set, or Nagle's algorithm
         is disabled.
 
@@ -754,7 +754,7 @@ struct Easy(Movable):
         """
         return self.inner.tcp_nodelay(enable)
 
-    fn tcp_keepalive(self, enable: Bool) -> Result:
+    def tcp_keepalive(self, enable: Bool) -> Result:
         """Configures whether TCP keepalive probes will be sent.
 
         The delay and frequency of these probes is controlled by `tcp_keepidle`
@@ -771,7 +771,7 @@ struct Easy(Movable):
         """
         return self.inner.tcp_keepalive(enable)
 
-    fn tcp_keepidle(self, seconds: Int) -> Result:
+    def tcp_keepidle(self, seconds: Int) -> Result:
         """Configures the TCP keepalive idle time wait.
 
         This is the delay, after which the connection is idle, keepalive probes
@@ -787,7 +787,7 @@ struct Easy(Movable):
         """
         return self.inner.tcp_keepidle(seconds)
 
-    fn tcp_keepintvl(self, seconds: Int) -> Result:
+    def tcp_keepintvl(self, seconds: Int) -> Result:
         """Configures the delay between keepalive probes.
 
         By default this corresponds to `CURLOPT_TCP_KEEPINTVL`.
@@ -800,7 +800,7 @@ struct Easy(Movable):
         """
         return self.inner.tcp_keepintvl(seconds)
 
-    fn address_scope(self, scope: Int) -> Result:
+    def address_scope(self, scope: Int) -> Result:
         """Configures the scope for local IPv6 addresses.
 
         Sets the scope_id value to use when connecting to IPv6 or link-local
@@ -819,7 +819,7 @@ struct Easy(Movable):
     # =========================================================================
     # Names and passwords
 
-    fn username(self, var user: String) -> Result:
+    def username(self, var user: String) -> Result:
         """Configures the username to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_USERNAME`.
@@ -832,7 +832,7 @@ struct Easy(Movable):
         """
         return self.inner.username(user)
 
-    fn password(self, var password: String) -> Result:
+    def password(self, var password: String) -> Result:
         """Configures the password to pass as authentication for this connection.
 
         By default this value is not set and corresponds to `CURLOPT_PASSWORD`.
@@ -845,7 +845,7 @@ struct Easy(Movable):
         """
         return self.inner.password(password)
 
-    fn http_auth(self, auth: Int) -> Result:
+    def http_auth(self, auth: Int) -> Result:
         """Set HTTP server authentication methods to try.
 
         If more than one method is set, libcurl will first query the site to see
@@ -866,7 +866,7 @@ struct Easy(Movable):
         """
         return self.inner.http_auth(auth)
 
-    fn aws_sigv4(self, var param: String) -> Result:
+    def aws_sigv4(self, var param: String) -> Result:
         """Provides AWS V4 signature authentication on HTTP(S) header.
 
         `param` is used to create outgoing authentication headers.
@@ -898,7 +898,7 @@ struct Easy(Movable):
         """
         return self.inner.aws_sigv4(param)
 
-    fn proxy_username(self, var user: String) -> Result:
+    def proxy_username(self, var user: String) -> Result:
         """Configures the proxy username to pass as authentication for this
         connection.
 
@@ -913,7 +913,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_username(user)
 
-    fn proxy_password(self, var password: String) -> Result:
+    def proxy_password(self, var password: String) -> Result:
         """Configures the proxy password to pass as authentication for this
         connection.
 
@@ -928,7 +928,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_password(password)
 
-    fn proxy_auth(self, auth: Int) -> Result:
+    def proxy_auth(self, auth: Int) -> Result:
         """Set HTTP proxy authentication methods to try.
 
         If more than one method is set, libcurl will first query the site to see
@@ -947,7 +947,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_auth(auth)
 
-    fn netrc(self, netrc: Int) -> Result:
+    def netrc(self, netrc: Int) -> Result:
         """Enable .netrc parsing.
 
         By default the .netrc file is ignored and corresponds to `CURL_NETRC_IGNORED`.
@@ -963,7 +963,7 @@ struct Easy(Movable):
     # =========================================================================
     # HTTP Options
 
-    fn autoreferer(self, enable: Bool) -> Result:
+    def autoreferer(self, enable: Bool) -> Result:
         """Indicates whether the referer header is automatically updated.
 
         By default this option is `false` and corresponds to
@@ -977,7 +977,7 @@ struct Easy(Movable):
         """
         return self.inner.autoreferer(enable)
 
-    fn accept_encoding(self, var encoding: String) -> Result:
+    def accept_encoding(self, var encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
 
         Sets the contents of the Accept-Encoding header sent in an HTTP request.
@@ -997,7 +997,7 @@ struct Easy(Movable):
         """
         return self.inner.accept_encoding(encoding)
 
-    fn transfer_encoding(self, enable: Bool) -> Result:
+    def transfer_encoding(self, enable: Bool) -> Result:
         """Request the HTTP Transfer Encoding.
 
         By default this option is `false` and corresponds to
@@ -1011,7 +1011,7 @@ struct Easy(Movable):
         """
         return self.inner.transfer_encoding(enable)
 
-    fn follow_location(self, enable: Bool) -> Result:
+    def follow_location(self, enable: Bool) -> Result:
         """Follow HTTP 3xx redirects.
 
         Indicates whether any `Location` headers in the response should get
@@ -1028,7 +1028,7 @@ struct Easy(Movable):
         """
         return self.inner.follow_location(enable)
 
-    fn unrestricted_auth(self, enable: Bool) -> Result:
+    def unrestricted_auth(self, enable: Bool) -> Result:
         """Send credentials to hosts other than the first as well.
 
         Sends username/password credentials even when the host changes as part
@@ -1045,7 +1045,7 @@ struct Easy(Movable):
         """
         return self.inner.unrestricted_auth(enable)
 
-    fn max_redirections(self, max: Int) -> Result:
+    def max_redirections(self, max: Int) -> Result:
         """Set the maximum number of redirects allowed.
 
         A value of 0 will refuse any redirect.
@@ -1061,7 +1061,7 @@ struct Easy(Movable):
         """
         return self.inner.max_redirections(max)
 
-    fn post_redirections(self, redirects: Int) -> Result:
+    def post_redirections(self, redirects: Int) -> Result:
         """Set the policy for handling redirects to POST requests.
 
         By default a POST is changed to a GET when following a redirect. Setting any
@@ -1076,14 +1076,14 @@ struct Easy(Movable):
         """
         return self.inner.post_redirections(redirects)
 
-    # fn put(self, enable: Bool) -> Result:
+    # def put(self, enable: Bool) -> Result:
     #     """Make an HTTP PUT request.
 
     #     By default this option is `false` and corresponds to `CURLOPT_PUT`.
     #     """
     #     return self.inner.set_option(Option.PUT, Int(enable))
 
-    fn post(self, enable: Bool) -> Result:
+    def post(self, enable: Bool) -> Result:
         """Make an HTTP POST request.
 
         This will also make the library use the
@@ -1102,7 +1102,7 @@ struct Easy(Movable):
         """
         return self.inner.post(enable)
 
-    fn post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
+    def post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         Pass a char pointer as parameter, pointing to the data buffer to use in an HTTP POST
@@ -1128,7 +1128,7 @@ struct Easy(Movable):
         """
         return self.inner.post_fields(data)
 
-    fn post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
+    def post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         Note that the data is copied into this handle and if that's not desired
@@ -1148,7 +1148,7 @@ struct Easy(Movable):
         """
         return self.inner.post_fields_copy(data)
 
-    fn post_field_size(self, size: Int) -> Result:
+    def post_field_size(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
         POST operation.
 
@@ -1167,7 +1167,7 @@ struct Easy(Movable):
         """
         return self.inner.post_field_size(size)
 
-    fn post_field_size_large(self, size: Int) -> Result:
+    def post_field_size_large(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
         POST operation.
 
@@ -1187,7 +1187,7 @@ struct Easy(Movable):
         return self.inner.post_field_size_large(size)
 
     # TODO: httppost - needs Form type implementation
-    # fn httppost(self, form: Form) -> Result:
+    # def httppost(self, form: Form) -> Result:
     #     """Tells libcurl you want a multipart/formdata HTTP POST to be made and you
     #     instruct what data to pass on to the server in the `form` argument.
     #
@@ -1197,7 +1197,7 @@ struct Easy(Movable):
     #     # TODO: Implement this when Form type is available
     #     pass
 
-    fn referer(self, var referer: String) -> Result:
+    def referer(self, var referer: String) -> Result:
         """Sets the HTTP referer header.
 
         By default this option is not set and corresponds to `CURLOPT_REFERER`.
@@ -1210,7 +1210,7 @@ struct Easy(Movable):
         """
         return self.inner.referer(referer)
 
-    fn useragent(self, var useragent: String) -> Result:
+    def useragent(self, var useragent: String) -> Result:
         """Sets the HTTP user-agent header.
 
         By default this option is not set and corresponds to
@@ -1224,7 +1224,7 @@ struct Easy(Movable):
         """
         return self.inner.useragent(useragent)
 
-    fn http_headers(self, mut headers: CurlList) -> Result:
+    def http_headers(self, mut headers: CurlList) -> Result:
         """Add some headers to this HTTP request.
 
         If you add a header that is otherwise used internally, the value here
@@ -1252,10 +1252,10 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_PROXYHEADER`
-    # fn proxy_headers(self, list: List) -> Result:
+    # def proxy_headers(self, list: List) -> Result:
     #     pass
 
-    fn cookie(self, var cookie: String) -> Result:
+    def cookie(self, var cookie: String) -> Result:
         """Set the contents of the HTTP Cookie header.
 
         Pass a string of the form `name=contents` for one cookie value or
@@ -1275,7 +1275,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie(cookie)
 
-    fn cookie_file(self, path: Optional[Path] = None) -> Result:
+    def cookie_file(self, path: Optional[Path] = None) -> Result:
         """Set the file name to read cookies from.
 
         The cookie data can be in either the old Netscape / Mozilla cookie data
@@ -1302,7 +1302,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie_file(path)
 
-    fn cookie_jar(self, path: Optional[Path] = None) -> Result:
+    def cookie_jar(self, path: Optional[Path] = None) -> Result:
         """Set the file name to store cookies to.
 
         This will make libcurl write all internally known cookies to the file
@@ -1326,7 +1326,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie_jar(path)
 
-    fn cookie_session(self, session: Bool) -> Result:
+    def cookie_session(self, session: Bool) -> Result:
         """Start a new cookie session.
 
         Marks this as a new cookie "session". It will force libcurl to ignore
@@ -1347,7 +1347,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie_session(session)
 
-    fn cookie_list(self, var cookie: String) -> Result:
+    def cookie_list(self, var cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
 
         Such a cookie can be either a single line in Netscape / Mozilla format
@@ -1382,7 +1382,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie_list(cookie)
 
-    fn cookies(self) raises -> CurlList:
+    def cookies(self) raises -> CurlList:
         """Get all known cookies.
 
         Returns a linked-list of all cookies cURL knows (expired ones, too).
@@ -1394,7 +1394,7 @@ struct Easy(Movable):
         """
         return self.inner.cookies()
 
-    fn get(self, enable: Bool) -> Result:
+    def get(self, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
 
         By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
@@ -1410,10 +1410,10 @@ struct Easy(Movable):
     # # Ask for a HTTP GET request.
     # #
     # # By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
-    # fn http_version(self, vers: String) -> Result:
+    # def http_version(self, vers: String) -> Result:
     #     pass
 
-    fn ignore_content_length(self, ignore: Bool) -> Result:
+    def ignore_content_length(self, ignore: Bool) -> Result:
         """Ignore the content-length header.
 
         By default this option is `false` and corresponds to
@@ -1427,7 +1427,7 @@ struct Easy(Movable):
         """
         return self.inner.ignore_content_length(ignore)
 
-    fn http_content_decoding(self, enable: Bool) -> Result:
+    def http_content_decoding(self, enable: Bool) -> Result:
         """Enable or disable HTTP content decoding.
 
         By default this option is `true` and corresponds to
@@ -1441,7 +1441,7 @@ struct Easy(Movable):
         """
         return self.inner.http_content_decoding(enable)
 
-    fn http_transfer_decoding(self, enable: Bool) -> Result:
+    def http_transfer_decoding(self, enable: Bool) -> Result:
         """Enable or disable HTTP transfer decoding.
 
         By default this option is `true` and corresponds to
@@ -1459,7 +1459,7 @@ struct Easy(Movable):
     # #
     # # By default this option is 1s and corresponds to
     # # `CURLOPT_EXPECT_100_TIMEOUT_MS`.
-    # fn expect_100_timeout(self, enable: Bool) -> Result:
+    # def expect_100_timeout(self, enable: Bool) -> Result:
     #     pass
 
     # # Wait for pipelining/multiplexing.
@@ -1486,13 +1486,13 @@ struct Easy(Movable):
     # # The waiting time is as long as it takes for the connection to get up and
     # # for libcurl to get the necessary response back that informs it about its
     # # protocol and support level.
-    # fn http_pipewait(self, enable: Bool) -> Result:
+    # def http_pipewait(self, enable: Bool) -> Result:
     #     pass
 
     # =========================================================================
     # Protocol Options
 
-    fn range(self, var range: String) -> Result:
+    def range(self, var range: String) -> Result:
         """Indicates the range that this request should retrieve.
 
         The string provided should be of the form `N-M` where either `N` or `M`
@@ -1509,7 +1509,7 @@ struct Easy(Movable):
         """
         return self.inner.range(range)
 
-    fn resume_from(self, from_byte: Int) -> Result:
+    def resume_from(self, from_byte: Int) -> Result:
         """Set a point to resume transfer from.
 
         Specify the offset in bytes you want the transfer to start from.
@@ -1525,7 +1525,7 @@ struct Easy(Movable):
         """
         return self.inner.resume_from(from_byte)
 
-    fn custom_request(self, var request: String) -> Result:
+    def custom_request(self, var request: String) -> Result:
         """Set a custom request string.
 
         Specifies that a custom request will be made (e.g. a custom HTTP
@@ -1543,7 +1543,7 @@ struct Easy(Movable):
         """
         return self.inner.custom_request(request)
 
-    fn fetch_filetime(self, fetch: Bool) -> Result:
+    def fetch_filetime(self, fetch: Bool) -> Result:
         """Get the modification time of the remote resource.
 
         If true, libcurl will attempt to get the modification time of the
@@ -1562,7 +1562,7 @@ struct Easy(Movable):
         """
         return self.inner.fetch_filetime(fetch)
 
-    fn nobody(self, enable: Bool) -> Result:
+    def nobody(self, enable: Bool) -> Result:
         """Indicate whether to download the request without getting the body.
 
         This is useful, for example, for doing a HEAD request.
@@ -1577,7 +1577,7 @@ struct Easy(Movable):
         """
         return self.inner.nobody(enable)
 
-    fn read_file_size(self, size: Int) -> Result:
+    def read_file_size(self, size: Int) -> Result:
         """Set the size of the input file to send off.
 
         By default this option is not set and corresponds to
@@ -1591,7 +1591,7 @@ struct Easy(Movable):
         """
         return self.inner.read_file_size(size)
 
-    fn upload(self, enable: Bool) -> Result:
+    def upload(self, enable: Bool) -> Result:
         """Enable or disable data upload.
 
         This means that a PUT request will be made for HTTP and probably wants
@@ -1608,7 +1608,7 @@ struct Easy(Movable):
         """
         return self.inner.upload(enable)
 
-    fn max_filesize(self, size: Int) -> Result:
+    def max_filesize(self, size: Int) -> Result:
         """Configure the maximum file size to download.
 
         By default this option is not set and corresponds to
@@ -1622,7 +1622,7 @@ struct Easy(Movable):
         """
         return self.inner.max_filesize(size)
 
-    fn time_condition(self, cond: Int) -> Result:
+    def time_condition(self, cond: Int) -> Result:
         """Selects a condition for a time request.
 
         This value indicates how the `time_value` option is interpreted.
@@ -1638,7 +1638,7 @@ struct Easy(Movable):
         """
         return self.inner.time_condition(cond)
 
-    fn time_value(self, val: Int) -> Result:
+    def time_value(self, val: Int) -> Result:
         """Sets the time value for a conditional request.
 
         The value here should be the number of seconds elapsed since January 1,
@@ -1658,7 +1658,7 @@ struct Easy(Movable):
     # =========================================================================
     # Connection Options
 
-    fn timeout(self, timeout_ms: Int) -> Result:
+    def timeout(self, timeout_ms: Int) -> Result:
         """Set maximum time the request is allowed to take.
 
         Normally, name lookups can take a considerable time and limiting
@@ -1689,7 +1689,7 @@ struct Easy(Movable):
         """
         return self.inner.timeout(timeout_ms)
 
-    fn low_speed_limit(self, limit: Int) -> Result:
+    def low_speed_limit(self, limit: Int) -> Result:
         """Set the low speed limit in bytes per second.
 
         This specifies the average transfer speed in bytes per second that the
@@ -1707,7 +1707,7 @@ struct Easy(Movable):
         """
         return self.inner.low_speed_limit(limit)
 
-    fn low_speed_time(self, seconds: Int) -> Result:
+    def low_speed_time(self, seconds: Int) -> Result:
         """Set the low speed time period.
 
         Specifies the window of time for which if the transfer rate is below
@@ -1724,7 +1724,7 @@ struct Easy(Movable):
         """
         return self.inner.low_speed_time(seconds)
 
-    fn max_send_speed(self, speed: Int) -> Result:
+    def max_send_speed(self, speed: Int) -> Result:
         """Rate limit data upload speed.
 
         If an upload exceeds this speed (counted in bytes per second) on
@@ -1742,7 +1742,7 @@ struct Easy(Movable):
         """
         return self.inner.max_send_speed(speed)
 
-    fn max_recv_speed(self, speed: Int) -> Result:
+    def max_recv_speed(self, speed: Int) -> Result:
         """Rate limit data download speed.
 
         If a download exceeds this speed (counted in bytes per second) on
@@ -1760,7 +1760,7 @@ struct Easy(Movable):
         """
         return self.inner.max_recv_speed(speed)
 
-    fn max_connects(self, max: Int) -> Result:
+    def max_connects(self, max: Int) -> Result:
         """Set the maximum connection cache size.
 
         The set amount will be the maximum number of simultaneously open
@@ -1784,7 +1784,7 @@ struct Easy(Movable):
         """
         return self.inner.max_connects(max)
 
-    fn maxage_conn(self, max_age_seconds: Int) -> Result:
+    def maxage_conn(self, max_age_seconds: Int) -> Result:
         """Set the maximum idle time allowed for a connection.
 
         This configuration sets the maximum time that a connection inside of the connection cache
@@ -1801,7 +1801,7 @@ struct Easy(Movable):
         """
         return self.inner.maxage_conn(max_age_seconds)
 
-    fn fresh_connect(self, enable: Bool) -> Result:
+    def fresh_connect(self, enable: Bool) -> Result:
         """Force a new connection to be used.
 
         Makes the next transfer use a new (fresh) connection by force instead of
@@ -1820,7 +1820,7 @@ struct Easy(Movable):
         """
         return self.inner.fresh_connect(enable)
 
-    fn forbid_reuse(self, enable: Bool) -> Result:
+    def forbid_reuse(self, enable: Bool) -> Result:
         """Make connection get closed at once after use.
 
         Makes libcurl explicitly close the connection when done with the
@@ -1840,7 +1840,7 @@ struct Easy(Movable):
         """
         return self.inner.forbid_reuse(enable)
 
-    fn connect_timeout(self, timeout_ms: Int) -> Result:
+    def connect_timeout(self, timeout_ms: Int) -> Result:
         """Timeout for the connect phase.
 
         This is the maximum time that you allow the connection phase to the
@@ -1858,7 +1858,7 @@ struct Easy(Movable):
         """
         return self.inner.connect_timeout(timeout_ms)
 
-    fn ip_resolve(self, resolve: Int) -> Result:
+    def ip_resolve(self, resolve: Int) -> Result:
         """Specify which IP protocol version to use.
 
         Allows an application to select what kind of IP addresses to use when
@@ -1876,7 +1876,7 @@ struct Easy(Movable):
         return self.inner.ip_resolve(resolve)
 
     # TODO: resolve - needs List type implementation
-    # fn resolve(self, list: List) -> Result:
+    # def resolve(self, list: List) -> Result:
     #     """Specify custom host name to IP address resolves.
     #
     #     Allows specifying hostname to IP mappings to use before trying the
@@ -1885,7 +1885,7 @@ struct Easy(Movable):
     #     # TODO: Implement this when List type is available
     #     pass
 
-    fn connect_only(self, enable: Bool) -> Result:
+    def connect_only(self, enable: Bool) -> Result:
         """Configure whether to stop when connected to target server.
 
         When enabled it tells the library to perform all the required proxy
@@ -1912,7 +1912,7 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_INTERFACE`.
-    # fn dns_interface(self, mut interface: String) -> Result:
+    # def dns_interface(self, mut interface: String) -> Result:
     #     pass
     #
     # # IPv4 address to bind DNS resolves to
@@ -1923,7 +1923,7 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_LOCAL_IP4`.
-    # fn dns_local_ip4(self, mut ip: String) -> Result:
+    # def dns_local_ip4(self, mut ip: String) -> Result:
     #     pass
     #
     # # IPv6 address to bind DNS resolves to
@@ -1934,7 +1934,7 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_LOCAL_IP6`.
-    # fn dns_local_ip6(self, mut ip: String) -> Result:
+    # def dns_local_ip6(self, mut ip: String) -> Result:
     #     pass
     #
     # # Set preferred DNS servers.
@@ -1946,14 +1946,14 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_DNS_SERVERS`.
-    # fn dns_servers(self, mut servers: String) -> Result:
+    # def dns_servers(self, mut servers: String) -> Result:
     #     pass
 
     # =========================================================================
     # SSL/Security Options
 
     # TODO: ssl_cert - needs path handling
-    # fn ssl_cert(self, cert: String) -> Result:
+    # def ssl_cert(self, cert: String) -> Result:
     #     """Sets the SSL client certificate.
     #
     #     The string should be the file name of your client certificate. The
@@ -1975,7 +1975,7 @@ struct Easy(Movable):
     #     pass
 
     # TODO: ssl_cert_blob - needs byte array handling
-    # fn ssl_cert_blob(self, blob: List[UInt8]) -> Result:
+    # def ssl_cert_blob(self, blob: List[UInt8]) -> Result:
     #     """Set the SSL client certificate using an in-memory blob.
     #
     #     The specified byte buffer should contain the binary content of your
@@ -1988,7 +1988,7 @@ struct Easy(Movable):
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_cert_type(self, var kind: String) -> Result:
+    def ssl_cert_type(self, var kind: String) -> Result:
         """Specify type of the client SSL certificate.
 
         The string should be the format of your certificate. Supported formats
@@ -2008,7 +2008,7 @@ struct Easy(Movable):
         return self.inner.ssl_cert_type(kind)
 
     # TODO: ssl_key - needs path handling
-    # fn ssl_key(self, key: String) -> Result:
+    # def ssl_key(self, key: String) -> Result:
     #     """Specify private keyfile for TLS and SSL client cert.
     #
     #     The string should be the file name of your private key. The default
@@ -2024,7 +2024,7 @@ struct Easy(Movable):
     #     pass
 
     # TODO: ssl_key_blob - needs byte array handling
-    # fn ssl_key_blob(self, blob: List[UInt8]) -> Result:
+    # def ssl_key_blob(self, blob: List[UInt8]) -> Result:
     #     """Specify an SSL private key using an in-memory blob.
     #
     #     The specified byte buffer should contain the binary content of your
@@ -2037,7 +2037,7 @@ struct Easy(Movable):
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_key_type(self, var kind: String) -> Result:
+    def ssl_key_type(self, var kind: String) -> Result:
         """Set type of the private key file.
 
         The string should be the format of your private key. Supported formats
@@ -2060,7 +2060,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_key_type(kind)
 
-    fn key_password(self, var password: String) -> Result:
+    def key_password(self, var password: String) -> Result:
         """Set passphrase to private key.
 
         This will be used as the password required to use the `ssl_key`.
@@ -2079,7 +2079,7 @@ struct Easy(Movable):
         return self.inner.key_password(password)
 
     # TODO: ssl_cainfo_blob - needs byte array handling
-    # fn ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
+    # def ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
     #     """Set the SSL Certificate Authorities using an in-memory blob.
     #
     #     The specified byte buffer should contain the binary content of one
@@ -2093,7 +2093,7 @@ struct Easy(Movable):
     #     pass
 
     # TODO: proxy_ssl_cainfo_blob - needs byte array handling
-    # fn proxy_ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
+    # def proxy_ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
     #     """Set the SSL Certificate Authorities for HTTPS proxies using an in-memory
     #     blob.
     #
@@ -2107,7 +2107,7 @@ struct Easy(Movable):
     #     # TODO: Implement blob handling
     #     pass
 
-    fn ssl_engine(self, var engine: String) -> Result:
+    def ssl_engine(self, var engine: String) -> Result:
         """Set the SSL engine identifier.
 
         This will be used as the identifier for the crypto engine you want to
@@ -2124,7 +2124,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_engine(engine)
 
-    fn ssl_engine_default(self, enable: Bool) -> Result:
+    def ssl_engine_default(self, enable: Bool) -> Result:
         """Make this handle's SSL engine the default.
 
         By default this option is not set and corresponds to
@@ -2147,10 +2147,10 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_SSL_FALSESTARTE`.
-    # fn ssl_false_start(self, enable: Bool) -> Result:
+    # def ssl_false_start(self, enable: Bool) -> Result:
     #     pass
 
-    fn http_version(self, version: Int) -> Result:
+    def http_version(self, version: Int) -> Result:
         """Set preferred HTTP version.
 
         By default this option is not set and corresponds to
@@ -2164,7 +2164,7 @@ struct Easy(Movable):
         """
         return self.inner.http_version(version)
 
-    fn ssl_version(self, version: Int) -> Result:
+    def ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version.
 
         By default this option is not set and corresponds to
@@ -2178,7 +2178,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_version(version)
 
-    fn proxy_ssl_version(self, version: Int) -> Result:
+    def proxy_ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version when connecting to an HTTPS proxy.
 
         By default this option is not set and corresponds to
@@ -2192,7 +2192,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_ssl_version(version)
 
-    fn ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
+    def ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version.
 
         By default this option is not set and corresponds to
@@ -2208,7 +2208,7 @@ struct Easy(Movable):
         var version = min_version | (max_version << 16)
         return self.inner.ssl_version(version)
 
-    fn proxy_ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
+    def proxy_ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version
         when connecting to an HTTPS proxy.
 
@@ -2225,7 +2225,7 @@ struct Easy(Movable):
         var version = min_version | (max_version << 16)
         return self.inner.proxy_ssl_version(version)
 
-    fn ssl_verify_host(self, verify: Bool) -> Result:
+    def ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host.
 
         This should be disabled with great caution! It basically disables the
@@ -2242,7 +2242,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_verify_host(verify)
 
-    fn proxy_ssl_verify_host(self, verify: Bool) -> Result:
+    def proxy_ssl_verify_host(self, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
 
         This should be disabled with great caution! It basically disables the
@@ -2259,7 +2259,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_ssl_verify_host(verify)
 
-    fn ssl_verify_peer(self, verify: Bool) -> Result:
+    def ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.
 
         This should be disabled with great caution! It basically disables the
@@ -2276,7 +2276,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_verify_peer(verify)
 
-    fn proxy_ssl_verify_peer(self, verify: Bool) -> Result:
+    def proxy_ssl_verify_peer(self, verify: Bool) -> Result:
         """Verify the peer's SSL certificate for HTTPS proxy.
 
         This should be disabled with great caution! It basically disables the
@@ -2301,12 +2301,12 @@ struct Easy(Movable):
     # #
     # # By default this option is set to `false` and corresponds to
     # # `CURLOPT_SSL_VERIFYSTATUS`.
-    # fn ssl_verify_status(self, verify: Bool) -> Result:
+    # def ssl_verify_status(self, verify: Bool) -> Result:
     #     pass
 
     # TODO: Specify the path to Certificate Authority (CA) bundle
     # Requires Path type support
-    # fn cainfo(self, path: Path) -> Result:
+    # def cainfo(self, path: Path) -> Result:
     #     """The file referenced should hold one or more certificates to verify the
     #     peer with.
     #
@@ -2323,7 +2323,7 @@ struct Easy(Movable):
 
     # TODO: Set the issuer SSL certificate filename
     # Requires Path type support
-    # fn issuer_cert(self, path: Path) -> Result:
+    # def issuer_cert(self, path: Path) -> Result:
     #     """Specifies a file holding a CA certificate in PEM format. If the option
     #     is set, an additional check against the peer certificate is performed to
     #     verify the issuer is indeed the one associated with the certificate
@@ -2342,7 +2342,7 @@ struct Easy(Movable):
 
     # TODO: Set the issuer SSL certificate filename for HTTPS proxies
     # Requires Path type support
-    # fn proxy_issuer_cert(self, path: Path) -> Result:
+    # def proxy_issuer_cert(self, path: Path) -> Result:
     #     """Specifies a file holding a CA certificate in PEM format. If the option
     #     is set, an additional check against the peer certificate is performed to
     #     verify the issuer is indeed the one associated with the certificate
@@ -2361,7 +2361,7 @@ struct Easy(Movable):
 
     # TODO: Set the issuer SSL certificate using an in-memory blob
     # Requires blob/byte array type support
-    # fn issuer_cert_blob(self, blob: Bytes) -> Result:
+    # def issuer_cert_blob(self, blob: Bytes) -> Result:
     #     """The specified byte buffer should contain the binary content of a CA
     #     certificate in the PEM format. The certificate will be copied into the
     #     handle.
@@ -2373,7 +2373,7 @@ struct Easy(Movable):
 
     # TODO: Set the issuer SSL certificate for HTTPS proxies using an in-memory blob
     # Requires blob/byte array type support
-    # fn proxy_issuer_cert_blob(self, blob: Bytes) -> Result:
+    # def proxy_issuer_cert_blob(self, blob: Bytes) -> Result:
     #     """The specified byte buffer should contain the binary content of a CA
     #     certificate in the PEM format. The certificate will be copied into the
     #     handle.
@@ -2385,7 +2385,7 @@ struct Easy(Movable):
 
     # TODO: Specify directory holding CA certificates
     # Requires Path type support
-    # fn capath(self, path: Path) -> Result:
+    # def capath(self, path: Path) -> Result:
     #     """Names a directory holding multiple CA certificates to verify the peer
     #     with. If libcurl is built against OpenSSL, the certificate directory
     #     must be prepared using the openssl c_rehash utility. This makes sense
@@ -2397,7 +2397,7 @@ struct Easy(Movable):
 
     # TODO: Specify a Certificate Revocation List file
     # Requires Path type support
-    # fn crlfile(self, path: Path) -> Result:
+    # def crlfile(self, path: Path) -> Result:
     #     """Names a file with the concatenation of CRL (in PEM format) to use in the
     #     certificate validation that occurs during the SSL exchange.
     #
@@ -2422,7 +2422,7 @@ struct Easy(Movable):
 
     # TODO: Specify a Certificate Revocation List file for HTTPS proxy
     # Requires Path type support
-    # fn proxy_crlfile(self, path: Path) -> Result:
+    # def proxy_crlfile(self, path: Path) -> Result:
     #     """Names a file with the concatenation of CRL (in PEM format) to use in the
     #     certificate validation that occurs during the SSL exchange.
     #
@@ -2440,7 +2440,7 @@ struct Easy(Movable):
     #     """
     #     return self.inner.set_option(Option.PROXY_CRLFILE, path)
 
-    fn certinfo(self, enable: Bool) -> Result:
+    def certinfo(self, enable: Bool) -> Result:
         """Request SSL certificate information.
 
         Enable libcurl's certificate chain info gatherer. With this enabled,
@@ -2458,7 +2458,7 @@ struct Easy(Movable):
         """
         return self.inner.certinfo(enable)
 
-    fn pinned_public_key(self, var pubkey: String) -> Result:
+    def pinned_public_key(self, var pubkey: String) -> Result:
         """Set pinned public key.
 
         Pass a pointer to a zero terminated string as parameter. The string can
@@ -2484,7 +2484,7 @@ struct Easy(Movable):
 
     # TODO: Specify a source for random data
     # Requires Path type support
-    # fn random_file(self, path: Path) -> Result:
+    # def random_file(self, path: Path) -> Result:
     #     """The file will be used to read from to seed the random engine for SSL and
     #     more.
     #
@@ -2495,7 +2495,7 @@ struct Easy(Movable):
 
     # TODO: Specify EGD socket path
     # Requires Path type support
-    # fn egd_socket(self, path: Path) -> Result:
+    # def egd_socket(self, path: Path) -> Result:
     #     """Indicates the path name to the Entropy Gathering Daemon socket. It will
     #     be used to seed the random engine for SSL.
     #
@@ -2504,7 +2504,7 @@ struct Easy(Movable):
     #     """
     #     return self.inner.set_option(Option.EGDSOCKET, path)
 
-    fn ssl_cipher_list(self, var ciphers: String) -> Result:
+    def ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS.
 
         Holds the list of ciphers to use for the SSL connection. The list must
@@ -2535,7 +2535,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_cipher_list(ciphers)
 
-    fn proxy_ssl_cipher_list(self, var ciphers: String) -> Result:
+    def proxy_ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS for an HTTPS proxy.
 
         Holds the list of ciphers to use for the SSL connection. The list must
@@ -2566,7 +2566,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_ssl_cipher_list(ciphers)
 
-    fn ssl_sessionid_cache(self, enable: Bool) -> Result:
+    def ssl_sessionid_cache(self, enable: Bool) -> Result:
         """Enable or disable use of the SSL session-ID cache.
 
         By default all transfers are done using the cache enabled. While nothing
@@ -2586,7 +2586,7 @@ struct Easy(Movable):
 
     # TODO: Set SSL behavior options
     # Requires SslOpt type support
-    # fn ssl_options(self, bits: SslOpt) -> Result:
+    # def ssl_options(self, bits: SslOpt) -> Result:
     #     """Inform libcurl about SSL specific behaviors.
     #
     #     This corresponds to the CURLOPT_SSL_OPTIONS option.
@@ -2595,7 +2595,7 @@ struct Easy(Movable):
 
     # TODO: Set SSL behavior options for proxies
     # Requires SslOpt type support
-    # fn proxy_ssl_options(self, bits: SslOpt) -> Result:
+    # def proxy_ssl_options(self, bits: SslOpt) -> Result:
     #     """Inform libcurl about SSL specific behaviors.
     #
     #     This corresponds to the CURLOPT_PROXY_SSL_OPTIONS option.
@@ -2607,7 +2607,7 @@ struct Easy(Movable):
 
     # TODO: Set maximum time to wait for Expect 100 request before sending body
     # Requires Duration type support
-    # fn expect_100_timeout(self, timeout_ms: Int) -> Result:
+    # def expect_100_timeout(self, timeout_ms: Int) -> Result:
     #     """curl has internal heuristics that trigger the use of a Expect
     #     header for large enough request bodies where the client first sends the
     #     request header along with an Expect: 100-continue header. The server
@@ -2631,7 +2631,7 @@ struct Easy(Movable):
     #     """
     #     return self.inner.set_option(Option.EXPECT_100_TIMEOUT_MS, timeout_ms)
 
-    fn effective_url(self) raises -> String:
+    def effective_url(self) raises -> String:
         """Get the last used effective URL.
 
         By default this option is not set and corresponds to
@@ -2642,7 +2642,7 @@ struct Easy(Movable):
         """
         return self.inner.effective_url()
 
-    fn response_code(self) raises -> c_long:
+    def response_code(self) raises -> c_long:
         """Get the last response code.
 
         By default this option is not set and corresponds to
@@ -2653,7 +2653,7 @@ struct Easy(Movable):
         """
         return self.inner.response_code()
 
-    fn http_connectcode(self) raises -> c_long:
+    def http_connectcode(self) raises -> c_long:
         """Get the CONNECT response code.
 
         By default this option is not set and corresponds to
@@ -2664,7 +2664,7 @@ struct Easy(Movable):
         """
         return self.inner.http_connectcode()
 
-    fn file_time(self) raises -> c_long:
+    def file_time(self) raises -> c_long:
         """Get the remote time of the retrieved document.
 
         By default this option is not set and corresponds to
@@ -2675,7 +2675,7 @@ struct Easy(Movable):
         """
         return self.inner.file_time()
 
-    fn redirect_count(self) raises -> c_long:
+    def redirect_count(self) raises -> c_long:
         """Get the number of redirects.
 
         By default this option is not set and corresponds to
@@ -2686,7 +2686,7 @@ struct Easy(Movable):
         """
         return self.inner.redirect_count()
 
-    fn redirect_url(self) raises -> String:
+    def redirect_url(self) raises -> String:
         """Get the URL a redirect would go to.
 
         By default this option is not set and corresponds to
@@ -2697,7 +2697,7 @@ struct Easy(Movable):
         """
         return self.inner.redirect_url()
 
-    fn header_size(self) raises -> c_long:
+    def header_size(self) raises -> c_long:
         """Get the number of bytes of all headers received.
 
         By default this option is not set and corresponds to
@@ -2708,7 +2708,7 @@ struct Easy(Movable):
         """
         return self.inner.header_size()
 
-    fn request_size(self) raises -> c_long:
+    def request_size(self) raises -> c_long:
         """Get the number of bytes sent in the request.
 
         By default this option is not set and corresponds to
@@ -2719,7 +2719,7 @@ struct Easy(Movable):
         """
         return self.inner.request_size()
 
-    fn content_type(self) raises -> String:
+    def content_type(self) raises -> String:
         """Get the content-type of the downloaded object.
 
         By default this option is not set and corresponds to
@@ -2730,7 +2730,7 @@ struct Easy(Movable):
         """
         return self.inner.content_type()
 
-    fn os_errno(self) raises -> c_long:
+    def os_errno(self) raises -> c_long:
         """Get errno number from last connect failure.
 
         By default this option is not set and corresponds to
@@ -2741,7 +2741,7 @@ struct Easy(Movable):
         """
         return self.inner.os_errno()
 
-    fn primary_ip(self) raises -> String:
+    def primary_ip(self) raises -> String:
         """Get the IP address of the most recent connection.
 
         By default this option is not set and corresponds to
@@ -2752,7 +2752,7 @@ struct Easy(Movable):
         """
         return self.inner.primary_ip()
 
-    fn primary_port(self) raises -> c_long:
+    def primary_port(self) raises -> c_long:
         """Get the destination port of the most recent connection.
 
         By default this option is not set and corresponds to
@@ -2763,7 +2763,7 @@ struct Easy(Movable):
         """
         return self.inner.primary_port()
 
-    fn local_ip(self) raises -> String:
+    def local_ip(self) raises -> String:
         """Get the local IP address of the most recent connection.
 
         By default this option is not set and corresponds to
@@ -2774,7 +2774,7 @@ struct Easy(Movable):
         """
         return self.inner.local_ip()
 
-    fn local_port(self) raises -> c_long:
+    def local_port(self) raises -> c_long:
         """Get the local port of the most recent connection.
 
         By default this option is not set and corresponds to
@@ -2785,7 +2785,7 @@ struct Easy(Movable):
         """
         return self.inner.local_port()
 
-    fn time_condition_unmet(self) raises -> c_long:
+    def time_condition_unmet(self) raises -> c_long:
         """Check if a time conditional was met.
 
         By default this option is not set and corresponds to
@@ -2796,7 +2796,7 @@ struct Easy(Movable):
         """
         return self.inner.time_condition_unmet()
 
-    fn download_size(self) raises -> Float64:
+    def download_size(self) raises -> Float64:
         """Get the content-length of the download.
 
         This is the value read from the Content-Length field.
@@ -2809,7 +2809,7 @@ struct Easy(Movable):
         """
         return self.inner.download_size()
 
-    fn upload_size(self) raises -> Float64:
+    def upload_size(self) raises -> Float64:
         """Get the specified size of the upload.
 
         By default this option is not set and corresponds to
@@ -2820,7 +2820,7 @@ struct Easy(Movable):
         """
         return self.inner.upload_size()
 
-    fn total_time(self) raises -> Float64:
+    def total_time(self) raises -> Float64:
         """Get the total time of the previous transfer in seconds.
 
         By default this option is not set and corresponds to
@@ -2831,7 +2831,7 @@ struct Easy(Movable):
         """
         return self.inner.total_time()
 
-    fn namelookup_time(self) raises -> Float64:
+    def namelookup_time(self) raises -> Float64:
         """Get the name lookup time in seconds.
 
         By default this option is not set and corresponds to
@@ -2842,7 +2842,7 @@ struct Easy(Movable):
         """
         return self.inner.namelookup_time()
 
-    fn connect_time(self) raises -> Float64:
+    def connect_time(self) raises -> Float64:
         """Get the time until connect in seconds.
 
         By default this option is not set and corresponds to
@@ -2853,7 +2853,7 @@ struct Easy(Movable):
         """
         return self.inner.connect_time()
 
-    fn appconnect_time(self) raises -> Float64:
+    def appconnect_time(self) raises -> Float64:
         """Get the time until the SSL/SSH handshake is completed in seconds.
 
         By default this option is not set and corresponds to
@@ -2864,7 +2864,7 @@ struct Easy(Movable):
         """
         return self.inner.appconnect_time()
 
-    fn pretransfer_time(self) raises -> Float64:
+    def pretransfer_time(self) raises -> Float64:
         """Get the time until the file transfer start in seconds.
 
         By default this option is not set and corresponds to
@@ -2875,7 +2875,7 @@ struct Easy(Movable):
         """
         return self.inner.pretransfer_time()
 
-    fn starttransfer_time(self) raises -> Float64:
+    def starttransfer_time(self) raises -> Float64:
         """Get the time until the first byte is received in seconds.
 
         By default this option is not set and corresponds to
@@ -2886,7 +2886,7 @@ struct Easy(Movable):
         """
         return self.inner.starttransfer_time()
 
-    fn redirect_time(self) raises -> Float64:
+    def redirect_time(self) raises -> Float64:
         """Get the time for all redirection steps in seconds.
 
         By default this option is not set and corresponds to
@@ -2897,7 +2897,7 @@ struct Easy(Movable):
         """
         return self.inner.redirect_time()
 
-    fn speed_download(self) raises -> Float64:
+    def speed_download(self) raises -> Float64:
         """Get the average download speed in bytes per second.
 
         By default this option is not set and corresponds to
@@ -2908,7 +2908,7 @@ struct Easy(Movable):
         """
         return self.inner.speed_download()
 
-    fn speed_upload(self) raises -> Float64:
+    def speed_upload(self) raises -> Float64:
         """Get the average upload speed in bytes per second.
 
         By default this option is not set and corresponds to
@@ -2919,7 +2919,7 @@ struct Easy(Movable):
         """
         return self.inner.speed_upload()
 
-    fn pipewait(self, wait: Bool) -> Result:
+    def pipewait(self, wait: Bool) -> Result:
         """Wait for pipelining/multiplexing.
 
         Set wait to True to tell libcurl to prefer to wait for a connection to
@@ -2956,7 +2956,7 @@ struct Easy(Movable):
         """
         return self.inner.pipewait(wait)
 
-    fn http_09_allowed(self, allow: Bool) -> Result:
+    def http_09_allowed(self, allow: Bool) -> Result:
         """Allow HTTP/0.9 compliant responses.
 
         Set allow to True to tell libcurl to allow HTTP/0.9 responses. A HTTP/0.9
@@ -2976,7 +2976,7 @@ struct Easy(Movable):
     # =========================================================================
     # Callback options
 
-    fn write_function(self, callback: ReadWriteCallbackFn) -> Result:
+    def write_function(self, callback: ReadWriteCallbackFn) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -3012,7 +3012,7 @@ struct Easy(Movable):
         """
         return self.inner.write_function(callback)
 
-    fn write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+    def write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
         By default this option is not set and corresponds to
@@ -3029,7 +3029,7 @@ struct Easy(Movable):
         """
         return self.inner.write_data(data)
 
-    fn read_function(self, callback: ReadWriteCallbackFn) -> Result:
+    def read_function(self, callback: ReadWriteCallbackFn) -> Result:
         """Set callback for reading data to upload.
 
         This callback function gets called by libcurl when it needs to read
@@ -3055,7 +3055,7 @@ struct Easy(Movable):
         """
         return self.inner.read_function(callback)
 
-    fn read_data[origin: ImmutOrigin, //](self, data: ImmutOpaquePointer[origin]) -> Result:
+    def read_data[origin: ImmutOrigin, //](self, data: ImmutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to read callback.
 
         By default this option is not set and corresponds to
@@ -3072,7 +3072,7 @@ struct Easy(Movable):
         """
         return self.inner.read_data(data)
 
-    fn headers(self, origin: HeaderOrigin = HeaderOrigin.HEADER) -> Dict[String, String]:
+    def headers(self, origin: HeaderOrigin = HeaderOrigin.HEADER) -> Dict[String, String]:
         """Move to next header set for multi-response requests.
 
         When performing a request that can return multiple responses - such as
@@ -3091,7 +3091,7 @@ struct Easy(Movable):
         """
         return self.inner.headers(origin)
 
-    fn get_scheme(self) raises -> String:
+    def get_scheme(self) raises -> String:
         """Get URL scheme used in transfer.
 
         Corresponds to `CURLINFO_SCHEME`.
@@ -3101,7 +3101,7 @@ struct Easy(Movable):
         """
         return self.inner.get_scheme()
 
-    fn escape(self, var string: String) raises -> String:
+    def escape(self, var string: String) raises -> String:
         """URL-encode the given string.
 
         This function returns a new string that is the URL-encoded version of

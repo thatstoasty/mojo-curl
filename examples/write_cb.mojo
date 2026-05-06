@@ -3,7 +3,7 @@ from std.ffi import c_char, c_size_t
 from mojo_curl import Easy
 from mojo_curl.c.types import MutExternalOpaquePointer, MutExternalPointer, Result
 
-fn write_callback(
+def write_callback(
     ptr: MutExternalPointer[c_char],
     size: c_size_t,
     nmemb: c_size_t,
@@ -12,7 +12,7 @@ fn write_callback(
     print(StringSlice(unsafe_from_utf8_ptr=ptr))
     return size * nmemb
 
-fn main() raises:
+def main() raises:
     var easy = Easy()
     _ = easy.url("https://httpbin.org/get")
     _ = easy.write_function(write_callback)

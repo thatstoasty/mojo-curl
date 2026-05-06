@@ -27,17 +27,17 @@ comptime curl_off_t = c_long
 """Type alias for curl offset type, used for file sizes and offsets."""
 
 # Callback function types
-comptime ReadWriteCallbackFn = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+comptime ReadWriteCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) abi("C") thin -> c_size_t
 """This is the prototype for the write callback function used by curl. It matches the `CURLOPT_WRITEFUNCTION` prototype and can also be used where a generic read/write signature is needed."""
-comptime ReadCallbackFn = fn(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) -> c_size_t
+comptime ReadCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) abi("C") thin -> c_size_t
 """This is the prototype for the read callback function used by curl. It matches the `CURLOPT_READFUNCTION` prototype, where the first argument is a writable buffer that the callback must fill."""
-comptime ProgressCallbackFn = fn(ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) -> c_int
+comptime ProgressCallbackFn = def(ImmutExternalOpaquePointer, Float64, Float64, Float64, Float64) abi("C") thin -> c_int
 """This is the prototype for the progress callback function used by curl. It was deprecated in favor of `TransferInfoCallbackFn` but is still supported for backward compatibility."""
-comptime DebugCallbackFn = fn(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) -> c_int
+comptime DebugCallbackFn = def(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) abi("C") thin -> c_int
 """This is the prototype for the debug callback function used by curl. It is used for `CURLOPT_DEBUGFUNCTION`."""
-comptime TransferInfoCallbackFn = fn(
+comptime TransferInfoCallbackFn = def(
     ImmutExternalOpaquePointer, curl_off_t, curl_off_t, curl_off_t, curl_off_t
-) -> c_int
+) abi("C") thin -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced 
 in 7.32.0, avoids the use of floating point numbers and provides more
 detailed information."""
@@ -57,7 +57,7 @@ struct curl_blob[origin: MutOrigin, //](Movable):
     var flags: c_uint
     """Control flags for the blob."""
 
-    fn __init__(out self, data: MutOpaquePointer[Self.origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
+    def __init__(out self, data: MutOpaquePointer[Self.origin], len: c_size_t, flags: c_uint = CURL_BLOB_COPY):
         """Initialize a curl_blob struct.
 
         Args:
@@ -171,17 +171,17 @@ struct Result(Copyable, Equatable, TrivialRegisterPassable, Writable):
     comptime SSL_PEER_CERTIFICATE: Self = 60  # Alias for PEER_FAILED_VERIFICATION
 
     @implicit
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = c_int(value)
 
     @implicit
-    fn __init__(out self, value: Int32):
+    def __init__(out self, value: Int32):
         self.value = value
 
-    fn __eq__(self, other: Self) -> Bool:
+    def __eq__(self, other: Self) -> Bool:
         return self.value == other.value
 
-    fn write_to(self, mut writer: Some[Writer]):
+    def write_to(self, mut writer: Some[Writer]):
         """Write the error message corresponding to the CURLcode to the given writer.
 
         Args:
@@ -443,11 +443,11 @@ struct Option(Copyable, TrivialRegisterPassable):
     comptime SSL_SIGNATURE_ALGORITHMS: Self = Self.OBJECT_POINT + 328
 
     @implicit
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = c_int(value)
 
     @implicit
-    fn __init__(out self, value: c_int):
+    def __init__(out self, value: c_int):
         self.value = value
 
 
@@ -638,7 +638,7 @@ struct SSLVersion(Copyable, TrivialRegisterPassable):
     comptime TLSv1_3: Self = 7
 
     @implicit
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = c_int(value)
 
 
@@ -687,7 +687,7 @@ struct curl_ssl_backend:
     comptime RUSTLS: Self = 14
 
     @implicit
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = value
 
 
@@ -780,7 +780,7 @@ comptime CURL_WRITEFUNC_ERROR = 0xFFFFFFFF
    will signal an error from the callback."""
 
 
-comptime curl_resolver_start_callback = fn(OpaquePointer, OpaquePointer, OpaquePointer) -> c_int
+comptime curl_resolver_start_callback = def(OpaquePointer, OpaquePointer, OpaquePointer) abi("C") thin -> c_int
 """This callback will be called when a new resolver request is made."""
 
 comptime CURL_GLOBAL_SSL = (1 << 0)

@@ -4,21 +4,24 @@ from mojo_curl.c.bindings import curl
 from mojo_curl.c.types import CURL_GLOBAL_DEFAULT, MutExternalOpaquePointer
 
 
-fn _init_global() -> MutExternalOpaquePointer:
+def _init_global() -> MutExternalOpaquePointer:
     var ptr = alloc[curl](1)
     ptr[] = curl()
     _ = ptr[].global_init(CURL_GLOBAL_DEFAULT)
     return ptr.bitcast[NoneType]()
 
 
-fn _destroy_global(lib: MutExternalOpaquePointer):
-    var p = lib.bitcast[curl]()
+def _destroy_global(lib: Optional[UnsafePointer[NoneType, MutExternalOrigin]]):
+    if not lib:
+        return
+
+    var p = lib.value().bitcast[curl]()
     p[].global_cleanup()
-    lib.free()
+    lib.value().free()
 
 
 @always_inline
-fn curl_ffi() -> UnsafePointer[curl, MutExternalOrigin]:
+def curl_ffi() -> UnsafePointer[curl, MutExternalOrigin]:
     """Initializes or gets the global curl handle.
 
     DO NOT FREE THE POINTER MANUALLY. It will be freed automatically on program exit.
@@ -26,4 +29,4 @@ fn curl_ffi() -> UnsafePointer[curl, MutExternalOrigin]:
     Returns:
         A pointer to the global curl handle.
     """
-    return _get_global["curl", _init_global, _destroy_global]().bitcast[curl]()
+    return _get_global["curl", _init_global, _destroy_global]().value().bitcast[curl]()

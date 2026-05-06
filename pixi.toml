@@ -3,7 +3,7 @@ description = "Mojo libcurl bindings"
 authors = ["Mikhail Tavarez <miktavarez@gmail.com>"]
 channels = [
     "conda-forge",
-    "https://conda.modular.com/max",
+    "https://conda.modular.com/max-nightly",
 ]
 platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
 license = "MIT"

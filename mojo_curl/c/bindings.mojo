@@ -20,11 +20,11 @@ struct curl:
     var lib: _curl
     """The raw libcurl bindings. DO NOT USE THIS DIRECTLY. Use the safe wrapper functions instead."""
 
-    fn __init__(out self):
+    def __init__(out self):
         self.lib = _curl()
 
     # Global libcurl functions
-    fn global_init(self, flags: c_long) -> Result:
+    def global_init(self, flags: c_long) -> Result:
         """Global libcurl initialization.
 
         Args:
@@ -35,11 +35,11 @@ struct curl:
         """
         return self.lib.curl_global_init(flags)
 
-    fn global_cleanup(self):
+    def global_cleanup(self):
         """Global libcurl cleanup."""
         self.lib.curl_global_cleanup()
 
-    fn version(self) -> String:
+    def version(self) -> String:
         """Return the version string of libcurl.
 
         Returns:
@@ -52,7 +52,7 @@ struct curl:
         return String(unsafe_from_utf8_ptr=self.lib.curl_version())
 
     # Easy interface functions
-    fn easy_init(self) -> CURL:
+    def easy_init(self) -> CURL:
         """Start a libcurl easy session.
 
         Returns:
@@ -60,7 +60,7 @@ struct curl:
         """
         return self.lib.curl_easy_init()
 
-    fn easy_setopt(self, easy: CURL, option: Option, mut parameter: String) -> Result:
+    def easy_setopt(self, easy: CURL, option: Option, mut parameter: String) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -73,7 +73,7 @@ struct curl:
         """
         return self.lib.curl_easy_setopt_string(easy, option.value, parameter.as_c_string_slice().unsafe_ptr())
 
-    fn easy_setopt[origin: ImmutOrigin, //](self, easy: CURL, option: Option, parameter: Span[UInt8, origin]) -> Result:
+    def easy_setopt[origin: ImmutOrigin, //](self, easy: CURL, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -90,7 +90,7 @@ struct curl:
         var ptr = parameter.unsafe_ptr().bitcast[c_char]()
         return self.lib.curl_easy_setopt_string(easy, option.value, ptr)
 
-    fn easy_setopt(self, easy: CURL, option: Option, parameter: c_long) -> Result:
+    def easy_setopt(self, easy: CURL, option: Option, parameter: c_long) -> Result:
         """Set a long/integer option for a curl easy handle using safe wrapper.
 
         Args:
@@ -103,7 +103,7 @@ struct curl:
         """
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
-    fn easy_setopt[
+    def easy_setopt[
         origin: Origin, //
     ](self, easy: CURL, option: Option, parameter: OpaquePointer[origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
@@ -121,7 +121,7 @@ struct curl:
         """
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 
-    fn easy_setopt(self, easy: CURL, option: Option, parameter: ReadWriteCallbackFn) -> Result:
+    def easy_setopt(self, easy: CURL, option: Option, parameter: ReadWriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -135,7 +135,7 @@ struct curl:
         return self.lib.curl_easy_setopt_callback(easy, option.value, parameter)
 
     # Safe getinfo functions using wrapper
-    fn easy_getinfo(self, easy: CURL, info: Info, mut parameter: MutExternalPointer[c_char]) -> Result:
+    def easy_getinfo(self, easy: CURL, info: Info, mut parameter: MutExternalPointer[c_char]) -> Result:
         """Get string info from a curl easy handle using safe wrapper.
 
         The pointer is NULL or points to private memory. You **must not free it**.
@@ -151,7 +151,7 @@ struct curl:
         """
         return self.lib.curl_easy_getinfo_string(easy, info.value, Pointer(to=parameter))
 
-    fn easy_getinfo(
+    def easy_getinfo(
         self,
         easy: CURL,
         info: Info,
@@ -169,7 +169,7 @@ struct curl:
         """
         return self.lib.curl_easy_getinfo_long(easy, info.value, Pointer(to=parameter))
 
-    fn easy_getinfo(
+    def easy_getinfo(
         self,
         easy: CURL,
         info: Info,
@@ -187,7 +187,7 @@ struct curl:
         """
         return self.lib.curl_easy_getinfo_float(easy, info.value, Pointer(to=parameter))
 
-    fn easy_getinfo[
+    def easy_getinfo[
         origin: MutOrigin, //
     ](self, easy: CURL, info: Info, mut ptr: MutOpaquePointer[origin]) -> Result:
         """Get long info from a curl easy handle using safe wrapper.
@@ -205,7 +205,7 @@ struct curl:
         """
         return self.lib.curl_easy_getinfo_ptr(easy, info.value, Pointer(to=ptr))
 
-    fn easy_getinfo[
+    def easy_getinfo[
         origin: MutOrigin, //
     ](self, easy: CURL, info: Info, mut ptr: MutUnsafePointer[curl_slist, origin],) -> Result:
         """Get long info from a curl easy handle using safe wrapper.
@@ -223,7 +223,7 @@ struct curl:
         """
         return self.lib.curl_easy_getinfo_curl_slist(easy, info.value, Pointer(to=ptr))
 
-    fn easy_perform(self, easy: CURL) -> Result:
+    def easy_perform(self, easy: CURL) -> Result:
         """Perform a blocking file transfer.
 
         Args:
@@ -234,7 +234,7 @@ struct curl:
         """
         return self.lib.curl_easy_perform(easy)
 
-    fn easy_cleanup(self, easy: CURL):
+    def easy_cleanup(self, easy: CURL):
         """End a libcurl easy handle.
 
         Args:
@@ -242,7 +242,7 @@ struct curl:
         """
         self.lib.curl_easy_cleanup(easy)
 
-    fn easy_strerror(self, code: Result) -> ImmutExternalPointer[c_char]:
+    def easy_strerror(self, code: Result) -> ImmutExternalPointer[c_char]:
         """Return string describing error code.
 
         Args:
@@ -254,7 +254,7 @@ struct curl:
         return self.lib.curl_easy_strerror(code.value)
 
     # String list functions
-    fn slist_append[
+    def slist_append[
         origin: ImmutOrigin, //
     ](
         self, list: MutExternalPointer[curl_slist], string: ImmutUnsafePointer[c_char, origin]
@@ -276,7 +276,7 @@ struct curl:
             raise Error("Failed to append to curl_slist")
         return data
 
-    fn slist_free_all(self, mut list: MutExternalPointer[curl_slist]):
+    def slist_free_all(self, mut list: MutExternalPointer[curl_slist]):
         """Free an entire curl string list.
 
         Args:
@@ -284,7 +284,7 @@ struct curl:
         """
         self.lib.curl_slist_free_all(list)
 
-    fn easy_header(
+    def easy_header(
         self,
         easy: CURL,
         mut name: String,
@@ -310,7 +310,7 @@ struct curl:
             easy, name.as_c_string_slice().unsafe_ptr(), index, origin, request, Pointer(to=hout)
         )
 
-    fn easy_nextheader(
+    def easy_nextheader(
         self,
         easy: CURL,
         origin: c_uint,
@@ -330,7 +330,7 @@ struct curl:
         """
         return self.lib.curl_easy_nextheader(easy, origin, request, prev)
 
-    fn easy_escape(
+    def easy_escape(
         self,
         easy: CURL,
         mut string: String,
@@ -348,7 +348,7 @@ struct curl:
         """
         return self.lib.curl_easy_escape(easy, string.as_c_string_slice().unsafe_ptr(), length)
 
-    fn easy_duphandle(self, easy: CURL) -> CURL:
+    def easy_duphandle(self, easy: CURL) -> CURL:
         """Creates a new curl session handle with the same options set for the handle
         passed in. Duplicating a handle could only be a matter of cloning data and
         options, internal state info and things like persistent connections cannot
@@ -364,7 +364,7 @@ struct curl:
         """
         return self.lib.curl_easy_duphandle(easy)
 
-    fn easy_reset(self, easy: CURL):
+    def easy_reset(self, easy: CURL):
         """Reset a curl easy handle to its default state.
         
         Args:
@@ -372,7 +372,7 @@ struct curl:
         """
         self.lib.curl_easy_reset(easy)
 
-    fn easy_recv[
+    def easy_recv[
         origin: MutOrigin, //
     ](self, easy: CURL, buffer: Span[c_uchar, origin], capacity: c_size_t) -> Tuple[Result, c_size_t]:
         """Receive data from the connected peer.
@@ -391,7 +391,7 @@ struct curl:
         )
         return result, bytes_received
 
-    fn easy_send[origin: ImmutOrigin, //](self, easy: CURL, buffer: Span[c_uchar, origin]) -> Tuple[Result, c_size_t]:
+    def easy_send[origin: ImmutOrigin, //](self, easy: CURL, buffer: Span[c_uchar, origin]) -> Tuple[Result, c_size_t]:
         """Send data to the connected peer.
 
         Args:
@@ -407,7 +407,7 @@ struct curl:
         )
         return result, bytes_sent
 
-    fn easy_upkeep(self, easy: CURL) -> Result:
+    def easy_upkeep(self, easy: CURL) -> Result:
         """Perform upkeep tasks for a curl easy handle.
 
         This function is used to perform any necessary upkeep tasks for a curl easy handle,

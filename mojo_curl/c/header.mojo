@@ -35,7 +35,7 @@ struct HeaderOrigin:
     """[CURLH_PSEUDO] Pseudo headers."""
 
     @implicit
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = c_uint(value)
 
 
@@ -63,5 +63,5 @@ struct CurlHeaderResult:
     """[CURLHE_NOT_BUILT_IN] If API was disabled in the build."""
 
     @implicit
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = c_int(value)
