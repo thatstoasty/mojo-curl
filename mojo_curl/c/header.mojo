@@ -1,5 +1,5 @@
-from mojo_curl.c.types import MutExternalPointer, MutExternalOpaquePointer
 from std.ffi import c_size_t, c_uint, c_char, c_int
+from mojo_curl.c.types import MutExternalPointer, MutExternalOpaquePointer
 
 
 struct curl_header:
@@ -17,7 +17,8 @@ struct curl_header:
     var anchor: MutExternalOpaquePointer
     """Pointer to the anchor."""
 
-struct HeaderOrigin:
+
+struct HeaderOrigin(TrivialRegisterPassable):
     """CURLH origin bits."""
 
     var value: c_uint
@@ -39,7 +40,7 @@ struct HeaderOrigin:
         self.value = c_uint(value)
 
 
-struct CurlHeaderResult:
+struct CurlHeaderResult(TrivialRegisterPassable):
     """CURLHcode result codes."""
 
     var value: c_int
