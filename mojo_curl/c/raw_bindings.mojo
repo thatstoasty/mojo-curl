@@ -5,7 +5,7 @@ from std.ffi import OwnedDLHandle, RTLD, c_char, c_int, c_long, c_uint, c_size_t
 from std.sys import get_defined_string
 from std.memory import MutPointer
 
-from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, WriteCallbackFn, ReadCallbackFn
+from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, WriteCallbackFn
 from mojo_curl.c.header import curl_header
 
 comptime CURLcode = c_int
