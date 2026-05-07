@@ -11,6 +11,7 @@ def _init_global() -> Optional[MutExternalPointer[NoneType]]:
     try:
         ptr[] = curl()
     except e:
+        # TODO: I'd like to remove aborting, but it'll make curl_ffi raising and viral.
         print("Failed to initialize global curl handle:", e, file=stderr)
         os.abort()
 

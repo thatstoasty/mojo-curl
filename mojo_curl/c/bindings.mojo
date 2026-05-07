@@ -1,4 +1,5 @@
 from std.ffi import c_char, c_uchar, c_int, c_long, c_size_t, c_uint
+from std.collections.string.string import CStringSlice
 
 from mojo_curl.c.raw_bindings import _curl
 from mojo_curl.c.types import (
@@ -61,7 +62,7 @@ struct curl(Movable):
         """
         return self.lib.curl_easy_init()
 
-    def easy_setopt(self, easy: CURL, option: Option, mut parameter: String) -> Result:
+    def easy_setopt(self, easy: CURL, option: Option, parameter: CStringSlice) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -72,7 +73,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_setopt_string(easy, option.value, parameter.as_c_string_slice().unsafe_ptr())
+        return self.lib.curl_easy_setopt_string(easy, option.value, parameter.unsafe_ptr())
 
     def easy_setopt[origin: ImmutOrigin, //](self, easy: CURL, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.

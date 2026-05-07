@@ -1,9 +1,11 @@
 from std.ffi import c_long
 from std.pathlib import Path
+from std.collections.string.string import CStringSlice
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
 from mojo_curl.c import HeaderOrigin, Info, Option, Result, WriteCallbackFn, ReadCallbackFn
+from mojo_curl.c.header import curl_header
 
 
 struct Easy(Movable):
@@ -22,7 +24,7 @@ struct Easy(Movable):
         """Explicitly clean up the easy handle."""
         self.inner^.close()
 
-    def set_option(self, option: Option, var parameter: String) -> Result:
+    def set_option(self, option: Option, parameter: CStringSlice) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -60,6 +62,21 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         return self.inner.set_option(option.value, parameter)
+    
+    def set_option[origin: Origin, //](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
+        """Set a bytes option for a curl easy handle using safe wrapper.
+
+        Parameters:
+            origin: The lifetime of the data.
+
+        Args:
+            option: The option to set.
+            parameter: The bytes parameter to set for the option.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.inner.set_option(option.value, parameter)
 
     def set_option(self, option: Option, parameter: WriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
@@ -72,6 +89,21 @@ struct Easy(Movable):
             Result: The result of setting the option.
         """
         return self.inner.set_option(option, parameter)
+    
+    def get_info(self, info: Info) raises -> String:
+        return self.inner.get_info(info)
+
+    def get_info_long(self, info: Info) raises -> c_long:
+        return self.inner.get_info_long(info)
+
+    def get_info_float(self, info: Info) raises -> Float64:
+        return self.inner.get_info_float(info)
+
+    def get_info_ptr[origin: MutOrigin, //](self, info: Info, mut ptr: MutOpaquePointer[origin]) raises:
+        return self.inner.get_info_ptr(info, ptr)
+
+    def get_info_curl_slist(self, info: Info) raises -> CurlList:
+        return self.inner.get_info_curl_slist(info)
 
     def perform(self) -> Result:
         """Perform a blocking file transfer.
@@ -117,7 +149,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.verbose(verbose=verbose)
+        return self.set_option(Option.VERBOSE, c_long(Int(verbose)))
 
     def show_header(self, *, show: Bool) -> Result:
         """Indicates whether header information is streamed to the output body of
@@ -139,7 +171,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.show_header(show=show)
+        return self.set_option(Option.HEADER, c_long(Int(show)))
 
     def progress(self, *, progress: Bool) -> Result:
         """Indicates whether a progress meter will be shown for requests done with
@@ -156,7 +188,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.progress(progress=progress)
+        return self.set_option(Option.NO_PROGRESS, c_long(Int(not progress)))
 
     def signal(self, *, signal: Bool) -> Result:
         """Inform libcurl whether or not it should install signal handlers or
@@ -179,7 +211,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.signal(signal=signal)
+        return self.set_option(Option.NO_SIGNAL, c_long(Int(not signal)))
 
     def wildcard_match(self, *, enable: Bool) -> Result:
         """Indicates whether multiple files will be transferred based on the file
@@ -196,7 +228,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.wildcard_match(enable=enable)
+        return self.set_option(Option.WILDCARD_MATCH, c_long(Int(enable)))
 
     # =========================================================================
     # Error options
@@ -217,7 +249,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.fail_on_error(fail=fail)
+        return self.set_option(Option.FAIL_ON_ERROR, c_long(Int(fail)))
 
     # =========================================================================
     # Network options
@@ -243,7 +275,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.url(url)
+        return self.set_option(Option.URL, url.as_c_string_slice())
 
     def port(self, port: Int) -> Result:
         """Configures the port number to connect to, instead of the one specified
@@ -255,7 +287,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.port(port)
+        return self.set_option(Option.PORT, c_long(port))
 
     # =========================================================================
     # Connection options
@@ -290,7 +322,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.path_as_is(as_is=as_is)
+        return self.set_option(Option.PATH_AS_IS, c_long(Int(as_is)))
 
     def proxy(self, var url: String) -> Result:
         """Provide the URL of a proxy to use.
@@ -303,7 +335,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy(url)
+        return self.set_option(Option.PROXY, url.as_c_string_slice())
 
     def proxy_port(self, port: Int) -> Result:
         """Provide port number the proxy is listening on.
@@ -317,7 +349,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_port(port)
+        return self.set_option(Option.PROXY_PORT, c_long(port))
 
     def no_proxy(self, var skip: String) -> Result:
         """Provide a list of hosts that should not be proxied to.
@@ -335,7 +367,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.no_proxy(skip=skip)
+        return self.set_option(Option.NO_PROXY, skip.as_c_string_slice())
 
     def http_proxy_tunnel(self, *, tunnel: Bool) -> Result:
         """Inform curl whether it should tunnel all operations through the proxy.
@@ -352,7 +384,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_proxy_tunnel(tunnel=tunnel)
+        return self.set_option(Option.HTTP_PROXY_TUNNEL, c_long(Int(tunnel)))
 
     def interface(self, var interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
@@ -368,7 +400,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.interface(interface)
+        return self.set_option(Option.INTERFACE, interface.as_c_string_slice())
 
     def set_local_port(self, port: Int) -> Result:
         """Indicate which port should be bound to locally for this connection.
@@ -382,7 +414,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.set_local_port(port)
+        return self.set_option(Option.LOCAL_PORT, c_long(port))
 
     def local_port_range(self, range: Int) -> Result:
         """Indicates the number of attempts libcurl will perform to find a working
@@ -397,7 +429,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.local_port_range(range)
+        return self.set_option(Option.LOCAL_PORT_RANGE, c_long(range))
 
     def dns_servers(self, var servers: String) -> Result:
         """Sets the DNS servers that will be used.
@@ -414,7 +446,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.dns_servers(servers)
+        return self.set_option(Option.DNS_SERVERS, servers.as_c_string_slice())
 
     def dns_cache_timeout(self, seconds: Int) -> Result:
         """Sets the timeout of how long name resolves will be kept in memory.
@@ -430,7 +462,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.dns_cache_timeout(seconds)
+        return self.set_option(Option.DNS_CACHE_TIMEOUT, c_long(seconds))
 
     def doh_url(self, var url: String) -> Result:
         """Provide the DNS-over-HTTPS URL.
@@ -459,7 +491,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_url(url)
+        return self.set_option(Option.DOH_URL, url.as_c_string_slice())
 
     def doh_ssl_verify_peer(self, *, verify: Bool) -> Result:
         """This option tells curl to verify the authenticity of the DoH
@@ -504,7 +536,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_ssl_verify_peer(verify=verify)
+        return self.set_option(Option.DOH_SSL_VERIFY_PEER, c_long(Int(verify)))
 
     def doh_ssl_verify_host(self, *, verify: Bool) -> Result:
         """Tells curl to verify the DoH (DNS-over-HTTPS) server's certificate name
@@ -539,7 +571,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_ssl_verify_host(verify=verify)
+        return self.set_option(Option.DOH_SSL_VERIFY_HOST, c_long(Int(verify)))
 
     def proxy_cainfo(self, var cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
@@ -553,7 +585,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_cainfo(cainfo)
+        return self.set_option(Option.PROXY_CAINFO, cainfo.as_c_string_slice())
 
     def proxy_capath(self, var path: String) -> Result:
         """Specify a directory holding CA certificates for proxy.
@@ -572,7 +604,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_capath(path)
+        return self.set_option(Option.PROXY_CAPATH, path.as_c_string_slice())
 
     def proxy_sslcert(self, var sslcert: String) -> Result:
         """Set client certificate for proxy.
@@ -586,7 +618,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_sslcert(sslcert)
+        return self.set_option(Option.PROXY_SSL_CERT, sslcert.as_c_string_slice())
 
     def proxy_sslcert_type(self, var kind: String) -> Result:
         """Set the type of client certificate for proxy.
@@ -600,7 +632,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_sslcert_type(kind)
+        return self.set_option(Option.PROXY_SSL_CERT_TYPE, kind.as_c_string_slice())
 
     def proxy_sslkey(self, var sslkey: String) -> Result:
         """Set private key for HTTPS proxy.
@@ -614,7 +646,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_sslkey(sslkey)
+        return self.set_option(Option.PROXY_SSL_KEY, sslkey.as_c_string_slice())
 
     def proxy_sslkey_type(self, var kind: String) -> Result:
         """Set type of the private key file for HTTPS proxy.
@@ -637,7 +669,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_sslkey_type(kind)
+        return self.set_option(Option.PROXY_SSL_KEY_TYPE, kind.as_c_string_slice())
 
     def proxy_key_password(self, var password: String) -> Result:
         """Set passphrase to private key for HTTPS proxy.
@@ -655,7 +687,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_key_password(password)
+        return self.set_option(Option.PROXY_KEYPASSWD, password.as_c_string_slice())
 
     def proxy_type(self, kind: Int) -> Result:
         """Indicates the type of proxy being used.
@@ -669,7 +701,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_type(kind)
+        return self.set_option(Option.PROXY_TYPE, c_long(kind))
 
     def doh_ssl_verify_status(self, *, verify: Bool) -> Result:
         """Pass a long as parameter set to 1 to enable or 0 to disable.
@@ -693,7 +725,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_ssl_verify_status(verify=verify)
+        return self.set_option(Option.DOH_SSL_VERIFY_STATUS, c_long(Int(verify)))
 
     def buffer_size(self, size: Int) -> Result:
         """Specify the preferred receive buffer size, in bytes.
@@ -711,7 +743,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.buffer_size(size)
+        return self.set_option(Option.BUFFER_SIZE, c_long(size))
 
     def upload_buffer_size(self, size: Int) -> Result:
         """Specify the preferred send buffer size, in bytes.
@@ -728,7 +760,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.upload_buffer_size(size)
+        return self.set_option(Option.UPLOAD_BUFFER_SIZE, c_long(size))
 
     # # Enable or disable TCP Fast Open
     # #
@@ -754,7 +786,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.tcp_nodelay(enable=enable)
+        return self.set_option(Option.TCP_NODELAY, c_long(Int(enable)))
 
     def tcp_keepalive(self, *, enable: Bool) -> Result:
         """Configures whether TCP keepalive probes will be sent.
@@ -771,7 +803,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.tcp_keepalive(enable=enable)
+        return self.set_option(Option.TCP_KEEPALIVE, c_long(Int(enable)))
 
     def tcp_keepidle(self, seconds: Int) -> Result:
         """Configures the TCP keepalive idle time wait.
@@ -787,7 +819,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.tcp_keepidle(seconds)
+        return self.set_option(Option.TCP_KEEPIDLE, c_long(seconds))
 
     def tcp_keepintvl(self, seconds: Int) -> Result:
         """Configures the delay between keepalive probes.
@@ -800,7 +832,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.tcp_keepintvl(seconds)
+        return self.set_option(Option.TCP_KEEPINTVL, c_long(seconds))
 
     def address_scope(self, scope: Int) -> Result:
         """Configures the scope for local IPv6 addresses.
@@ -816,7 +848,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.address_scope(scope)
+        return self.set_option(Option.ADDRESS_SCOPE, c_long(scope))
 
     # =========================================================================
     # Names and passwords
@@ -832,7 +864,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.username(user)
+        return self.set_option(Option.USERNAME, user.as_c_string_slice())
 
     def password(self, var password: String) -> Result:
         """Configures the password to pass as authentication for this connection.
@@ -845,7 +877,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.password(password)
+        return self.set_option(Option.PASSWORD, password.as_c_string_slice())
 
     def http_auth(self, auth: Int) -> Result:
         """Set HTTP server authentication methods to try.
@@ -866,7 +898,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_auth(auth)
+        return self.set_option(Option.HTTP_AUTH, c_long(auth))
 
     def aws_sigv4(self, var param: String) -> Result:
         """Provides AWS V4 signature authentication on HTTP(S) header.
@@ -898,7 +930,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.aws_sigv4(param)
+        return self.set_option(Option.AWS_SIGV4, param.as_c_string_slice())
 
     def proxy_username(self, var user: String) -> Result:
         """Configures the proxy username to pass as authentication for this
@@ -913,7 +945,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_username(user)
+        return self.set_option(Option.PROXY_USERNAME, user.as_c_string_slice())
 
     def proxy_password(self, var password: String) -> Result:
         """Configures the proxy password to pass as authentication for this
@@ -928,7 +960,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_password(password)
+        return self.set_option(Option.PROXY_PASSWORD, password.as_c_string_slice())
 
     def proxy_auth(self, auth: Int) -> Result:
         """Set HTTP proxy authentication methods to try.
@@ -947,7 +979,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_auth(auth)
+        return self.set_option(Option.PROXY_AUTH, c_long(auth))
 
     def netrc(self, netrc: Int) -> Result:
         """Enable .netrc parsing.
@@ -960,7 +992,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.netrc(netrc)
+        return self.set_option(Option.NETRC, c_long(netrc))
 
     # =========================================================================
     # HTTP Options
@@ -977,7 +1009,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.autoreferer(enable=enable)
+        return self.set_option(Option.AUTO_REFERER, c_long(Int(enable)))
 
     def accept_encoding(self, var encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
@@ -997,7 +1029,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.accept_encoding(encoding)
+        return self.set_option(Option.ACCEPT_ENCODING, encoding.as_c_string_slice())
 
     def transfer_encoding(self, *, enable: Bool) -> Result:
         """Request the HTTP Transfer Encoding.
@@ -1011,7 +1043,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.transfer_encoding(enable=enable)
+        return self.set_option(Option.TRANSFER_ENCODING, c_long(Int(enable)))
 
     def follow_location(self, *, enable: Bool) -> Result:
         """Follow HTTP 3xx redirects.
@@ -1028,7 +1060,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.follow_location(enable=enable)
+        return self.set_option(Option.FOLLOW_LOCATION, c_long(Int(enable)))
 
     def unrestricted_auth(self, *, enable: Bool) -> Result:
         """Send credentials to hosts other than the first as well.
@@ -1045,7 +1077,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.unrestricted_auth(enable=enable)
+        return self.set_option(Option.UNRESTRICTED_AUTH, c_long(Int(enable)))
 
     def max_redirections(self, max: Int) -> Result:
         """Set the maximum number of redirects allowed.
@@ -1061,7 +1093,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.max_redirections(max)
+        return self.set_option(Option.MAXREDIRS, c_long(max))
 
     def post_redirections(self, redirects: Int) -> Result:
         """Set the policy for handling redirects to POST requests.
@@ -1076,7 +1108,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post_redirections(redirects)
+        return self.set_option(Option.POST_REDIR, c_long(redirects))
 
     # def put(self, *, enable: Bool) -> Result:
     #     """Make an HTTP PUT request.
@@ -1102,7 +1134,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post(enable=enable)
+        return self.set_option(Option.POST, c_long(Int(enable)))
 
     def post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
@@ -1128,7 +1160,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post_fields(data)
+        return self.set_option(Option.POST_FIELDS, data)
 
     def post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
@@ -1148,7 +1180,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post_fields_copy(data)
+        return self.set_option(Option.COPY_POST_FIELDS, data)
 
     def post_field_size(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
@@ -1167,7 +1199,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post_field_size(size)
+        return self.set_option(Option.POST_FIELD_SIZE, c_long(size))
 
     def post_field_size_large(self, size: Int) -> Result:
         """Configures the size of data that's going to be uploaded as part of a
@@ -1186,7 +1218,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post_field_size_large(size)
+        return self.set_option(Option.POST_FIELD_SIZE_LARGE, c_long(size))
 
     # TODO: httppost - needs Form type implementation
     # def httppost(self, form: Form) -> Result:
@@ -1210,7 +1242,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.referer(referer)
+        return self.set_option(Option.REFERER, referer.as_c_string_slice())
 
     def useragent(self, var useragent: String) -> Result:
         """Sets the HTTP user-agent header.
@@ -1224,7 +1256,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.useragent(useragent)
+        return self.set_option(Option.USERAGENT, useragent.as_c_string_slice())
 
     def http_headers(self, mut headers: CurlList) -> Result:
         """Add some headers to this HTTP request.
@@ -1275,7 +1307,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.cookie(cookie)
+        return self.set_option(Option.COOKIE, cookie.as_c_string_slice())
 
     def cookie_file(self, path: Optional[Path] = None) -> Result:
         """Set the file name to read cookies from.
@@ -1302,7 +1334,8 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.cookie_file(path)
+        var file = String(path.value()) if path else ""
+        return self.set_option(Option.COOKIE_FILE, file.as_c_string_slice())
 
     def cookie_jar(self, path: Optional[Path] = None) -> Result:
         """Set the file name to store cookies to.
@@ -1326,7 +1359,8 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.cookie_jar(path)
+        var file = String(path.value()) if path else "-"  # default to stdout
+        return self.set_option(Option.COOKIEJAR, file.as_c_string_slice())
 
     def cookie_session(self, *, session: Bool) -> Result:
         """Start a new cookie session.
@@ -1347,7 +1381,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.cookie_session(session=session)
+        return self.set_option(Option.COOKIE_SESSION, c_long(Int(session)))
 
     def cookie_list(self, var cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
@@ -1382,7 +1416,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.cookie_list(cookie)
+        return self.set_option(Option.COOKIE_LIST, cookie.as_c_string_slice())
 
     def cookies(self) raises -> CurlList:
         """Get all known cookies.
@@ -1394,7 +1428,7 @@ struct Easy(Movable):
         Returns:
             A `CurlList` containing all known cookies.
         """
-        return self.inner.cookies()
+        return self.get_info_curl_slist(Info.COOKIE_LIST)
 
     def get(self, *, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
@@ -1407,7 +1441,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.get(enable=enable)
+        return self.set_option(Option.HTTPGET, c_long(Int(enable)))
 
     # # Ask for a HTTP GET request.
     # #
@@ -1427,7 +1461,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ignore_content_length(ignore=ignore)
+        return self.set_option(Option.IGNORE_CONTENT_LENGTH, c_long(Int(ignore)))
 
     def http_content_decoding(self, *, enable: Bool) -> Result:
         """Enable or disable HTTP content decoding.
@@ -1441,7 +1475,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_content_decoding(enable=enable)
+        return self.set_option(Option.HTTP_CONTENT_DECODING, c_long(Int(enable)))
 
     def http_transfer_decoding(self, *, enable: Bool) -> Result:
         """Enable or disable HTTP transfer decoding.
@@ -1455,7 +1489,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_transfer_decoding(enable=enable)
+        return self.set_option(Option.HTTP_TRANSFER_DECODING, c_long(Int(enable)))
 
     # # Timeout for the Expect: 100-continue response
     # #
@@ -1509,7 +1543,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.range(range)
+        return self.set_option(Option.RANGE, range.as_c_string_slice())
 
     def resume_from(self, from_byte: Int) -> Result:
         """Set a point to resume transfer from.
@@ -1525,7 +1559,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.resume_from(from_byte)
+        return self.set_option(Option.RESUME_FROM_LARGE, c_long(from_byte))
 
     def custom_request(self, var request: String) -> Result:
         """Set a custom request string.
@@ -1543,7 +1577,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.custom_request(request)
+        return self.set_option(Option.CUSTOM_REQUEST, request.as_c_string_slice())
 
     def fetch_filetime(self, *, fetch: Bool) -> Result:
         """Get the modification time of the remote resource.
@@ -1562,7 +1596,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.fetch_filetime(fetch=fetch)
+        return self.set_option(Option.FILE_TIME, c_long(Int(fetch)))
 
     def nobody(self, *, enable: Bool) -> Result:
         """Indicate whether to download the request without getting the body.
@@ -1577,7 +1611,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.nobody(enable=enable)
+        return self.set_option(Option.NO_BODY, c_long(Int(enable)))
 
     def read_file_size(self, size: Int) -> Result:
         """Set the size of the input file to send off.
@@ -1591,7 +1625,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.read_file_size(size)
+        return self.set_option(Option.IN_FILE_SIZE_LARGE, c_long(size))
 
     def upload(self, *, enable: Bool) -> Result:
         """Enable or disable data upload.
@@ -1608,7 +1642,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.upload(enable=enable)
+        return self.set_option(Option.UPLOAD, c_long(Int(enable)))
 
     def max_filesize(self, size: Int) -> Result:
         """Configure the maximum file size to download.
@@ -1622,7 +1656,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.max_filesize(size)
+        return self.set_option(Option.MAX_FILE_SIZE_LARGE, c_long(size))
 
     def time_condition(self, cond: Int) -> Result:
         """Selects a condition for a time request.
@@ -1638,7 +1672,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.time_condition(cond)
+        return self.set_option(Option.TIME_CONDITION, c_long(cond))
 
     def time_value(self, val: Int) -> Result:
         """Sets the time value for a conditional request.
@@ -1655,7 +1689,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.time_value(val)
+        return self.set_option(Option.TIME_VALUE, c_long(val))
 
     # =========================================================================
     # Connection Options
@@ -1689,7 +1723,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.timeout(timeout_ms)
+        return self.set_option(Option.TIMEOUT_MS, c_long(timeout_ms))
 
     def low_speed_limit(self, limit: Int) -> Result:
         """Set the low speed limit in bytes per second.
@@ -1707,7 +1741,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.low_speed_limit(limit)
+        return self.set_option(Option.LOW_SPEED_LIMIT, c_long(limit))
 
     def low_speed_time(self, seconds: Int) -> Result:
         """Set the low speed time period.
@@ -1724,7 +1758,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.low_speed_time(seconds)
+        return self.set_option(Option.LOW_SPEED_TIME, c_long(seconds))
 
     def max_send_speed(self, speed: Int) -> Result:
         """Rate limit data upload speed.
@@ -1742,7 +1776,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.max_send_speed(speed)
+        return self.set_option(Option.MAX_SEND_SPEED_LARGE, c_long(speed))
 
     def max_recv_speed(self, speed: Int) -> Result:
         """Rate limit data download speed.
@@ -1760,7 +1794,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.max_recv_speed(speed)
+        return self.set_option(Option.MAX_RECV_SPEED_LARGE, c_long(speed))
 
     def max_connects(self, max: Int) -> Result:
         """Set the maximum connection cache size.
@@ -1784,7 +1818,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.max_connects(max)
+        return self.set_option(Option.MAX_CONNECTS, c_long(max))
 
     def maxage_conn(self, max_age_seconds: Int) -> Result:
         """Set the maximum idle time allowed for a connection.
@@ -1801,7 +1835,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.maxage_conn(max_age_seconds)
+        return self.set_option(Option.MAX_AGE_CONN, c_long(max_age_seconds))
 
     def fresh_connect(self, *, enable: Bool) -> Result:
         """Force a new connection to be used.
@@ -1820,7 +1854,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.fresh_connect(enable=enable)
+        return self.set_option(Option.FRESH_CONNECT, c_long(Int(enable)))
 
     def forbid_reuse(self, *, enable: Bool) -> Result:
         """Make connection get closed at once after use.
@@ -1840,7 +1874,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.forbid_reuse(enable=enable)
+        return self.set_option(Option.FORBID_REUSE, c_long(Int(enable)))
 
     def connect_timeout(self, timeout_ms: Int) -> Result:
         """Timeout for the connect phase.
@@ -1858,7 +1892,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.connect_timeout(timeout_ms)
+        return self.set_option(Option.CONNECT_TIMEOUT_MS, c_long(timeout_ms))
 
     def ip_resolve(self, resolve: Int) -> Result:
         """Specify which IP protocol version to use.
@@ -1875,7 +1909,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ip_resolve(resolve)
+        return self.set_option(Option.IP_RESOLVE, c_long(resolve))
 
     # TODO: resolve - needs List type implementation
     # def resolve(self, list: List) -> Result:
@@ -1905,7 +1939,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.connect_only(enable=enable)
+        return self.set_option(Option.CONNECT_ONLY, c_long(Int(enable)))
 
     # # Set interface to speak DNS over.
     # #
@@ -2007,7 +2041,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_cert_type(kind)
+        return self.set_option(Option.SSL_CERT_TYPE, kind.as_c_string_slice())
 
     # TODO: ssl_key - needs path handling
     # def ssl_key(self, key: String) -> Result:
@@ -2060,7 +2094,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_key_type(kind)
+        return self.set_option(Option.SSL_KEY_TYPE, kind.as_c_string_slice())
 
     def key_password(self, var password: String) -> Result:
         """Set passphrase to private key.
@@ -2078,7 +2112,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.key_password(password)
+        return self.set_option(Option.KEY_PASSWD, password.as_c_string_slice())
 
     # TODO: ssl_cainfo_blob - needs byte array handling
     # def ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
@@ -2124,7 +2158,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_engine(engine)
+        return self.set_option(Option.SSL_ENGINE, engine.as_c_string_slice())
 
     def ssl_engine_default(self, *, enable: Bool) -> Result:
         """Make this handle's SSL engine the default.
@@ -2138,7 +2172,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_engine_default(enable=enable)
+        return self.set_option(Option.SSL_ENGINE_DEFAULT, c_long(Int(enable)))
 
     # # Enable TLS false start.
     # #
@@ -2164,7 +2198,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_version(version)
+        return self.set_option(Option.HTTP_VERSION, c_long(version))
 
     def ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version.
@@ -2178,7 +2212,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_version(version)
+        return self.set_option(Option.SSL_VERSION, c_long(version))
 
     def proxy_ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version when connecting to an HTTPS proxy.
@@ -2192,7 +2226,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_ssl_version(version)
+        return self.set_option(Option.PROXY_SSL_VERSION, c_long(version))
 
     def ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version.
@@ -2208,7 +2242,7 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         var version = min_version | (max_version << 16)
-        return self.inner.ssl_version(version)
+        return self.set_option(Option.SSL_VERSION, c_long(version))
 
     def proxy_ssl_min_max_version(self, min_version: Int, max_version: Int) -> Result:
         """Set preferred TLS/SSL version with minimum version and maximum version
@@ -2225,7 +2259,7 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         var version = min_version | (max_version << 16)
-        return self.inner.proxy_ssl_version(version)
+        return self.set_option(Option.PROXY_SSL_VERSION, c_long(version))
 
     def ssl_verify_host(self, *, verify: Bool) -> Result:
         """Verify the certificate's name against host.
@@ -2242,7 +2276,8 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_verify_host(verify=verify)
+        var val = 2 if verify else 0
+        return self.set_option(Option.SSL_VERIFY_HOST, c_long(val))
 
     def proxy_ssl_verify_host(self, *, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
@@ -2259,7 +2294,8 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_ssl_verify_host(verify=verify)
+        var val = 2 if verify else 0
+        return self.set_option(Option.PROXY_SSL_VERIFYHOST, c_long(val))
 
     def ssl_verify_peer(self, *, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.
@@ -2276,7 +2312,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_verify_peer(verify=verify)
+        return self.set_option(Option.SSL_VERIFYPEER, c_long(Int(verify)))
 
     def proxy_ssl_verify_peer(self, *, verify: Bool) -> Result:
         """Verify the peer's SSL certificate for HTTPS proxy.
@@ -2293,7 +2329,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_ssl_verify_peer(verify=verify)
+        return self.set_option(Option.PROXY_SSL_VERIFYPEER, c_long(Int(verify)))
 
     # # Verify the certificate's status.
     # #
@@ -2458,7 +2494,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.certinfo(enable=enable)
+        return self.set_option(Option.CERT_INFO, c_long(Int(enable)))
 
     def pinned_public_key(self, var pubkey: String) -> Result:
         """Set pinned public key.
@@ -2482,7 +2518,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.pinned_public_key(pubkey)
+        return self.set_option(Option.PINNED_PUBLIC_KEY, pubkey.as_c_string_slice())
 
     # TODO: Specify a source for random data
     # Requires Path type support
@@ -2535,7 +2571,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_cipher_list(ciphers)
+        return self.set_option(Option.SSL_CIPHER_LIST, ciphers.as_c_string_slice())
 
     def proxy_ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS for an HTTPS proxy.
@@ -2566,7 +2602,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_ssl_cipher_list(ciphers)
+        return self.set_option(Option.PROXY_SSL_CIPHER_LIST, ciphers.as_c_string_slice())
 
     def ssl_sessionid_cache(self, *, enable: Bool) -> Result:
         """Enable or disable use of the SSL session-ID cache.
@@ -2584,7 +2620,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_sessionid_cache(enable=enable)
+        return self.set_option(Option.SSL_SESSIONID_CACHE, c_long(Int(enable)))
 
     # TODO: Set SSL behavior options
     # Requires SslOpt type support
@@ -2642,7 +2678,7 @@ struct Easy(Movable):
         Returns:
             The last used effective URL as a string.
         """
-        return self.inner.effective_url()
+        return self.get_info(Info.EFFECTIVE_URL)
 
     def response_code(self) raises -> c_long:
         """Get the last response code.
@@ -2653,7 +2689,7 @@ struct Easy(Movable):
         Returns:
             The last response code.
         """
-        return self.inner.response_code()
+        return self.get_info_long(Info.RESPONSE_CODE)
 
     def http_connectcode(self) raises -> c_long:
         """Get the CONNECT response code.
@@ -2664,7 +2700,7 @@ struct Easy(Movable):
         Returns:
             The CONNECT response code.
         """
-        return self.inner.http_connectcode()
+        return self.get_info_long(Info.HTTP_CONNECT_CODE)
 
     def file_time(self) raises -> c_long:
         """Get the remote time of the retrieved document.
@@ -2675,7 +2711,7 @@ struct Easy(Movable):
         Returns:
             The remote time of the retrieved document.
         """
-        return self.inner.file_time()
+        return self.get_info_long(Info.FILE_TIME)
 
     def redirect_count(self) raises -> c_long:
         """Get the number of redirects.
@@ -2686,7 +2722,7 @@ struct Easy(Movable):
         Returns:
             The number of redirects.
         """
-        return self.inner.redirect_count()
+        return self.get_info_long(Info.REDIRECT_COUNT)
 
     def redirect_url(self) raises -> String:
         """Get the URL a redirect would go to.
@@ -2697,7 +2733,7 @@ struct Easy(Movable):
         Returns:
             The URL a redirect would go to.
         """
-        return self.inner.redirect_url()
+        return self.get_info(Info.REDIRECT_URL)
 
     def header_size(self) raises -> c_long:
         """Get the number of bytes of all headers received.
@@ -2708,7 +2744,7 @@ struct Easy(Movable):
         Returns:
             The total number of bytes of all headers received.
         """
-        return self.inner.header_size()
+        return self.get_info_long(Info.HEADER_SIZE)
 
     def request_size(self) raises -> c_long:
         """Get the number of bytes sent in the request.
@@ -2719,7 +2755,7 @@ struct Easy(Movable):
         Returns:
             The total number of bytes sent in the request.
         """
-        return self.inner.request_size()
+        return self.get_info_long(Info.REQUEST_SIZE)
 
     def content_type(self) raises -> String:
         """Get the content-type of the downloaded object.
@@ -2730,7 +2766,7 @@ struct Easy(Movable):
         Returns:
             The content-type of the downloaded object.
         """
-        return self.inner.content_type()
+        return self.get_info(Info.CONTENT_TYPE)
 
     def os_errno(self) raises -> c_long:
         """Get errno number from last connect failure.
@@ -2741,7 +2777,7 @@ struct Easy(Movable):
         Returns:
             The errno number from the last connect failure.
         """
-        return self.inner.os_errno()
+        return self.get_info_long(Info.OS_ERRNO)
 
     def primary_ip(self) raises -> String:
         """Get the IP address of the most recent connection.
@@ -2752,7 +2788,7 @@ struct Easy(Movable):
         Returns:
             The IP address of the most recent connection.
         """
-        return self.inner.primary_ip()
+        return self.get_info(Info.PRIMARY_IP)
 
     def primary_port(self) raises -> c_long:
         """Get the destination port of the most recent connection.
@@ -2763,7 +2799,7 @@ struct Easy(Movable):
         Returns:
             The destination port of the most recent connection.
         """
-        return self.inner.primary_port()
+        return self.get_info_long(Info.PRIMARY_PORT)
 
     def local_ip(self) raises -> String:
         """Get the local IP address of the most recent connection.
@@ -2774,7 +2810,7 @@ struct Easy(Movable):
         Returns:
             The local IP address of the most recent connection.
         """
-        return self.inner.local_ip()
+        return self.get_info(Info.LOCAL_IP)
 
     def local_port(self) raises -> c_long:
         """Get the local port of the most recent connection.
@@ -2785,7 +2821,7 @@ struct Easy(Movable):
         Returns:
             The local port of the most recent connection.
         """
-        return self.inner.local_port()
+        return self.get_info_long(Info.LOCAL_PORT)
 
     def time_condition_unmet(self) raises -> c_long:
         """Check if a time conditional was met.
@@ -2796,7 +2832,7 @@ struct Easy(Movable):
         Returns:
             Non-zero if the time condition was not met.
         """
-        return self.inner.time_condition_unmet()
+        return self.get_info_long(Info.CONDITION_UNMET)
 
     def download_size(self) raises -> Float64:
         """Get the content-length of the download.
@@ -2809,7 +2845,7 @@ struct Easy(Movable):
         Returns:
             The content-length of the download.
         """
-        return self.inner.download_size()
+        return self.get_info_float(Info.CONTENT_LENGTH_DOWNLOAD_T)
 
     def upload_size(self) raises -> Float64:
         """Get the specified size of the upload.
@@ -2820,7 +2856,7 @@ struct Easy(Movable):
         Returns:
             The specified size of the upload.
         """
-        return self.inner.upload_size()
+        return self.get_info_float(Info.CONTENT_LENGTH_UPLOAD_T)
 
     def total_time(self) raises -> Float64:
         """Get the total time of the previous transfer in seconds.
@@ -2831,7 +2867,7 @@ struct Easy(Movable):
         Returns:
             The total time of the previous transfer in seconds.
         """
-        return self.inner.total_time()
+        return self.get_info_float(Info.TOTAL_TIME)
 
     def namelookup_time(self) raises -> Float64:
         """Get the name lookup time in seconds.
@@ -2842,7 +2878,7 @@ struct Easy(Movable):
         Returns:
             The name lookup time in seconds.
         """
-        return self.inner.namelookup_time()
+        return self.get_info_float(Info.NAME_LOOKUP_TIME)
 
     def connect_time(self) raises -> Float64:
         """Get the time until connect in seconds.
@@ -2853,7 +2889,7 @@ struct Easy(Movable):
         Returns:
             The time until connect in seconds.
         """
-        return self.inner.connect_time()
+        return self.get_info_float(Info.CONNECT_TIME)
 
     def appconnect_time(self) raises -> Float64:
         """Get the time until the SSL/SSH handshake is completed in seconds.
@@ -2864,7 +2900,7 @@ struct Easy(Movable):
         Returns:
             The time until the SSL/SSH handshake is completed in seconds.
         """
-        return self.inner.appconnect_time()
+        return self.get_info_float(Info.APP_CONNECT_TIME)
 
     def pretransfer_time(self) raises -> Float64:
         """Get the time until the file transfer start in seconds.
@@ -2875,7 +2911,7 @@ struct Easy(Movable):
         Returns:
             The time until the file transfer start in seconds.
         """
-        return self.inner.pretransfer_time()
+        return self.get_info_float(Info.PRE_TRANSFER_TIME)
 
     def starttransfer_time(self) raises -> Float64:
         """Get the time until the first byte is received in seconds.
@@ -2886,7 +2922,7 @@ struct Easy(Movable):
         Returns:
             The time until the first byte is received in seconds.
         """
-        return self.inner.starttransfer_time()
+        return self.get_info_float(Info.START_TRANSFER_TIME)
 
     def redirect_time(self) raises -> Float64:
         """Get the time for all redirection steps in seconds.
@@ -2897,7 +2933,7 @@ struct Easy(Movable):
         Returns:
             The time for all redirection steps in seconds.
         """
-        return self.inner.redirect_time()
+        return self.get_info_float(Info.REDIRECT_TIME)
 
     def speed_download(self) raises -> Float64:
         """Get the average download speed in bytes per second.
@@ -2908,7 +2944,7 @@ struct Easy(Movable):
         Returns:
             The average download speed in bytes per second.
         """
-        return self.inner.speed_download()
+        return self.get_info_float(Info.SPEED_DOWNLOAD_T)
 
     def speed_upload(self) raises -> Float64:
         """Get the average upload speed in bytes per second.
@@ -2919,7 +2955,7 @@ struct Easy(Movable):
         Returns:
             The average upload speed in bytes per second.
         """
-        return self.inner.speed_upload()
+        return self.get_info_float(Info.SPEED_UPLOAD_T)
 
     def pipewait(self, *, wait: Bool) -> Result:
         """Wait for pipelining/multiplexing.
@@ -2956,7 +2992,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.pipewait(wait=wait)
+        return self.set_option(Option.PIPE_WAIT, c_long(Int(wait)))
 
     def http_09_allowed(self, *, allow: Bool) -> Result:
         """Allow HTTP/0.9 compliant responses.
@@ -2973,7 +3009,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_09_allowed(allow=allow)
+        return self.set_option(Option.HTTP09_ALLOWED, c_long(Int(allow)))
 
     # =========================================================================
     # Callback options
@@ -3012,7 +3048,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.write_function(callback)
+        return self.set_option(Option.WRITE_FUNCTION, callback)
 
     def write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
@@ -3029,7 +3065,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.write_data(data)
+        return self.set_option(Option.WRITE_DATA, data)
 
     def read_function(self, callback: ReadCallbackFn) -> Result:
         """Set callback for reading data to upload.
@@ -3055,7 +3091,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.read_function(callback)
+        return self.set_option(Option.READ_FUNCTION, callback)
 
     def read_data[origin: ImmutOrigin, //](self, data: ImmutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to read callback.
@@ -3072,7 +3108,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.read_data(data)
+        return self.set_option(Option.READ_DATA, data)
 
     def headers(self, origin: HeaderOrigin = HeaderOrigin.HEADER) -> Dict[String, String]:
         """Move to next header set for multi-response requests.
@@ -3101,7 +3137,7 @@ struct Easy(Movable):
         Returns:
             The URL scheme used in the transfer.
         """
-        return self.inner.get_scheme()
+        return self.get_info(Info.SCHEME)
 
     def escape(self, var string: String) raises -> String:
         """URL-encode the given string.
