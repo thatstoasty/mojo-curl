@@ -3,11 +3,13 @@ from std.pathlib import Path
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
-from mojo_curl.c import HeaderOrigin, Info, Option, Result, ReadWriteCallbackFn
+from mojo_curl.c import HeaderOrigin, Info, Option, Result, WriteCallbackFn, ReadCallbackFn
 
 
 struct Easy(Movable):
+    """A handle for performing file transfers with libcurl."""
     var inner: InnerEasy
+    """The inner easy handle that manages the libcurl resources."""
 
     def __init__(out self):
         self.inner = InnerEasy()
@@ -59,7 +61,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    def set_option(self, option: Option, parameter: ReadWriteCallbackFn) -> Result:
+    def set_option(self, option: Option, parameter: WriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -99,7 +101,7 @@ struct Easy(Movable):
         return self.inner.describe_error(code)
 
     # Behavior options
-    def verbose(self, verbose: Bool) -> Result:
+    def verbose(self, *, verbose: Bool) -> Result:
         """Configures this handle to have verbose output to help debug protocol
         information.
 
@@ -115,9 +117,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.verbose(verbose)
+        return self.inner.verbose(verbose=verbose)
 
-    def show_header(self, show: Bool) -> Result:
+    def show_header(self, *, show: Bool) -> Result:
         """Indicates whether header information is streamed to the output body of
         this request.
 
@@ -137,9 +139,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.show_header(show)
+        return self.inner.show_header(show=show)
 
-    def progress(self, progress: Bool) -> Result:
+    def progress(self, *, progress: Bool) -> Result:
         """Indicates whether a progress meter will be shown for requests done with
         this handle.
 
@@ -154,9 +156,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.progress(progress)
+        return self.inner.progress(progress=progress)
 
-    def signal(self, signal: Bool) -> Result:
+    def signal(self, *, signal: Bool) -> Result:
         """Inform libcurl whether or not it should install signal handlers or
         attempt to use signals to perform library functions.
 
@@ -177,9 +179,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.signal(signal)
+        return self.inner.signal(signal=signal)
 
-    def wildcard_match(self, m: Bool) -> Result:
+    def wildcard_match(self, *, enable: Bool) -> Result:
         """Indicates whether multiple files will be transferred based on the file
         name pattern.
 
@@ -189,19 +191,19 @@ struct Easy(Movable):
         `CURLOPT_WILDCARDMATCH`.
 
         Args:
-            m: Whether to enable wildcard matching.
+            enable: Whether to enable wildcard matching.
 
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.wildcard_match(m)
+        return self.inner.wildcard_match(enable=enable)
 
     # =========================================================================
     # Error options
 
     # TODO: error buffer and stderr
 
-    def fail_on_error(self, fail: Bool) -> Result:
+    def fail_on_error(self, *, fail: Bool) -> Result:
         """Indicates whether this library will fail on HTTP response codes >= 400.
 
         This method is not fail-safe especially when authentication is involved.
@@ -215,7 +217,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.fail_on_error(fail)
+        return self.inner.fail_on_error(fail=fail)
 
     # =========================================================================
     # Network options
@@ -276,7 +278,7 @@ struct Easy(Movable):
     #     # This requires curl_slist support which needs to be added
     #     return Result(0)
 
-    def path_as_is(self, as_is: Bool) -> Result:
+    def path_as_is(self, *, as_is: Bool) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
 
         By default this option is `false` and corresponds to
@@ -288,7 +290,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.path_as_is(as_is)
+        return self.inner.path_as_is(as_is=as_is)
 
     def proxy(self, var url: String) -> Result:
         """Provide the URL of a proxy to use.
@@ -333,9 +335,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.no_proxy(skip)
+        return self.inner.no_proxy(skip=skip)
 
-    def http_proxy_tunnel(self, tunnel: Bool) -> Result:
+    def http_proxy_tunnel(self, *, tunnel: Bool) -> Result:
         """Inform curl whether it should tunnel all operations through the proxy.
 
         This essentially means that a `CONNECT` is sent to the proxy for all
@@ -350,7 +352,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_proxy_tunnel(tunnel)
+        return self.inner.http_proxy_tunnel(tunnel=tunnel)
 
     def interface(self, var interface: String) -> Result:
         """Tell curl which interface to bind to for an outgoing network interface.
@@ -459,7 +461,7 @@ struct Easy(Movable):
         """
         return self.inner.doh_url(url)
 
-    def doh_ssl_verify_peer(self, verify: Bool) -> Result:
+    def doh_ssl_verify_peer(self, *, verify: Bool) -> Result:
         """This option tells curl to verify the authenticity of the DoH
         (DNS-over-HTTPS) server's certificate. A value of `true` means curl
         verifies; `false` means it does not.
@@ -502,9 +504,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_ssl_verify_peer(verify)
+        return self.inner.doh_ssl_verify_peer(verify=verify)
 
-    def doh_ssl_verify_host(self, verify: Bool) -> Result:
+    def doh_ssl_verify_host(self, *, verify: Bool) -> Result:
         """Tells curl to verify the DoH (DNS-over-HTTPS) server's certificate name
         fields against the host name.
 
@@ -537,7 +539,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_ssl_verify_host(verify)
+        return self.inner.doh_ssl_verify_host(verify=verify)
 
     def proxy_cainfo(self, var cainfo: String) -> Result:
         """Set CA certificate to verify peer against for proxy.
@@ -669,7 +671,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_type(kind)
 
-    def doh_ssl_verify_status(self, verify: Bool) -> Result:
+    def doh_ssl_verify_status(self, *, verify: Bool) -> Result:
         """Pass a long as parameter set to 1 to enable or 0 to disable.
 
         This option determines whether libcurl verifies the status of the DoH
@@ -691,7 +693,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.doh_ssl_verify_status(verify)
+        return self.inner.doh_ssl_verify_status(verify=verify)
 
     def buffer_size(self, size: Int) -> Result:
         """Specify the preferred receive buffer size, in bytes.
@@ -732,10 +734,10 @@ struct Easy(Movable):
     # #
     # # By default this options defaults to `false` and corresponds to
     # # `CURLOPT_TCP_FASTOPEN`
-    # def fast_open(self, enable: Bool) -> Result:
+    # def fast_open(self, *, enable: Bool) -> Result:
     #
 
-    def tcp_nodelay(self, enable: Bool) -> Result:
+    def tcp_nodelay(self, *, enable: Bool) -> Result:
         """Configures whether the TCP_NODELAY option is set, or Nagle's algorithm
         is disabled.
 
@@ -752,9 +754,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.tcp_nodelay(enable)
+        return self.inner.tcp_nodelay(enable=enable)
 
-    def tcp_keepalive(self, enable: Bool) -> Result:
+    def tcp_keepalive(self, *, enable: Bool) -> Result:
         """Configures whether TCP keepalive probes will be sent.
 
         The delay and frequency of these probes is controlled by `tcp_keepidle`
@@ -769,7 +771,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.tcp_keepalive(enable)
+        return self.inner.tcp_keepalive(enable=enable)
 
     def tcp_keepidle(self, seconds: Int) -> Result:
         """Configures the TCP keepalive idle time wait.
@@ -963,7 +965,7 @@ struct Easy(Movable):
     # =========================================================================
     # HTTP Options
 
-    def autoreferer(self, enable: Bool) -> Result:
+    def autoreferer(self, *, enable: Bool) -> Result:
         """Indicates whether the referer header is automatically updated.
 
         By default this option is `false` and corresponds to
@@ -975,7 +977,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.autoreferer(enable)
+        return self.inner.autoreferer(enable=enable)
 
     def accept_encoding(self, var encoding: String) -> Result:
         """Enables automatic decompression of HTTP downloads.
@@ -997,7 +999,7 @@ struct Easy(Movable):
         """
         return self.inner.accept_encoding(encoding)
 
-    def transfer_encoding(self, enable: Bool) -> Result:
+    def transfer_encoding(self, *, enable: Bool) -> Result:
         """Request the HTTP Transfer Encoding.
 
         By default this option is `false` and corresponds to
@@ -1009,9 +1011,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.transfer_encoding(enable)
+        return self.inner.transfer_encoding(enable=enable)
 
-    def follow_location(self, enable: Bool) -> Result:
+    def follow_location(self, *, enable: Bool) -> Result:
         """Follow HTTP 3xx redirects.
 
         Indicates whether any `Location` headers in the response should get
@@ -1026,9 +1028,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.follow_location(enable)
+        return self.inner.follow_location(enable=enable)
 
-    def unrestricted_auth(self, enable: Bool) -> Result:
+    def unrestricted_auth(self, *, enable: Bool) -> Result:
         """Send credentials to hosts other than the first as well.
 
         Sends username/password credentials even when the host changes as part
@@ -1043,7 +1045,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.unrestricted_auth(enable)
+        return self.inner.unrestricted_auth(enable=enable)
 
     def max_redirections(self, max: Int) -> Result:
         """Set the maximum number of redirects allowed.
@@ -1076,14 +1078,14 @@ struct Easy(Movable):
         """
         return self.inner.post_redirections(redirects)
 
-    # def put(self, enable: Bool) -> Result:
+    # def put(self, *, enable: Bool) -> Result:
     #     """Make an HTTP PUT request.
 
     #     By default this option is `false` and corresponds to `CURLOPT_PUT`.
     #     """
-    #     return self.inner.set_option(Option.PUT, Int(enable))
+    #     return self.inner.set_option(Option.PUT, Int(enable=enable))
 
-    def post(self, enable: Bool) -> Result:
+    def post(self, *, enable: Bool) -> Result:
         """Make an HTTP POST request.
 
         This will also make the library use the
@@ -1100,7 +1102,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.post(enable)
+        return self.inner.post(enable=enable)
 
     def post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
@@ -1326,7 +1328,7 @@ struct Easy(Movable):
         """
         return self.inner.cookie_jar(path)
 
-    def cookie_session(self, session: Bool) -> Result:
+    def cookie_session(self, *, session: Bool) -> Result:
         """Start a new cookie session.
 
         Marks this as a new cookie "session". It will force libcurl to ignore
@@ -1345,7 +1347,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.cookie_session(session)
+        return self.inner.cookie_session(session=session)
 
     def cookie_list(self, var cookie: String) -> Result:
         """Add to or manipulate cookies held in memory.
@@ -1394,7 +1396,7 @@ struct Easy(Movable):
         """
         return self.inner.cookies()
 
-    def get(self, enable: Bool) -> Result:
+    def get(self, *, enable: Bool) -> Result:
         """Ask for a HTTP GET request.
 
         By default this option is `false` and corresponds to `CURLOPT_HTTPGET`.
@@ -1405,7 +1407,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.get(enable)
+        return self.inner.get(enable=enable)
 
     # # Ask for a HTTP GET request.
     # #
@@ -1413,7 +1415,7 @@ struct Easy(Movable):
     # def http_version(self, vers: String) -> Result:
     #     pass
 
-    def ignore_content_length(self, ignore: Bool) -> Result:
+    def ignore_content_length(self, *, ignore: Bool) -> Result:
         """Ignore the content-length header.
 
         By default this option is `false` and corresponds to
@@ -1425,9 +1427,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ignore_content_length(ignore)
+        return self.inner.ignore_content_length(ignore=ignore)
 
-    def http_content_decoding(self, enable: Bool) -> Result:
+    def http_content_decoding(self, *, enable: Bool) -> Result:
         """Enable or disable HTTP content decoding.
 
         By default this option is `true` and corresponds to
@@ -1439,9 +1441,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_content_decoding(enable)
+        return self.inner.http_content_decoding(enable=enable)
 
-    def http_transfer_decoding(self, enable: Bool) -> Result:
+    def http_transfer_decoding(self, *, enable: Bool) -> Result:
         """Enable or disable HTTP transfer decoding.
 
         By default this option is `true` and corresponds to
@@ -1453,13 +1455,13 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_transfer_decoding(enable)
+        return self.inner.http_transfer_decoding(enable=enable)
 
     # # Timeout for the Expect: 100-continue response
     # #
     # # By default this option is 1s and corresponds to
     # # `CURLOPT_EXPECT_100_TIMEOUT_MS`.
-    # def expect_100_timeout(self, enable: Bool) -> Result:
+    # def expect_100_timeout(self, *, enable: Bool) -> Result:
     #     pass
 
     # # Wait for pipelining/multiplexing.
@@ -1486,7 +1488,7 @@ struct Easy(Movable):
     # # The waiting time is as long as it takes for the connection to get up and
     # # for libcurl to get the necessary response back that informs it about its
     # # protocol and support level.
-    # def http_pipewait(self, enable: Bool) -> Result:
+    # def http_pipewait(self, *, enable: Bool) -> Result:
     #     pass
 
     # =========================================================================
@@ -1543,7 +1545,7 @@ struct Easy(Movable):
         """
         return self.inner.custom_request(request)
 
-    def fetch_filetime(self, fetch: Bool) -> Result:
+    def fetch_filetime(self, *, fetch: Bool) -> Result:
         """Get the modification time of the remote resource.
 
         If true, libcurl will attempt to get the modification time of the
@@ -1560,9 +1562,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.fetch_filetime(fetch)
+        return self.inner.fetch_filetime(fetch=fetch)
 
-    def nobody(self, enable: Bool) -> Result:
+    def nobody(self, *, enable: Bool) -> Result:
         """Indicate whether to download the request without getting the body.
 
         This is useful, for example, for doing a HEAD request.
@@ -1575,7 +1577,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.nobody(enable)
+        return self.inner.nobody(enable=enable)
 
     def read_file_size(self, size: Int) -> Result:
         """Set the size of the input file to send off.
@@ -1591,7 +1593,7 @@ struct Easy(Movable):
         """
         return self.inner.read_file_size(size)
 
-    def upload(self, enable: Bool) -> Result:
+    def upload(self, *, enable: Bool) -> Result:
         """Enable or disable data upload.
 
         This means that a PUT request will be made for HTTP and probably wants
@@ -1606,7 +1608,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.upload(enable)
+        return self.inner.upload(enable=enable)
 
     def max_filesize(self, size: Int) -> Result:
         """Configure the maximum file size to download.
@@ -1801,7 +1803,7 @@ struct Easy(Movable):
         """
         return self.inner.maxage_conn(max_age_seconds)
 
-    def fresh_connect(self, enable: Bool) -> Result:
+    def fresh_connect(self, *, enable: Bool) -> Result:
         """Force a new connection to be used.
 
         Makes the next transfer use a new (fresh) connection by force instead of
@@ -1818,9 +1820,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.fresh_connect(enable)
+        return self.inner.fresh_connect(enable=enable)
 
-    def forbid_reuse(self, enable: Bool) -> Result:
+    def forbid_reuse(self, *, enable: Bool) -> Result:
         """Make connection get closed at once after use.
 
         Makes libcurl explicitly close the connection when done with the
@@ -1838,7 +1840,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.forbid_reuse(enable)
+        return self.inner.forbid_reuse(enable=enable)
 
     def connect_timeout(self, timeout_ms: Int) -> Result:
         """Timeout for the connect phase.
@@ -1885,7 +1887,7 @@ struct Easy(Movable):
     #     # TODO: Implement this when List type is available
     #     pass
 
-    def connect_only(self, enable: Bool) -> Result:
+    def connect_only(self, *, enable: Bool) -> Result:
         """Configure whether to stop when connected to target server.
 
         When enabled it tells the library to perform all the required proxy
@@ -1903,7 +1905,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.connect_only(enable)
+        return self.inner.connect_only(enable=enable)
 
     # # Set interface to speak DNS over.
     # #
@@ -2124,7 +2126,7 @@ struct Easy(Movable):
         """
         return self.inner.ssl_engine(engine)
 
-    def ssl_engine_default(self, enable: Bool) -> Result:
+    def ssl_engine_default(self, *, enable: Bool) -> Result:
         """Make this handle's SSL engine the default.
 
         By default this option is not set and corresponds to
@@ -2136,7 +2138,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_engine_default(enable)
+        return self.inner.ssl_engine_default(enable=enable)
 
     # # Enable TLS false start.
     # #
@@ -2147,7 +2149,7 @@ struct Easy(Movable):
     # #
     # # By default this option is not set and corresponds to
     # # `CURLOPT_SSL_FALSESTARTE`.
-    # def ssl_false_start(self, enable: Bool) -> Result:
+    # def ssl_false_start(self, *, enable: Bool) -> Result:
     #     pass
 
     def http_version(self, version: Int) -> Result:
@@ -2225,7 +2227,7 @@ struct Easy(Movable):
         var version = min_version | (max_version << 16)
         return self.inner.proxy_ssl_version(version)
 
-    def ssl_verify_host(self, verify: Bool) -> Result:
+    def ssl_verify_host(self, *, verify: Bool) -> Result:
         """Verify the certificate's name against host.
 
         This should be disabled with great caution! It basically disables the
@@ -2240,9 +2242,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_verify_host(verify)
+        return self.inner.ssl_verify_host(verify=verify)
 
-    def proxy_ssl_verify_host(self, verify: Bool) -> Result:
+    def proxy_ssl_verify_host(self, *, verify: Bool) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
 
         This should be disabled with great caution! It basically disables the
@@ -2257,9 +2259,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_ssl_verify_host(verify)
+        return self.inner.proxy_ssl_verify_host(verify=verify)
 
-    def ssl_verify_peer(self, verify: Bool) -> Result:
+    def ssl_verify_peer(self, *, verify: Bool) -> Result:
         """Verify the peer's SSL certificate.
 
         This should be disabled with great caution! It basically disables the
@@ -2274,9 +2276,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_verify_peer(verify)
+        return self.inner.ssl_verify_peer(verify=verify)
 
-    def proxy_ssl_verify_peer(self, verify: Bool) -> Result:
+    def proxy_ssl_verify_peer(self, *, verify: Bool) -> Result:
         """Verify the peer's SSL certificate for HTTPS proxy.
 
         This should be disabled with great caution! It basically disables the
@@ -2291,7 +2293,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.proxy_ssl_verify_peer(verify)
+        return self.inner.proxy_ssl_verify_peer(verify=verify)
 
     # # Verify the certificate's status.
     # #
@@ -2301,7 +2303,7 @@ struct Easy(Movable):
     # #
     # # By default this option is set to `false` and corresponds to
     # # `CURLOPT_SSL_VERIFYSTATUS`.
-    # def ssl_verify_status(self, verify: Bool) -> Result:
+    # def ssl_verify_status(self, *, verify: Bool) -> Result:
     #     pass
 
     # TODO: Specify the path to Certificate Authority (CA) bundle
@@ -2440,7 +2442,7 @@ struct Easy(Movable):
     #     """
     #     return self.inner.set_option(Option.PROXY_CRLFILE, path)
 
-    def certinfo(self, enable: Bool) -> Result:
+    def certinfo(self, *, enable: Bool) -> Result:
         """Request SSL certificate information.
 
         Enable libcurl's certificate chain info gatherer. With this enabled,
@@ -2456,7 +2458,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.certinfo(enable)
+        return self.inner.certinfo(enable=enable)
 
     def pinned_public_key(self, var pubkey: String) -> Result:
         """Set pinned public key.
@@ -2566,7 +2568,7 @@ struct Easy(Movable):
         """
         return self.inner.proxy_ssl_cipher_list(ciphers)
 
-    def ssl_sessionid_cache(self, enable: Bool) -> Result:
+    def ssl_sessionid_cache(self, *, enable: Bool) -> Result:
         """Enable or disable use of the SSL session-ID cache.
 
         By default all transfers are done using the cache enabled. While nothing
@@ -2582,7 +2584,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.ssl_sessionid_cache(enable)
+        return self.inner.ssl_sessionid_cache(enable=enable)
 
     # TODO: Set SSL behavior options
     # Requires SslOpt type support
@@ -2919,7 +2921,7 @@ struct Easy(Movable):
         """
         return self.inner.speed_upload()
 
-    def pipewait(self, wait: Bool) -> Result:
+    def pipewait(self, *, wait: Bool) -> Result:
         """Wait for pipelining/multiplexing.
 
         Set wait to True to tell libcurl to prefer to wait for a connection to
@@ -2954,9 +2956,9 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.pipewait(wait)
+        return self.inner.pipewait(wait=wait)
 
-    def http_09_allowed(self, allow: Bool) -> Result:
+    def http_09_allowed(self, *, allow: Bool) -> Result:
         """Allow HTTP/0.9 compliant responses.
 
         Set allow to True to tell libcurl to allow HTTP/0.9 responses. A HTTP/0.9
@@ -2971,12 +2973,12 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.inner.http_09_allowed(allow)
+        return self.inner.http_09_allowed(allow=allow)
 
     # =========================================================================
     # Callback options
 
-    def write_function(self, callback: ReadWriteCallbackFn) -> Result:
+    def write_function(self, callback: WriteCallbackFn) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -3001,7 +3003,7 @@ struct Easy(Movable):
         By default data is sent into the void, and this corresponds to the
         `CURLOPT_WRITEFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the ReadWriteCallbackFn
+        Note: In Mojo, the callback function must match the WriteCallbackFn
         signature defined in the bindings.
 
         Args:
@@ -3029,7 +3031,7 @@ struct Easy(Movable):
         """
         return self.inner.write_data(data)
 
-    def read_function(self, callback: ReadWriteCallbackFn) -> Result:
+    def read_function(self, callback: ReadCallbackFn) -> Result:
         """Set callback for reading data to upload.
 
         This callback function gets called by libcurl when it needs to read
@@ -3044,7 +3046,7 @@ struct Easy(Movable):
         By default data is read from /dev/null, and this corresponds to the
         `CURLOPT_READFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the ReadWriteCallbackFn
+        Note: In Mojo, the callback function must match the ReadCallbackFn
         signature defined in the bindings.
 
         Args:

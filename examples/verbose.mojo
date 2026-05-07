@@ -5,7 +5,7 @@ def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://httpbin.org/get")
-    _ = easy.verbose(True)
+    _ = easy.verbose(verbose=True)
     var result = easy.perform()
     if result != Result.OK:
         raise Error(easy.describe_error(result))

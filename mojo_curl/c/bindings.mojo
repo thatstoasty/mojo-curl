@@ -8,19 +8,20 @@ from mojo_curl.c.types import (
     Info,
     Option,
     Result,
-    ReadWriteCallbackFn,
+    WriteCallbackFn,
+    ReadCallbackFn,
     curl_slist,
 )
 from mojo_curl.c.header import curl_header
 
 
 @fieldwise_init
-struct curl:
+struct curl(Movable):
     """Struct representing the libcurl library and its functions."""
     var lib: _curl
     """The raw libcurl bindings. DO NOT USE THIS DIRECTLY. Use the safe wrapper functions instead."""
 
-    def __init__(out self):
+    def __init__(out self) raises:
         self.lib = _curl()
 
     # Global libcurl functions
@@ -121,7 +122,7 @@ struct curl:
         """
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 
-    def easy_setopt(self, easy: CURL, option: Option, parameter: ReadWriteCallbackFn) -> Result:
+    def easy_setopt(self, easy: CURL, option: Option, parameter: WriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -149,7 +150,7 @@ struct curl:
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_getinfo_string(easy, info.value, Pointer(to=parameter))
+        return self.lib.curl_easy_getinfo_string(easy, info.value, UnsafePointer(to=parameter))
 
     def easy_getinfo(
         self,
@@ -167,7 +168,7 @@ struct curl:
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_getinfo_long(easy, info.value, Pointer(to=parameter))
+        return self.lib.curl_easy_getinfo_long(easy, info.value, UnsafePointer(to=parameter))
 
     def easy_getinfo(
         self,
@@ -185,7 +186,7 @@ struct curl:
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_getinfo_float(easy, info.value, Pointer(to=parameter))
+        return self.lib.curl_easy_getinfo_double(easy, info.value, UnsafePointer(to=parameter))
 
     def easy_getinfo[
         origin: MutOrigin, //
@@ -387,7 +388,7 @@ struct curl:
         """
         var bytes_received: c_size_t = 0
         var result = self.lib.curl_easy_recv(
-            easy, buffer.unsafe_ptr().bitcast[NoneType](), capacity, Pointer(to=bytes_received)
+            easy, buffer.unsafe_ptr().bitcast[NoneType](), capacity, UnsafePointer(to=bytes_received)
         )
         return result, bytes_received
 
@@ -403,7 +404,7 @@ struct curl:
         """
         var bytes_sent: c_size_t = 0
         var result = self.lib.curl_easy_send(
-            easy, buffer.unsafe_ptr().bitcast[NoneType](), UInt(len(buffer)), Pointer(to=bytes_sent)
+            easy, buffer.unsafe_ptr().bitcast[NoneType](), UInt(len(buffer)), UnsafePointer(to=bytes_sent)
         )
         return result, bytes_sent
 

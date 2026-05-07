@@ -1,5 +1,5 @@
 from std.ffi import c_size_t, c_uint, c_char, c_int
-from mojo_curl.c.types import MutExternalPointer, MutExternalOpaquePointer
+from mojo_curl.c.types import MutExternalPointer
 
 
 struct curl_header:
@@ -14,7 +14,7 @@ struct curl_header:
     """Index of the header."""
     var origin: c_uint
     """Origin of the header."""
-    var anchor: MutExternalOpaquePointer
+    var anchor: MutExternalPointer[NoneType]
     """Pointer to the anchor."""
 
 

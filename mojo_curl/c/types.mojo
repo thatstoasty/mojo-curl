@@ -1,13 +1,11 @@
 from std.ffi import c_char, c_int, c_long, c_size_t, c_uint
-
+from mojo_curl.c.network import sockaddr
 
 comptime ImmutExternalPointer = ImmutUnsafePointer[origin=ImmutExternalOrigin, ...]
-comptime ImmutExternalOpaquePointer = ImmutExternalPointer[NoneType]
 comptime MutExternalPointer = MutUnsafePointer[origin=MutExternalOrigin, ...]
-comptime MutExternalOpaquePointer = MutExternalPointer[NoneType]
 
 # Type aliases for curl
-comptime CURL = MutExternalOpaquePointer
+comptime CURL = MutExternalPointer[NoneType]
 """Opaque pointer type for CURL easy handles."""
 
 struct curl_slist(TrivialRegisterPassable):
@@ -25,10 +23,8 @@ comptime CURL_SOCKET_BAD = -1
 """Constant representing an invalid socket in curl."""
 comptime curl_off_t = c_long
 """Type alias for curl offset type, used for file sizes and offsets."""
-
-comptime DebugCallbackFn = def(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalOpaquePointer) abi("C") thin -> c_int
-"""This is the prototype for the debug callback function used by curl. It is used for `CURLOPT_DEBUGFUNCTION`."""
-
+comptime time_t = Int64
+"""Type alias for time type used in curl, typically representing seconds since the Unix epoch."""
 
 struct curl_blob[origin: MutOrigin, //](Movable):
     """CURL blob struct for binary data transfer.
@@ -726,7 +722,7 @@ struct curl_httppost:
     """As defined below."""
     var show_file_name: MutExternalPointer[c_char]
     """The filename to show. If not set, the actual filename will be used (if this is a file part)."""
-    var user_ptr: MutExternalOpaquePointer
+    var user_ptr: MutExternalPointer[NoneType]
     """Custom user pointer used for HTTPPOST_CALLBACK posts."""
     var contentlen: curl_off_t
     """Alternative length of contents field. Used if CURL_HTTPPOST_LARGE is set. Added in 7.46.0."""
@@ -769,7 +765,7 @@ comptime CURL_WRITEFUNC_ERROR = 0xFFFFFFFF
 """This is a return code for the write callback that, when returned,
 will signal an error from the callback."""
 
-comptime WriteCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) abi("C") thin -> c_size_t
+comptime WriteCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_size_t
 """This is the prototype for the write callback function used by curl. It matches the `CURLOPT_WRITEFUNCTION` prototype and can also be used where a generic read/write signature is needed."""
 
 comptime ResolverStartCallbackFn = def(MutExternalPointer[NoneType], MutExternalPointer[NoneType], MutExternalPointer[NoneType]) abi("C") thin -> c_int
@@ -869,7 +865,7 @@ comptime CURL_CHUNK_BGN_FUNC_SKIP = 2
 comptime ChunkBgnCallbackFn = def(ImmutExternalPointer[NoneType], MutExternalPointer[NoneType], c_int) abi("C") thin -> c_long
 """If splitting of data transfer is enabled, this callback is called before
 download of an individual chunk started. Note that parameter "remains" works
-only for FTP wildcard downloading (for now), otherwise is not used"""
+only for FTP wildcard downloading (for now), otherwise is not used."""
 
 # Return codes for CURLOPT_CHUNK_END_FUNCTION
 comptime CURL_CHUNK_END_FUNC_OK = 0
@@ -922,7 +918,7 @@ comptime CURL_TRAILERFUNC_OK = 0
 comptime CURL_TRAILERFUNC_ABORT = 1
 """Return code for when there was an error in the trailing header's list and we want to abort the request."""
 
-comptime ReadCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalOpaquePointer) abi("C") thin -> c_size_t
+comptime ReadCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_size_t
 """This is the prototype for the read callback function used by curl. It matches the `CURLOPT_READFUNCTION` prototype, where the first argument is a writable buffer that the callback must fill."""
 comptime TrailerCallbackFn = def(MutExternalPointer[MutExternalPointer[curl_slist]], MutExternalPointer[NoneType]) abi("C") thin -> c_int
 """This is the prototype for the trailing headers callback function used by curl. It matches the `CURLOPT_TRAILERFUNCTION` prototype, where the first argument is a pointer to a pointer to a curl_slist that the callback must fill with the trailing headers."""
@@ -982,6 +978,46 @@ comptime CURLIOCMD_LAST: curliocmd = 2
 
 comptime IOCtlCallbackFn = def(CURL, curliocmd, MutExternalPointer[NoneType]) abi("C") thin -> curlioerr
 """This is the prototype for the ioctl callback function used by curl. It matches the `CURLOPT_IOCTLFUNCTION` prototype, where the `cmd` parameter is one of the `curliocmd` values and the return value should be one of the `curlioerr` values."""
+
+
+# The following typedef's are signatures of malloc, free, realloc, strdup and calloc respectively.
+# Function pointers of these types can be passed to the
+# curl_global_init_mem() function to set user defined memory management
+# callback routines.
+comptime MallocCallbackFn = def(size: c_size_t) abi("C") thin -> MutExternalPointer[NoneType]
+comptime FreeCallbackFn = def(ptr: MutExternalPointer[NoneType]) abi("C") thin -> None
+comptime ReallocCallbackFn = def(ptr: MutExternalPointer[NoneType], size: c_size_t) abi("C") thin -> MutExternalPointer[NoneType]
+comptime StrdupCallbackFn = def(str: ImmutExternalPointer[c_char]) abi("C") thin -> MutExternalPointer[c_char]
+comptime CallocCallbackFn = def(nmemb: c_size_t, size: c_size_t) abi("C") thin -> MutExternalPointer[NoneType]
+
+comptime curl_infotype = c_int
+"""Enumeration of information types used in the `CURLOPT_DEBUGFUNCTION` callback."""
+comptime CURLINFO_TEXT: curl_infotype = 0
+"""Informational text. This is the default type of information passed to the debug callback."""
+comptime CURLINFO_HEADER_IN: curl_infotype = 1
+"""Header data received from the server."""
+comptime CURLINFO_HEADER_OUT: curl_infotype = 2
+"""Header data sent to the server."""
+comptime CURLINFO_DATA_IN: curl_infotype = 3
+"""Data received from the server."""
+comptime CURLINFO_DATA_OUT: curl_infotype = 4
+"""Data sent to the server."""
+comptime CURLINFO_SSL_DATA_IN: curl_infotype = 5
+"""SSL data received from the server."""
+comptime CURLINFO_SSL_DATA_OUT: curl_infotype = 6
+"""SSL data sent to the server."""
+comptime CURLINFO_END: curl_infotype = 7
+"""Marker for the last valid curl_infotype value. Never use."""
+
+comptime DebugCallbackFn = def(CURL, c_int, MutExternalPointer[c_char], c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_int
+"""This is the prototype for the debug callback function used by curl. It is used for `CURLOPT_DEBUGFUNCTION`."""
+comptime PreReqCallbackFn = def(MutExternalPointer[NoneType], MutExternalPointer[c_char], MutExternalPointer[c_char], c_int, c_int) abi("C") thin -> c_int
+"""This is the `CURLOPT_PREREQFUNCTION` callback prototype."""
+
+comptime CURL_PREREQFUNC_OK = 0
+"""Return code for when the pre-request callback has terminated without any errors."""
+comptime CURL_PREREQFUNC_ABORT = 1
+"""Return code for when there was an error in the pre-request callback and we want to abort the request."""
 
 comptime CURL_GLOBAL_SSL = (1 << 0)
 comptime CURL_GLOBAL_WIN32 = (1 << 1)

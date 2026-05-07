@@ -1,9 +1,35 @@
+from std.collections.string.string import CStringSlice
 from mojo_curl.c.types import curl_slist, MutExternalPointer
 from mojo_curl.c.api import curl_ffi
 
 
+def _build_header_string(key: String, value: String) -> String:
+    """Builds a header string in the format "Key: Value" or "Key;" if the value is empty.
+
+    Args:
+        key: The header key.
+        value: The header value.
+
+    Returns:
+        A formatted header string.
+    """
+    var key_byte_length = key.byte_length()
+    var value_byte_length = value.byte_length()
+    var capacity_to_reserve = (key_byte_length + 2) if value_byte_length == 0 else (value_byte_length + key_byte_length + 2)
+    var header = String(capacity=capacity_to_reserve)  # +2 for ": " or ";"
+    header.write(key)
+    if value_byte_length > 0:
+        header.write(": ")
+        header.write(value)
+    else:
+        header.write(";")
+    return header^
+
+
+# TODO: Add Boolable and Defaultable back in the next release, at the moment
+# they conform to ImplicitlyDestructible, but that's been removed in the next Mojo release.
 @explicit_destroy("CurlList must be explicitly destroyed using the `free` method.")
-struct CurlList(Boolable, Defaultable, Movable):
+struct CurlList(Movable):
     """Represents a linked list of HTTP headers for use with libcurl."""
 
     var data: MutExternalPointer[curl_slist]
@@ -15,15 +41,9 @@ struct CurlList(Boolable, Defaultable, Movable):
     def __init__(out self, headers: Dict[String, String]) raises:
         self.data = MutExternalPointer[curl_slist]()
         for pair in headers.items():
-            var header = pair.key.copy()
-            if len(pair.value) > 0:
-                header.write(": ")
-                header.write(pair.value)
-            else:
-                header.write(";")
-
+            var header = _build_header_string(pair.key, pair.value)
             try:
-                self.append(header)
+                self.append(header.as_c_string_slice())
             except e:
                 self^.free()
                 raise e^
@@ -36,15 +56,9 @@ struct CurlList(Boolable, Defaultable, Movable):
     ) raises:
         self.data = MutExternalPointer[curl_slist]()
         for pair in zip(headers, values):
-            var header = pair[0]
-            if len(pair[1]) > 0:
-                header.write(": ")
-                header.write(pair[1])
-            else:
-                header.write(";")
-
+            var header = _build_header_string(pair[0], pair[1])
             try:
-                self.append(header)
+                self.append(header.as_c_string_slice())
             except e:
                 self^.free()
                 raise e^
@@ -52,8 +66,8 @@ struct CurlList(Boolable, Defaultable, Movable):
     def __bool__(self) -> Bool:
         return Bool(self.data)
 
-    def append(mut self, mut header: String) raises:
-        var ptr = curl_ffi()[].slist_append(self.data, header.as_c_string_slice().unsafe_ptr())
+    def append(mut self, header: CStringSlice) raises:
+        var ptr = curl_ffi()[].slist_append(self.data, header.unsafe_ptr())
         if not ptr:
             raise Error("Failed to append to curl_slist")
         self.data = ptr

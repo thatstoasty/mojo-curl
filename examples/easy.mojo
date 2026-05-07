@@ -1,11 +1,11 @@
 from std.ffi import c_char, c_long, c_size_t
 
-from mojo_curl.c.types import MutExternalOpaquePointer, MutExternalPointer, Option, Result
+from mojo_curl.c.types import MutExternalPointer, Option, Result
 from mojo_curl.easy import Easy
 from mojo_curl.list import CurlList
 
 
-def write_callback(ptr: MutExternalPointer[c_char], size: c_size_t, nmemb: c_size_t, userdata: MutExternalOpaquePointer) -> c_size_t:
+def write_callback(ptr: MutExternalPointer[c_char], size: c_size_t, nmemb: c_size_t, userdata: MutExternalPointer[NoneType]) abi("C") -> c_size_t:
     print("write callback called with size:", size * nmemb)
     print(StringSlice(unsafe_from_utf8_ptr=ptr))
     return size * nmemb
