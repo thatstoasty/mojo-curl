@@ -112,8 +112,8 @@ struct curl(Movable):
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
     def easy_setopt[
-        origin: Origin, //
-    ](self, easy: CURL, option: Option, parameter: OpaquePointer[origin]) -> Result:
+        origin: ImmutOrigin, //
+    ](self, easy: CURL, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -128,6 +128,24 @@ struct curl(Movable):
             CURLcode result code.
         """
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
+    
+    def easy_setopt[
+        origin: MutOrigin, //
+    ](self, easy: CURL, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
+        """Set a pointer option for a curl easy handle using safe wrapper.
+
+        Parameters:
+            origin: The origin of the pointer.
+
+        Args:
+            easy: The curl easy handle.
+            option: The option to set.
+            parameter: The pointer parameter to set.
+
+        Returns:
+            CURLcode result code.
+        """
+        return self.lib.curl_easy_setopt_pointer_mut(easy, option.value, parameter)
 
     def easy_setopt(self, easy: CURL, option: Option, parameter: WriteCallbackFn) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
@@ -215,7 +233,7 @@ struct curl(Movable):
 
     def easy_getinfo[
         origin: MutOrigin, //
-    ](self, easy: CURL, info: Info, mut ptr: MutUnsafePointer[curl_slist, origin],) -> Result:
+    ](self, easy: CURL, info: Info, mut ptr: MutUnsafePointer[curl_slist, origin]) -> Result:
         """Get long info from a curl easy handle using safe wrapper.
 
         Parameters:

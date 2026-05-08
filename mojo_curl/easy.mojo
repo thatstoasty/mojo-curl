@@ -14,7 +14,7 @@ struct Easy(Movable):
     var inner: InnerEasy
     """The inner easy handle that manages the libcurl resources."""
 
-    def __init__(out self):
+    def __init__(out self) raises:
         self.inner = InnerEasy()
 
     def __del__(deinit self):
@@ -49,7 +49,22 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    def set_option[origin: Origin, //](self, option: Option, parameter: OpaquePointer[origin]) -> Result:
+    def set_option[origin: ImmutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
+        """Set a pointer option for a curl easy handle using safe wrapper.
+
+        Parameters:
+            origin: The lifetime of the data.
+
+        Args:
+            option: The option to set.
+            parameter: The pointer parameter to set for the option.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.inner.set_option(option.value, parameter)
+    
+    def set_option[origin: MutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -306,7 +321,7 @@ struct Easy(Movable):
     # =========================================================================
     # Connection options
 
-    def connect_to(self, list: CurlList) -> Result:
+    def connect_to(self, list: CurlList) raises -> Result:
         """Connect to a specific host and port.
 
         Each single string should be written using the format
@@ -319,8 +334,19 @@ struct Easy(Movable):
 
         By default, this option is empty and corresponds to
         `CURLOPT_CONNECT_TO`.
+
+        Args:
+            list: A `CurlList` of strings specifying hosts and ports to connect to.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+
+        Raises:
+            Error: If the provided list is empty.
         """
-        return self.set_option(Option.CONNECT_TO, list.unsafe_ptr().bitcast[NoneType]())
+        if not list.unsafe_ptr():
+            raise Error(t"Failed to set `connect_to` option: `list` cannot be empty.")
+        return self.set_option(Option.CONNECT_TO, list.unsafe_ptr().value().bitcast[NoneType]())
 
     def path_as_is(self, *, as_is: Bool) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
@@ -1263,7 +1289,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.USERAGENT, useragent.as_c_string_slice())
 
-    def http_headers(self, mut headers: CurlList) -> Result:
+    def http_headers(self, headers: CurlList) -> Result:
         """Add some headers to this HTTP request.
 
         If you add a header that is otherwise used internally, the value here
@@ -1283,7 +1309,10 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.HTTP_HEADER, headers.unsafe_ptr().bitcast[NoneType]())
+        var ptr = headers.unsafe_ptr()
+        if not ptr:
+            return Result.OK
+        return self.set_option(Option.HTTP_HEADER, ptr.value().bitcast[NoneType]())
 
     def cookie(self, var cookie: String) -> Result:
         """Set the contents of the HTTP Cookie header.
@@ -1873,13 +1902,25 @@ struct Easy(Movable):
         """
         return self.set_option(Option.IP_RESOLVE, c_long(resolve))
 
-    def resolve(self, list: CurlList) -> Result:
+    def resolve(self, list: CurlList) raises -> Result:
         """Specify custom host name to IP address resolves.
-    
+
         Allows specifying hostname to IP mappings to use before trying the
         system resolver.
+
+        Args:
+            list: ...
+
+        Returns:
+            ...
+
+        Raises:
+            An error if `list` is empty.
         """
-        return self.set_option(Option.RESOLVE, list.unsafe_ptr().bitcast[NoneType]())
+        var ptr = list.unsafe_ptr()
+        if not ptr:
+            raise Error(t"Failed to set `resolve` option: `list` should not be empty.")
+        return self.set_option(Option.RESOLVE, list.unsafe_ptr().value().bitcast[NoneType]())
 
     def connect_only(self, *, enable: Bool) -> Result:
         """Configure whether to stop when connected to target server.
@@ -3005,7 +3046,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.WRITE_FUNCTION, callback)
 
-    def write_data[origin: MutOrigin](self, data: MutOpaquePointer[origin]) -> Result:
+    def write_data[origin: MutOrigin, //](self, data: MutOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to write callback.
 
         By default this option is not set and corresponds to

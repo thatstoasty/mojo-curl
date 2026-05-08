@@ -12,12 +12,11 @@ struct InnerEasy(Movable):
     var easy: CURL
     """Internal external pointer to the libcurl easy handle."""
 
-    def __init__(out self):
+    def __init__(out self) raises:
         self.easy = curl_ffi()[].easy_init()
 
     def close(deinit self):
-        if self.easy:
-            curl_ffi()[].easy_cleanup(self.easy)
+        curl_ffi()[].easy_cleanup(self.easy)
 
     def set_option(self, option: Option, parameter: CStringSlice) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
@@ -28,7 +27,10 @@ struct InnerEasy(Movable):
     def set_option(self, option: Option, parameter: c_long) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    def set_option[origin: Origin, //](self, option: Option, parameter: OpaquePointer[origin]) -> Result:
+    def set_option[origin: ImmutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
+        return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
+
+    def set_option[origin: MutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     def set_option(self, option: Option, parameter: WriteCallbackFn) -> Result:
@@ -36,7 +38,7 @@ struct InnerEasy(Movable):
 
     def get_info(self, info: Info) raises -> String:
         # Data is filled by data owned curl and must not be freed by the caller (this library) :)
-        var data = MutExternalPointer[c_char]()
+        var data = MutExternalPointer[c_char].unsafe_dangling()
         var result = curl_ffi()[].easy_getinfo(self.easy, info, data)
         if result.value != 0:
             raise Error(t"Failed to get info: {self.describe_error(result)}")
@@ -66,7 +68,7 @@ struct InnerEasy(Movable):
 
     def get_info_curl_slist(self, info: Info) raises -> CurlList:
         var list = CurlList()
-        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data)
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data.value())
         if result.value != 0:
             list^.free()
             raise Error(t"Failed to get info: {self.describe_error(result)}")
@@ -89,20 +91,17 @@ struct InnerEasy(Movable):
 
     def headers(self, origin: HeaderOrigin) -> Dict[String, String]:
         var headers = Dict[String, String]()
-        var prev = MutExternalPointer[curl_header]()
+        var prev: Optional[MutExternalPointer[curl_header]] = None
 
         while True:
             var h = curl_ffi()[].easy_nextheader(self.easy, origin.value, 0, prev)
             if not h:
                 break
             prev = h
-            headers[String(unsafe_from_utf8_ptr=h[].name)] = String(unsafe_from_utf8_ptr=h[].value)
+            headers[String(unsafe_from_utf8_ptr=h.value()[].name)] = String(unsafe_from_utf8_ptr=h.value()[].value)
 
         return headers^
 
     def escape(self, mut string: String) raises -> String:
         var data = curl_ffi()[].easy_escape(self.easy, string, 0)
-        if not data:
-            raise Error("Failed to escape string.")
-
         return String(unsafe_from_utf8_ptr=data)
