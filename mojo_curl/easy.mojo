@@ -6,6 +6,7 @@ from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
 from mojo_curl.c import HeaderOrigin, Info, Option, Result, WriteCallbackFn, ReadCallbackFn
 from mojo_curl.c.header import curl_header
+from mojo_curl.c.ssl_options import SSLOption
 
 
 struct Easy(Movable):
@@ -90,6 +91,19 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option, parameter)
     
+    def set_option(self, option: Option, parameter: Path) -> Result:
+        """Set a callback function for a curl easy handle using safe wrapper.
+
+        Args:
+            option: The option to set.
+            parameter: The callback function to set for the option.
+
+        Returns:
+            Result: The result of setting the option.
+        """
+        var path = String(parameter)
+        return self.set_option(option, path.as_c_string_slice())
+    
     def get_info(self, info: Info) raises -> String:
         return self.inner.get_info(info)
 
@@ -113,9 +127,9 @@ struct Easy(Movable):
         """
         return self.inner.perform()
 
-    def cleanup(self) -> NoneType:
+    def cleanup(self):
         """End a libcurl easy handle."""
-        return self.inner.cleanup()
+        self.inner.cleanup()
 
     def reset(self):
         """Reset all options of this handle to their default value."""
@@ -292,23 +306,21 @@ struct Easy(Movable):
     # =========================================================================
     # Connection options
 
-    # def connect_to(self, list: List) -> Result:
-    #     """Connect to a specific host and port.
+    def connect_to(self, list: CurlList) -> Result:
+        """Connect to a specific host and port.
 
-    #     Each single string should be written using the format
-    #     `HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT` where `HOST` is the host of
-    #     the request, `PORT` is the port of the request, `CONNECT-TO-HOST` is the
-    #     host name to connect to, and `CONNECT-TO-PORT` is the port to connect
-    #     to.
+        Each single string should be written using the format
+        `HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT` where `HOST` is the host of
+        the request, `PORT` is the port of the request, `CONNECT-TO-HOST` is the
+        host name to connect to, and `CONNECT-TO-PORT` is the port to connect
+        to.
 
-    #     The first string that matches the request's host and port is used.
+        The first string that matches the request's host and port is used.
 
-    #     By default, this option is empty and corresponds to
-    #     `CURLOPT_CONNECT_TO`.
-    #     """
-    #     # TODO: Implement list handling for CURLOPT_CONNECT_TO
-    #     # This requires curl_slist support which needs to be added
-    #     return Result(0)
+        By default, this option is empty and corresponds to
+        `CURLOPT_CONNECT_TO`.
+        """
+        return self.set_option(Option.CONNECT_TO, list.unsafe_ptr().bitcast[NoneType]())
 
     def path_as_is(self, *, as_is: Bool) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
@@ -761,13 +773,6 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         return self.set_option(Option.UPLOAD_BUFFER_SIZE, c_long(size))
-
-    # # Enable or disable TCP Fast Open
-    # #
-    # # By default this options defaults to `false` and corresponds to
-    # # `CURLOPT_TCP_FASTOPEN`
-    # def fast_open(self, *, enable: Bool) -> Result:
-    #
 
     def tcp_nodelay(self, *, enable: Bool) -> Result:
         """Configures whether the TCP_NODELAY option is set, or Nagle's algorithm
@@ -1280,15 +1285,6 @@ struct Easy(Movable):
         """
         return self.set_option(Option.HTTP_HEADER, headers.unsafe_ptr().bitcast[NoneType]())
 
-    # # Add some headers to send to the HTTP proxy.
-    # #
-    # # This function is essentially the same as `http_headers`.
-    # #
-    # # By default this option is not set and corresponds to
-    # # `CURLOPT_PROXYHEADER`
-    # def proxy_headers(self, list: List) -> Result:
-    #     pass
-
     def cookie(self, var cookie: String) -> Result:
         """Set the contents of the HTTP Cookie header.
 
@@ -1490,40 +1486,6 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         return self.set_option(Option.HTTP_TRANSFER_DECODING, c_long(Int(enable)))
-
-    # # Timeout for the Expect: 100-continue response
-    # #
-    # # By default this option is 1s and corresponds to
-    # # `CURLOPT_EXPECT_100_TIMEOUT_MS`.
-    # def expect_100_timeout(self, *, enable: Bool) -> Result:
-    #     pass
-
-    # # Wait for pipelining/multiplexing.
-    # #
-    # # Tells libcurl to prefer to wait for a connection to confirm or deny that
-    # # it can do pipelining or multiplexing before continuing.
-    # #
-    # # When about to perform a new transfer that allows pipelining or
-    # # multiplexing, libcurl will check for existing connections to re-use and
-    # # pipeline on. If no such connection exists it will immediately continue
-    # # and create a fresh new connection to use.
-    # #
-    # # By setting this option to `true` - having `pipeline` enabled for the
-    # # multi handle this transfer is associated with - libcurl will instead
-    # # wait for the connection to reveal if it is possible to
-    # # pipeline/multiplex on before it continues. This enables libcurl to much
-    # # better keep the number of connections to a minimum when using pipelining
-    # # or multiplexing protocols.
-    # #
-    # # The effect thus becomes that with this option set, libcurl prefers to
-    # # wait and re-use an existing connection for pipelining rather than the
-    # # opposite: prefer to open a new connection rather than waiting.
-    # #
-    # # The waiting time is as long as it takes for the connection to get up and
-    # # for libcurl to get the necessary response back that informs it about its
-    # # protocol and support level.
-    # def http_pipewait(self, *, enable: Bool) -> Result:
-    #     pass
 
     # =========================================================================
     # Protocol Options
@@ -1911,15 +1873,13 @@ struct Easy(Movable):
         """
         return self.set_option(Option.IP_RESOLVE, c_long(resolve))
 
-    # TODO: resolve - needs List type implementation
-    # def resolve(self, list: List) -> Result:
-    #     """Specify custom host name to IP address resolves.
-    #
-    #     Allows specifying hostname to IP mappings to use before trying the
-    #     system resolver.
-    #     """
-    #     # TODO: Implement this when List type is available
-    #     pass
+    def resolve(self, list: CurlList) -> Result:
+        """Specify custom host name to IP address resolves.
+    
+        Allows specifying hostname to IP mappings to use before trying the
+        system resolver.
+        """
+        return self.set_option(Option.RESOLVE, list.unsafe_ptr().bitcast[NoneType]())
 
     def connect_only(self, *, enable: Bool) -> Result:
         """Configure whether to stop when connected to target server.
@@ -1941,88 +1901,52 @@ struct Easy(Movable):
         """
         return self.set_option(Option.CONNECT_ONLY, c_long(Int(enable)))
 
-    # # Set interface to speak DNS over.
-    # #
-    # # Set the name of the network interface that the DNS resolver should bind
-    # # to. This must be an interface name (not an address).
-    # #
-    # # By default this option is not set and corresponds to
-    # # `CURLOPT_DNS_INTERFACE`.
-    # def dns_interface(self, mut interface: String) -> Result:
-    #     pass
-    #
-    # # IPv4 address to bind DNS resolves to
-    # #
-    # # Set the local IPv4 address that the resolver should bind to. The
-    # # argument should be of type char * and contain a single numerical IPv4
-    # # address as a string.
-    # #
-    # # By default this option is not set and corresponds to
-    # # `CURLOPT_DNS_LOCAL_IP4`.
-    # def dns_local_ip4(self, mut ip: String) -> Result:
-    #     pass
-    #
-    # # IPv6 address to bind DNS resolves to
-    # #
-    # # Set the local IPv6 address that the resolver should bind to. The
-    # # argument should be of type char * and contain a single numerical IPv6
-    # # address as a string.
-    # #
-    # # By default this option is not set and corresponds to
-    # # `CURLOPT_DNS_LOCAL_IP6`.
-    # def dns_local_ip6(self, mut ip: String) -> Result:
-    #     pass
-    #
-    # # Set preferred DNS servers.
-    # #
-    # # Provides a list of DNS servers to be used instead of the system default.
-    # # The format of the dns servers option is:
-    # #
-    # # host[:port],[host[:port]]...
-    # #
-    # # By default this option is not set and corresponds to
-    # # `CURLOPT_DNS_SERVERS`.
-    # def dns_servers(self, mut servers: String) -> Result:
-    #     pass
-
     # =========================================================================
     # SSL/Security Options
 
-    # TODO: ssl_cert - needs path handling
-    # def ssl_cert(self, cert: String) -> Result:
-    #     """Sets the SSL client certificate.
-    #
-    #     The string should be the file name of your client certificate. The
-    #     default format is "P12" on Secure Transport and "PEM" on other engines,
-    #     and can be changed with `ssl_cert_type`.
-    #
-    #     With NSS or Secure Transport, this can also be the nickname of the
-    #     certificate you wish to authenticate with as it is named in the security
-    #     database. If you want to use a file from the current directory, please
-    #     precede it with "./" prefix, in order to avoid confusion with a
-    #     nickname.
-    #
-    #     When using a client certificate, you most likely also need to provide a
-    #     private key with `ssl_key`.
-    #
-    #     By default this option is not set and corresponds to `CURLOPT_SSLCERT`.
-    #     """
-    #     # TODO: Implement path handling
-    #     pass
+    def ssl_cert(self, cert: Path) -> Result:
+        """Sets the SSL client certificate.
 
-    # TODO: ssl_cert_blob - needs byte array handling
-    # def ssl_cert_blob(self, blob: List[UInt8]) -> Result:
-    #     """Set the SSL client certificate using an in-memory blob.
-    #
-    #     The specified byte buffer should contain the binary content of your
-    #     client certificate, which will be copied into the handle. The format of
-    #     the certificate can be specified with `ssl_cert_type`.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_SSLCERT_BLOB`.
-    #     """
-    #     # TODO: Implement blob handling
-    #     pass
+        The string should be the file name of your client certificate. The
+        default format is "P12" on Secure Transport and "PEM" on other engines,
+        and can be changed with `ssl_cert_type`.
+
+        With NSS or Secure Transport, this can also be the nickname of the
+        certificate you wish to authenticate with as it is named in the security
+        database. If you want to use a file from the current directory, please
+        precede it with "./" prefix, in order to avoid confusion with a
+        nickname.
+
+        When using a client certificate, you most likely also need to provide a
+        private key with `ssl_key`.
+
+        By default this option is not set and corresponds to `CURLOPT_SSLCERT`.
+
+        Args:
+            cert: The path to the client certificate file.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.SSL_CERT, cert)
+
+    def ssl_cert_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+        """Set the SSL client certificate using an in-memory blob.
+
+        The specified byte buffer should contain the binary content of your
+        client certificate, which will be copied into the handle. The format of
+        the certificate can be specified with `ssl_cert_type`.
+
+        By default this option is not set and corresponds to
+        `CURLOPT_SSLCERT_BLOB`.
+
+        Args:
+            blob: The byte buffer containing the client certificate.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.SSL_CERT_BLOB, blob)
 
     def ssl_cert_type(self, var kind: String) -> Result:
         """Specify type of the client SSL certificate.
@@ -2043,35 +1967,44 @@ struct Easy(Movable):
         """
         return self.set_option(Option.SSL_CERT_TYPE, kind.as_c_string_slice())
 
-    # TODO: ssl_key - needs path handling
-    # def ssl_key(self, key: String) -> Result:
-    #     """Specify private keyfile for TLS and SSL client cert.
-    #
-    #     The string should be the file name of your private key. The default
-    #     format is "PEM" and can be changed with `ssl_key_type`.
-    #
-    #     (iOS and Mac OS X only) This option is ignored if curl was built against
-    #     Secure Transport. Secure Transport expects the private key to be already
-    #     present in the keychain or PKCS#12 file containing the certificate.
-    #
-    #     By default this option is not set and corresponds to `CURLOPT_SSLKEY`.
-    #     """
-    #     # TODO: Implement path handling
-    #     pass
+    def ssl_key(self, key: Path) -> Result:
+        """Specify private keyfile for TLS and SSL client cert.
+
+        The string should be the file name of your private key. The default
+        format is "PEM" and can be changed with `ssl_key_type`.
+
+        (iOS and Mac OS X only) This option is ignored if curl was built against
+        Secure Transport. Secure Transport expects the private key to be already
+        present in the keychain or PKCS#12 file containing the certificate.
+
+        By default this option is not set and corresponds to `CURLOPT_SSLKEY`.
+
+        Args:
+            key: The path to the private key file.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.SSL_KEY, key)
 
     # TODO: ssl_key_blob - needs byte array handling
-    # def ssl_key_blob(self, blob: List[UInt8]) -> Result:
-    #     """Specify an SSL private key using an in-memory blob.
-    #
-    #     The specified byte buffer should contain the binary content of your
-    #     private key, which will be copied into the handle. The format of
-    #     the private key can be specified with `ssl_key_type`.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_SSLKEY_BLOB`.
-    #     """
-    #     # TODO: Implement blob handling
-    #     pass
+    def ssl_key_blob[origin: ImmutOrigin](self, blob: Span[UInt8, origin]) -> Result:
+        """Specify an SSL private key using an in-memory blob.
+
+        The specified byte buffer should contain the binary content of your
+        private key, which will be copied into the handle. The format of
+        the private key can be specified with `ssl_key_type`.
+
+        By default this option is not set and corresponds to
+        `CURLOPT_SSLKEY_BLOB`.
+
+        Args:
+            blob: The byte buffer containing the private key.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.SSL_KEY_BLOB, blob)
 
     def ssl_key_type(self, var kind: String) -> Result:
         """Set type of the private key file.
@@ -2114,34 +2047,30 @@ struct Easy(Movable):
         """
         return self.set_option(Option.KEY_PASSWD, password.as_c_string_slice())
 
-    # TODO: ssl_cainfo_blob - needs byte array handling
-    # def ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
-    #     """Set the SSL Certificate Authorities using an in-memory blob.
-    #
-    #     The specified byte buffer should contain the binary content of one
-    #     or more PEM-encoded CA certificates, which will be copied into
-    #     the handle.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_CAINFO_BLOB`.
-    #     """
-    #     # TODO: Implement blob handling
-    #     pass
+    def ssl_cainfo_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+        """Set the SSL Certificate Authorities using an in-memory blob.
+    
+        The specified byte buffer should contain the binary content of one
+        or more PEM-encoded CA certificates, which will be copied into
+        the handle.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_CAINFO_BLOB`.
+        """
+        return self.set_option(Option.CAINFO_BLOB, blob)
 
-    # TODO: proxy_ssl_cainfo_blob - needs byte array handling
-    # def proxy_ssl_cainfo_blob(self, blob: List[UInt8]) -> Result:
-    #     """Set the SSL Certificate Authorities for HTTPS proxies using an in-memory
-    #     blob.
-    #
-    #     The specified byte buffer should contain the binary content of one
-    #     or more PEM-encoded CA certificates, which will be copied into
-    #     the handle.
-    #
-    #     By default this option is not set and corresponds to
-    #     `CURLOPT_PROXY_CAINFO_BLOB`.
-    #     """
-    #     # TODO: Implement blob handling
-    #     pass
+    def proxy_ssl_cainfo_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+        """Set the SSL Certificate Authorities for HTTPS proxies using an in-memory
+        blob.
+    
+        The specified byte buffer should contain the binary content of one
+        or more PEM-encoded CA certificates, which will be copied into
+        the handle.
+    
+        By default this option is not set and corresponds to
+        `CURLOPT_PROXY_CAINFO_BLOB`.
+        """
+        return self.set_option(Option.PROXY_CAINFO_BLOB, blob)
 
     def ssl_engine(self, var engine: String) -> Result:
         """Set the SSL engine identifier.
@@ -2173,18 +2102,6 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         return self.set_option(Option.SSL_ENGINE_DEFAULT, c_long(Int(enable)))
-
-    # # Enable TLS false start.
-    # #
-    # # This option determines whether libcurl should use false start during the
-    # # TLS handshake. False start is a mode where a TLS client will start
-    # # sending application data before verifying the server's Finished message,
-    # # thus saving a round trip when performing a full handshake.
-    # #
-    # # By default this option is not set and corresponds to
-    # # `CURLOPT_SSL_FALSESTARTE`.
-    # def ssl_false_start(self, *, enable: Bool) -> Result:
-    #     pass
 
     def http_version(self, version: Int) -> Result:
         """Set preferred HTTP version.
@@ -2331,152 +2248,173 @@ struct Easy(Movable):
         """
         return self.set_option(Option.PROXY_SSL_VERIFYPEER, c_long(Int(verify)))
 
-    # # Verify the certificate's status.
-    # #
-    # # This option determines whether libcurl verifies the status of the server
-    # # cert using the "Certificate Status Request" TLS extension (aka. OCSP
-    # # stapling).
-    # #
-    # # By default this option is set to `false` and corresponds to
-    # # `CURLOPT_SSL_VERIFYSTATUS`.
-    # def ssl_verify_status(self, *, verify: Bool) -> Result:
-    #     pass
+    def cainfo(self, path: Path) -> Result:
+        """The file referenced should hold one or more certificates to verify the
+        peer with.
 
-    # TODO: Specify the path to Certificate Authority (CA) bundle
-    # Requires Path type support
-    # def cainfo(self, path: Path) -> Result:
-    #     """The file referenced should hold one or more certificates to verify the
-    #     peer with.
-    #
-    #     This option is by default set to the system path where libcurl's cacert
-    #     bundle is assumed to be stored, as established at build time.
-    #
-    #     If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
-    #     (libnsspem.so) needs to be available for this option to work properly.
-    #
-    #     By default this option is the system defaults, and corresponds to
-    #     CURLOPT_CAINFO.
-    #     """
-    #     return self.inner.set_option(Option.CAINFO, path)
+        This option is by default set to the system path where libcurl's cacert
+        bundle is assumed to be stored, as established at build time.
 
-    # TODO: Set the issuer SSL certificate filename
-    # Requires Path type support
-    # def issuer_cert(self, path: Path) -> Result:
-    #     """Specifies a file holding a CA certificate in PEM format. If the option
-    #     is set, an additional check against the peer certificate is performed to
-    #     verify the issuer is indeed the one associated with the certificate
-    #     provided by the option. This additional check is useful in multi-level
-    #     PKI where one needs to enforce that the peer certificate is from a
-    #     specific branch of the tree.
-    #
-    #     This option makes sense only when used in combination with the
-    #     ssl_verify_peer option. Otherwise, the result of the check is
-    #     not considered as failure.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_ISSUERCERT.
-    #     """
-    #     return self.inner.set_option(Option.ISSUERCERT, path)
+        If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
+        (libnsspem.so) needs to be available for this option to work properly.
 
-    # TODO: Set the issuer SSL certificate filename for HTTPS proxies
-    # Requires Path type support
-    # def proxy_issuer_cert(self, path: Path) -> Result:
-    #     """Specifies a file holding a CA certificate in PEM format. If the option
-    #     is set, an additional check against the peer certificate is performed to
-    #     verify the issuer is indeed the one associated with the certificate
-    #     provided by the option. This additional check is useful in multi-level
-    #     PKI where one needs to enforce that the peer certificate is from a
-    #     specific branch of the tree.
-    #
-    #     This option makes sense only when used in combination with the
-    #     proxy_ssl_verify_peer option. Otherwise, the result of the check is
-    #     not considered as failure.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_PROXY_ISSUERCERT.
-    #     """
-    #     return self.inner.set_option(Option.PROXY_ISSUERCERT, path)
+        By default this option is the system defaults, and corresponds to
+        CURLOPT_CAINFO.
 
-    # TODO: Set the issuer SSL certificate using an in-memory blob
-    # Requires blob/byte array type support
-    # def issuer_cert_blob(self, blob: Bytes) -> Result:
-    #     """The specified byte buffer should contain the binary content of a CA
-    #     certificate in the PEM format. The certificate will be copied into the
-    #     handle.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_ISSUERCERT_BLOB.
-    #     """
-    #     return self.inner.set_option(Option.ISSUERCERT_BLOB, blob)
+        Args:
+            path: The path to the CA certificate file.
 
-    # TODO: Set the issuer SSL certificate for HTTPS proxies using an in-memory blob
-    # Requires blob/byte array type support
-    # def proxy_issuer_cert_blob(self, blob: Bytes) -> Result:
-    #     """The specified byte buffer should contain the binary content of a CA
-    #     certificate in the PEM format. The certificate will be copied into the
-    #     handle.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_PROXY_ISSUERCERT_BLOB.
-    #     """
-    #     return self.inner.set_option(Option.PROXY_ISSUERCERT_BLOB, blob)
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.CAINFO, path)
 
-    # TODO: Specify directory holding CA certificates
-    # Requires Path type support
-    # def capath(self, path: Path) -> Result:
-    #     """Names a directory holding multiple CA certificates to verify the peer
-    #     with. If libcurl is built against OpenSSL, the certificate directory
-    #     must be prepared using the openssl c_rehash utility. This makes sense
-    #     only when used in combination with the ssl_verify_peer option.
-    #
-    #     By default this option is not set and corresponds to CURLOPT_CAPATH.
-    #     """
-    #     return self.inner.set_option(Option.CAPATH, path)
+    def issuer_cert(self, path: Path) -> Result:
+        """Specifies a file holding a CA certificate in PEM format. If the option
+        is set, an additional check against the peer certificate is performed to
+        verify the issuer is indeed the one associated with the certificate
+        provided by the option. This additional check is useful in multi-level
+        PKI where one needs to enforce that the peer certificate is from a
+        specific branch of the tree.
 
-    # TODO: Specify a Certificate Revocation List file
-    # Requires Path type support
-    # def crlfile(self, path: Path) -> Result:
-    #     """Names a file with the concatenation of CRL (in PEM format) to use in the
-    #     certificate validation that occurs during the SSL exchange.
-    #
-    #     When curl is built to use NSS or GnuTLS, there is no way to influence
-    #     the use of CRL passed to help in the verification process. When libcurl
-    #     is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and
-    #     X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all
-    #     the elements of the certificate chain if a CRL file is passed.
-    #
-    #     This option makes sense only when used in combination with the
-    #     ssl_verify_peer option.
-    #
-    #     A specific error code (is_ssl_crl_badfile) is defined with the
-    #     option. It is returned when the SSL exchange fails because the CRL file
-    #     cannot be loaded. A failure in certificate verification due to a
-    #     revocation information found in the CRL does not trigger this specific
-    #     error.
-    #
-    #     By default this option is not set and corresponds to CURLOPT_CRLFILE.
-    #     """
-    #     return self.inner.set_option(Option.CRLFILE, path)
+        This option makes sense only when used in combination with the
+        ssl_verify_peer option. Otherwise, the result of the check is
+        not considered as failure.
 
-    # TODO: Specify a Certificate Revocation List file for HTTPS proxy
-    # Requires Path type support
-    # def proxy_crlfile(self, path: Path) -> Result:
-    #     """Names a file with the concatenation of CRL (in PEM format) to use in the
-    #     certificate validation that occurs during the SSL exchange.
-    #
-    #     When curl is built to use NSS or GnuTLS, there is no way to influence
-    #     the use of CRL passed to help in the verification process. When libcurl
-    #     is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and
-    #     X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all
-    #     the elements of the certificate chain if a CRL file is passed.
-    #
-    #     This option makes sense only when used in combination with the
-    #     proxy_ssl_verify_peer option.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_PROXY_CRLFILE.
-    #     """
-    #     return self.inner.set_option(Option.PROXY_CRLFILE, path)
+        By default this option is not set and corresponds to
+        CURLOPT_ISSUERCERT.
+
+        Args:
+            path: The path to the issuer certificate file.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.ISSUER_CERT, path)
+
+    def proxy_issuer_cert(self, path: Path) -> Result:
+        """Specifies a file holding a CA certificate in PEM format. If the option
+        is set, an additional check against the peer certificate is performed to
+        verify the issuer is indeed the one associated with the certificate
+        provided by the option. This additional check is useful in multi-level
+        PKI where one needs to enforce that the peer certificate is from a
+        specific branch of the tree.
+
+        This option makes sense only when used in combination with the
+        proxy_ssl_verify_peer option. Otherwise, the result of the check is
+        not considered as failure.
+
+        By default this option is not set and corresponds to
+        CURLOPT_PROXY_ISSUERCERT.
+
+        Args:
+            path: The path to the issuer certificate file for HTTPS proxy.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.PROXY_ISSUER_CERT, path)
+
+    def issuer_cert_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+        """The specified byte buffer should contain the binary content of a CA
+        certificate in the PEM format. The certificate will be copied into the
+        handle.
+
+        By default this option is not set and corresponds to
+        CURLOPT_ISSUERCERT_BLOB.
+
+        Args:
+            blob: The byte buffer containing the issuer certificate.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.ISSUER_CERT_BLOB, blob)
+
+    def proxy_issuer_cert_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+        """The specified byte buffer should contain the binary content of a CA
+        certificate in the PEM format. The certificate will be copied into the
+        handle.
+
+        By default this option is not set and corresponds to
+        CURLOPT_PROXY_ISSUERCERT_BLOB.
+
+        Args:
+            blob: The byte buffer containing the issuer certificate for HTTPS proxy.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.PROXY_ISSUER_CERT_BLOB, blob)
+
+    def capath(self, path: Path) -> Result:
+        """Names a directory holding multiple CA certificates to verify the peer
+        with. If libcurl is built against OpenSSL, the certificate directory
+        must be prepared using the openssl c_rehash utility. This makes sense
+        only when used in combination with the ssl_verify_peer option.
+
+        By default this option is not set and corresponds to CURLOPT_CAPATH.
+
+        Args:
+            path: The path to the directory containing CA certificates.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.CAPATH, path)
+
+    def crlfile(self, path: Path) -> Result:
+        """Names a file with the concatenation of CRL (in PEM format) to use in the
+        certificate validation that occurs during the SSL exchange.
+
+        When curl is built to use NSS or GnuTLS, there is no way to influence
+        the use of CRL passed to help in the verification process. When libcurl
+        is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and
+        X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all
+        the elements of the certificate chain if a CRL file is passed.
+
+        This option makes sense only when used in combination with the
+        ssl_verify_peer option.
+
+        A specific error code (is_ssl_crl_badfile) is defined with the
+        option. It is returned when the SSL exchange fails because the CRL file
+        cannot be loaded. A failure in certificate verification due to a
+        revocation information found in the CRL does not trigger this specific
+        error.
+
+        By default this option is not set and corresponds to CURLOPT_CRLFILE.
+
+        Args:
+            path: The path to the CRL file.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.CRL_FILE, path)
+
+    def proxy_crlfile(self, path: Path) -> Result:
+        """Names a file with the concatenation of CRL (in PEM format) to use in the
+        certificate validation that occurs during the SSL exchange.
+
+        When curl is built to use NSS or GnuTLS, there is no way to influence
+        the use of CRL passed to help in the verification process. When libcurl
+        is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and
+        X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all
+        the elements of the certificate chain if a CRL file is passed.
+
+        This option makes sense only when used in combination with the
+        proxy_ssl_verify_peer option.
+
+        By default this option is not set and corresponds to
+        CURLOPT_PROXY_CRLFILE.
+
+        Args:
+            path: The path to the proxy CRL file.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.PROXY_CRL_FILE, path)
 
     def certinfo(self, *, enable: Bool) -> Result:
         """Request SSL certificate information.
@@ -2520,27 +2458,35 @@ struct Easy(Movable):
         """
         return self.set_option(Option.PINNED_PUBLIC_KEY, pubkey.as_c_string_slice())
 
-    # TODO: Specify a source for random data
-    # Requires Path type support
-    # def random_file(self, path: Path) -> Result:
-    #     """The file will be used to read from to seed the random engine for SSL and
-    #     more.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_RANDOM_FILE.
-    #     """
-    #     return self.inner.set_option(Option.RANDOM_FILE, path)
+    def random_file(self, path: Path) -> Result:
+        """The file will be used to read from to seed the random engine for SSL and
+        more.
 
-    # TODO: Specify EGD socket path
-    # Requires Path type support
-    # def egd_socket(self, path: Path) -> Result:
-    #     """Indicates the path name to the Entropy Gathering Daemon socket. It will
-    #     be used to seed the random engine for SSL.
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_EGDSOCKET.
-    #     """
-    #     return self.inner.set_option(Option.EGDSOCKET, path)
+        By default this option is not set and corresponds to
+        `CURLOPT_RANDOM_FILE`.
+
+        Args:
+            path: The path to the random file.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.RANDOM_FILE, path)
+
+    def egd_socket(self, path: Path) -> Result:
+        """Indicates the path name to the Entropy Gathering Daemon socket. It will
+        be used to seed the random engine for SSL.
+
+        By default this option is not set and corresponds to
+        CURLOPT_EGDSOCKET.
+
+        Args:
+            path: The path to the EGD socket.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.EGD_SOCKET, path)
 
     def ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS.
@@ -2622,52 +2568,61 @@ struct Easy(Movable):
         """
         return self.set_option(Option.SSL_SESSIONID_CACHE, c_long(Int(enable)))
 
-    # TODO: Set SSL behavior options
-    # Requires SslOpt type support
-    # def ssl_options(self, bits: SslOpt) -> Result:
-    #     """Inform libcurl about SSL specific behaviors.
-    #
-    #     This corresponds to the CURLOPT_SSL_OPTIONS option.
-    #     """
-    #     return self.inner.set_option(Option.SSL_OPTIONS, bits.bits)
+    def ssl_options(self, option: SSLOption) -> Result:
+        """Inform libcurl about SSL specific behaviors.
 
-    # TODO: Set SSL behavior options for proxies
-    # Requires SslOpt type support
-    # def proxy_ssl_options(self, bits: SslOpt) -> Result:
-    #     """Inform libcurl about SSL specific behaviors.
-    #
-    #     This corresponds to the CURLOPT_PROXY_SSL_OPTIONS option.
-    #     """
-    #     return self.inner.set_option(Option.PROXY_SSL_OPTIONS, bits.bits)
+        This corresponds to the `CURLOPT_SSL_OPTIONS` option.
 
-    # =========================================================================
-    # Getters
+        Args:
+            option: The SSL option to set.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.SSL_OPTIONS, option.bits)
 
-    # TODO: Set maximum time to wait for Expect 100 request before sending body
-    # Requires Duration type support
-    # def expect_100_timeout(self, timeout_ms: Int) -> Result:
-    #     """curl has internal heuristics that trigger the use of a Expect
-    #     header for large enough request bodies where the client first sends the
-    #     request header along with an Expect: 100-continue header. The server
-    #     is supposed to validate the headers and respond with a 100 response
-    #     status code after which curl will send the actual request body.
-    #
-    #     However, if the server does not respond to the initial request
-    #     within CURLOPT_EXPECT_100_TIMEOUT_MS then curl will send the
-    #     request body anyways.
-    #
-    #     The best-case scenario is where the request is invalid and the server
-    #     replies with a 417 Expectation Failed without having to wait for or process
-    #     the request body at all. However, this behaviour can also lead to higher
-    #     total latency since in the best case, an additional server roundtrip is required
-    #     and in the worst case, the request is delayed by CURLOPT_EXPECT_100_TIMEOUT_MS.
-    #
-    #     More info: https://mojo_curl.se/libcurl/c/CURLOPT_EXPECT_100_TIMEOUT_MS.html
-    #
-    #     By default this option is not set and corresponds to
-    #     CURLOPT_EXPECT_100_TIMEOUT_MS.
-    #     """
-    #     return self.inner.set_option(Option.EXPECT_100_TIMEOUT_MS, timeout_ms)
+    def proxy_ssl_options(self, option: SSLOption) -> Result:
+        """Inform libcurl about SSL specific behaviors.
+
+        This corresponds to the `CURLOPT_PROXY_SSL_OPTIONS` option.
+
+        Args:
+            option: The SSL option to set for HTTPS proxy.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.PROXY_SSL_OPTIONS, option.bits)
+
+    def expect_100_timeout(self, timeout_ms: Int) -> Result:
+        """Curl has internal heuristics that trigger the use of a Expect
+        header for large enough request bodies where the client first sends the
+        request header along with an Expect: 100-continue header. The server
+        is supposed to validate the headers and respond with a 100 response
+        status code after which curl will send the actual request body.
+
+        However, if the server does not respond to the initial request
+        within CURLOPT_EXPECT_100_TIMEOUT_MS then curl will send the
+        request body anyways.
+
+        The best-case scenario is where the request is invalid and the server
+        replies with a 417 Expectation Failed without having to wait for or process
+        the request body at all. However, this behaviour can also lead to higher
+        total latency since in the best case, an additional server roundtrip is required
+        and in the worst case, the request is delayed by CURLOPT_EXPECT_100_TIMEOUT_MS.
+
+        More info: https://mojo_curl.se/libcurl/c/CURLOPT_EXPECT_100_TIMEOUT_MS.html
+
+        By default this option is not set and corresponds to
+        CURLOPT_EXPECT_100_TIMEOUT_MS.
+
+        Args:
+            timeout_ms: The timeout in milliseconds.
+        
+        Returns:
+            A `Result` indicating success or failure of the operation.
+        """
+        return self.set_option(Option.EXPECT_100_TIMEOUT_MS, c_long(timeout_ms))
 
     def effective_url(self) raises -> String:
         """Get the last used effective URL.

@@ -54,13 +54,19 @@ struct curl(Movable):
         return String(unsafe_from_utf8_ptr=self.lib.curl_version())
 
     # Easy interface functions
-    def easy_init(self) -> CURL:
+    def easy_init(self) raises -> CURL:
         """Start a libcurl easy session.
 
         Returns:
-            A new curl easy handle, or a NULL pointer on error.
+            A new curl easy handle.
+        
+        Raises:
+            Error: If initialization fails.
         """
-        return self.lib.curl_easy_init()
+        var easy = self.lib.curl_easy_init()
+        if not easy:
+            raise Error("Failed to initialize curl easy handle.")
+        return easy.value()
 
     def easy_setopt(self, easy: CURL, option: Option, parameter: CStringSlice) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
@@ -259,8 +265,8 @@ struct curl(Movable):
     def slist_append[
         origin: ImmutOrigin, //
     ](
-        self, list: MutExternalPointer[curl_slist], string: ImmutUnsafePointer[c_char, origin]
-    ) raises -> MutExternalPointer[curl_slist]:
+        self, list: Optional[MutExternalPointer[curl_slist]], string: ImmutUnsafePointer[c_char, origin]
+    ) raises -> Optional[MutExternalPointer[curl_slist]]:
         """Append a string to a curl string list.
 
         Parameters:
@@ -317,8 +323,8 @@ struct curl(Movable):
         easy: CURL,
         origin: c_uint,
         request: c_int,
-        mut prev: MutExternalPointer[curl_header],
-    ) -> MutExternalPointer[curl_header]:
+        mut prev: Optional[MutExternalPointer[curl_header]],
+    ) -> Optional[MutExternalPointer[curl_header]]:
         """Get the next header in the list for a curl easy handle.
 
         Args:
@@ -337,7 +343,7 @@ struct curl(Movable):
         easy: CURL,
         mut string: String,
         length: c_int,
-    ) -> MutExternalPointer[c_char]:
+    ) raises -> MutExternalPointer[c_char]:
         """URL-encode a string using curl easy handle.
 
         Args:
@@ -346,11 +352,17 @@ struct curl(Movable):
             length: The length of the string (or 0 to calculate it automatically).
 
         Returns:
-            A pointer to the URL-encoded string, or NULL on error.
+            A pointer to the URL-encoded string.
+        
+        Raises:
+            Error: If encoding fails and a `NULL` pointer is returned.
         """
-        return self.lib.curl_easy_escape(easy, string.as_c_string_slice().unsafe_ptr(), length)
+        var result = self.lib.curl_easy_escape(easy, string.as_c_string_slice().unsafe_ptr(), length)
+        if not result:
+            raise Error("Failed to URL-encode string")
+        return result.value()
 
-    def easy_duphandle(self, easy: CURL) -> CURL:
+    def easy_duphandle(self, easy: CURL) raises -> CURL:
         """Creates a new curl session handle with the same options set for the handle
         passed in. Duplicating a handle could only be a matter of cloning data and
         options, internal state info and things like persistent connections cannot
@@ -362,9 +374,15 @@ struct curl(Movable):
             easy: The curl easy handle to duplicate.
 
         Returns:
-            A new curl easy handle that is a duplicate of the original, or NULL on error.
+            A new curl easy handle that is a duplicate of the original.
+
+        Raises:
+            Error: If duplication fails and a `NULL` pointer is returned.
         """
-        return self.lib.curl_easy_duphandle(easy)
+        var dupe = self.lib.curl_easy_duphandle(easy)
+        if not dupe:
+            raise Error("Failed to duplicate curl easy handle")
+        return dupe.value()
 
     def easy_reset(self, easy: CURL):
         """Reset a curl easy handle to its default state.

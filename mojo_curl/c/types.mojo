@@ -249,6 +249,8 @@ struct Option(Copyable, TrivialRegisterPassable):
     comptime MAX_CONNECTS: Self = Self.LONG + 71
     comptime FRESH_CONNECT: Self = Self.LONG + 74
     comptime FORBID_REUSE: Self = Self.LONG + 75
+    comptime RANDOM_FILE: Self = Self.OBJECT_POINT + 76
+    comptime EGD_SOCKET: Self = Self.OBJECT_POINT + 77
     comptime CONNECT_TIMEOUT: Self = Self.LONG + 78
     comptime HEADER_FUNCTION: Self = Self.FUNCTION_POINT + 79
     comptime HTTPGET: Self = Self.LONG + 80

@@ -83,11 +83,11 @@ comptime curl_easy_getinfo_double = def(CURL, CURLINFO, MutExternalPointer[c_dou
 comptime curl_easy_perform = def(CURL) abi("C") thin -> CURLcode
 comptime curl_easy_cleanup = def(CURL) abi("C") thin -> NoneType
 comptime curl_easy_strerror = def(CURLcode) abi("C") thin -> ImmutExternalPointer[c_char]
-comptime curl_slist_append = def(MutExternalPointer[curl_slist], ImmutExternalPointer[c_char]) abi("C") thin -> MutExternalPointer[curl_slist]
+comptime curl_slist_append = def(Optional[MutExternalPointer[curl_slist]], ImmutExternalPointer[c_char]) abi("C") thin -> Optional[MutExternalPointer[curl_slist]]
 comptime curl_slist_free_all = def(MutExternalPointer[curl_slist]) abi("C") thin -> NoneType
-comptime curl_easy_nextheader = def(CURL, c_uint, c_int, MutExternalPointer[curl_header]) abi("C") thin -> MutExternalPointer[curl_header]
-comptime curl_easy_escape = def(CURL, ImmutExternalPointer[c_char], c_int) abi("C") thin -> MutExternalPointer[c_char]
-comptime curl_easy_duphandle = def(CURL) abi("C") thin -> CURL
+comptime curl_easy_nextheader = def(CURL, c_uint, c_int, Optional[MutExternalPointer[curl_header]]) abi("C") thin -> Optional[MutExternalPointer[curl_header]]
+comptime curl_easy_escape = def(CURL, ImmutExternalPointer[c_char], c_int) abi("C") thin -> Optional[MutExternalPointer[c_char]]
+comptime curl_easy_duphandle = def(CURL) abi("C") thin -> Optional[CURL]
 comptime curl_easy_reset = def(CURL) abi("C") thin -> NoneType
 comptime curl_easy_recv = def(CURL, MutExternalPointer[NoneType], c_size_t, MutExternalPointer[c_size_t]) abi("C") thin -> CURLcode
 comptime curl_easy_send = def(CURL, ImmutExternalPointer[NoneType], c_size_t, MutExternalPointer[c_size_t]) abi("C") thin -> CURLcode
@@ -191,7 +191,7 @@ struct _curl(Movable):
         return self._fn_curl_version()
 
     # Easy interface functions
-    def curl_easy_init(self) -> CURL:
+    def curl_easy_init(self) -> Optional[CURL]:
         """Start a libcurl easy session.
         
         Returns:
@@ -394,9 +394,7 @@ struct _curl(Movable):
     # String list functions
     def curl_slist_append[
         origin: ImmutOrigin, //
-    ](self, list: MutExternalPointer[curl_slist], string: ImmutUnsafePointer[c_char, origin]) -> MutExternalPointer[
-        curl_slist
-    ]:
+    ](self, list: Optional[MutExternalPointer[curl_slist]], string: ImmutUnsafePointer[c_char, origin]) -> Optional[MutExternalPointer[curl_slist]]:
         """Append a string to a curl string list.
 
         Parameters:
@@ -456,8 +454,8 @@ struct _curl(Movable):
         easy: CURL,
         origin: c_uint,
         request: c_int,
-        prev: MutExternalPointer[curl_header],
-    ) -> MutExternalPointer[curl_header]:
+        prev: Optional[MutExternalPointer[curl_header]],
+    ) -> Optional[MutExternalPointer[curl_header]]:
         """Get the next header in the list for a curl easy handle.
 
         Args:
@@ -473,7 +471,7 @@ struct _curl(Movable):
 
     def curl_easy_escape[
         origin: ImmutOrigin, //
-    ](self, easy: CURL, string: ImmutUnsafePointer[c_char, origin], length: c_int) -> MutExternalPointer[c_char]:
+    ](self, easy: CURL, string: ImmutUnsafePointer[c_char, origin], length: c_int) -> Optional[MutExternalPointer[c_char]]:
         """URL-encode a string using curl easy handle.
 
         Parameters:
@@ -489,7 +487,7 @@ struct _curl(Movable):
         """
         return self._fn_curl_easy_escape(easy, string.unsafe_origin_cast[ImmutExternalOrigin](), length)
 
-    def curl_easy_duphandle(self, easy: CURL) -> CURL:
+    def curl_easy_duphandle(self, easy: CURL) -> Optional[CURL]:
         """Creates a new curl session handle with the same options set for the handle
         passed in. Duplicating a handle could only be a matter of cloning data and
         options, internal state info and things like persistent connections cannot

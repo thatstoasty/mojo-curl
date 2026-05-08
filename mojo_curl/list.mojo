@@ -32,14 +32,14 @@ def _build_header_string(key: String, value: String) -> String:
 struct CurlList(Movable):
     """Represents a linked list of HTTP headers for use with libcurl."""
 
-    var data: MutExternalPointer[curl_slist]
+    var data: Optional[MutExternalPointer[curl_slist]]
     """The underlying pointer to the `curl_slist` structure."""
 
     def __init__(out self):
-        self.data = MutExternalPointer[curl_slist]()
+        self.data = None
 
     def __init__(out self, headers: Dict[String, String]) raises:
-        self.data = MutExternalPointer[curl_slist]()
+        self.data = None
         for pair in headers.items():
             var header = _build_header_string(pair.key, pair.value)
             try:
@@ -54,7 +54,7 @@ struct CurlList(Movable):
         var values: List[String],
         __dict_literal__: (),
     ) raises:
-        self.data = MutExternalPointer[curl_slist]()
+        self.data = None
         for pair in zip(headers, values):
             var header = _build_header_string(pair[0], pair[1])
             try:
@@ -74,11 +74,9 @@ struct CurlList(Movable):
 
     def free(deinit self):
         if self.data:
-            curl_ffi()[].slist_free_all(self.data)
+            curl_ffi()[].slist_free_all(self.data.value())
 
-    def unsafe_ptr[
-        origin: Origin, address_space: AddressSpace, //
-    ](ref[origin, address_space] self) -> UnsafePointer[curl_slist, origin, address_space=address_space]:
+    def unsafe_ptr[origin: Origin, //](ref[origin] self) -> Optional[UnsafePointer[curl_slist, origin]]:
         """Retrieves a pointer to the underlying memory.
         Parameters:
             origin: The origin of the `SocketAddress`.
@@ -86,7 +84,9 @@ struct CurlList(Movable):
         Returns:
             The pointer to the underlying memory.
         """
-        return self.data.unsafe_mut_cast[origin.mut]().unsafe_origin_cast[origin]().address_space_cast[address_space]()
+        if not self.data:
+            return None
+        return self.data.value().unsafe_mut_cast[origin.mut]().unsafe_origin_cast[origin]()
 
     @always_inline
     def __iter__(ref self) -> _CurlListIterator[origin_of(self)]:
@@ -100,7 +100,7 @@ struct _CurlListIterator[origin: Origin](Copyable, Iterable, Iterator):
     comptime IteratorType[iterable_mut: Bool, //, iterable_origin: Origin[mut=iterable_mut]]: Iterator = Self
 
     var src: Pointer[CurlList, Self.origin]
-    var curr: MutExternalPointer[curl_slist]
+    var curr: Optional[MutExternalPointer[curl_slist]]
 
     def __init__(out self, src: Pointer[CurlList, Self.origin]):
         self.src = src
@@ -119,9 +119,9 @@ struct _CurlListIterator[origin: Origin](Copyable, Iterable, Iterator):
 
     def __next_ref__(mut self) -> Self.Element:
         var old = self.curr
-        self.curr = self.curr[].next
+        self.curr = self.curr.value()[].next if self.curr else None
 
-        return StringSlice(unsafe_from_utf8_ptr=old[].data)
+        return StringSlice(unsafe_from_utf8_ptr=old.value()[].data)
 
     def __next__(mut self) -> Self.Element:
         """Returns the next row in the result set.

@@ -3,7 +3,7 @@ description = "Mojo libcurl bindings"
 authors = ["Mikhail Tavarez <miktavarez@gmail.com>"]
 channels = [
     "conda-forge",
-    "https://conda.modular.com/max-nightly",
+    "https://conda.modular.com/max",
 ]
 platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
 license = "MIT"
@@ -35,18 +35,18 @@ version = "0.3.0"
 backend = { name = "pixi-build-mojo", version = "*" }
 
 [dependencies]
-mojo = ">=0.26.2.0,<0.26.3.0"
+mojo = ">=1.0.0b1,<1.0.0b2"
 curl_wrapper = { git = "https://github.com/thatstoasty/mojo-curl.git", subdirectory = "shim", branch = "main" }
 
 [package.build-dependencies]
-mojo-compiler = ">=0.26.2.0,<0.26.3.0"
+mojo-compiler = ">=1.0.0b1,<1.0.0b2"
 
 [package.host-dependencies]
-mojo-compiler = ">=0.26.2.0,<0.26.3.0"
+mojo-compiler = ">=1.0.0b1,<1.0.0b2"
 libcurl = ">=8.17.0,<9.0.0"
 curl_wrapper = { path = "shim" }
 
 [package.run-dependencies]
-mojo-compiler = ">=0.26.2.0,<0.26.3.0"
+mojo-compiler = ">=1.0.0b1,<1.0.0b2"
 libcurl = ">=8.17.0,<9.0.0"
 curl_wrapper = { path = "shim" }
