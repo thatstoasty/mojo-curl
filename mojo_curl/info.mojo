@@ -1,339 +1,212 @@
 from std.ffi import c_int
 from mojo_curl.c.types import (
-    CURLOPT_FILE,
-    CURLOPT_URL,
-    CURLOPT_PORT,
-    CURLOPT_PROXY,
-    CURLOPT_USERPWD,
-    CURLOPT_PROXYUSERPWD,
-    CURLOPT_RANGE,
-    CURLOPT_INFILE,
-    CURLOPT_ERRORBUFFER,
-    CURLOPT_WRITEFUNCTION,
-    CURLOPT_READFUNCTION,
-    CURLOPT_TIMEOUT,
-    CURLOPT_INFILESIZE,
-    CURLOPT_POSTFIELDS,
-    CURLOPT_REFERER,
-    CURLOPT_FTPPORT,
-    CURLOPT_USERAGENT,
-    CURLOPT_LOW_SPEED_LIMIT,
-    CURLOPT_LOW_SPEED_TIME,
-    CURLOPT_RESUME_FROM,
-    CURLOPT_COOKIE,
-    CURLOPT_HTTPHEADER,
-    CURLOPT_HTTPPOST,
-    CURLOPT_SSLCERT,
-    CURLOPT_KEYPASSWD,
-    CURLOPT_CRLF,
-    CURLOPT_QUOTE,
-    CURLOPT_WRITEHEADER,
-    CURLOPT_COOKIEFILE,
-    CURLOPT_SSLVERSION,
-    CURLOPT_TIMECONDITION,
-    CURLOPT_TIMEVALUE,
-    CURLOPT_CUSTOMREQUEST,
-    CURLOPT_STDERR,
-    CURLOPT_POSTQUOTE,
-    CURLOPT_WRITEINFO,
-    CURLOPT_VERBOSE,
-    CURLOPT_HEADER,
-    CURLOPT_NOPROGRESS,
-    CURLOPT_NOBODY,
-    CURLOPT_FAILONERROR,
-    CURLOPT_UPLOAD,
-    CURLOPT_POST,
-    CURLOPT_DIRLISTONLY,
-    CURLOPT_APPEND,
-    CURLOPT_NETRC,
-    CURLOPT_FOLLOWLOCATION,
-    CURLOPT_TRANSFERTEXT,
-    CURLOPT_PUT,
-    CURLOPT_PROGRESSFUNCTION,
-    CURLOPT_PROGRESSDATA,
-    CURLOPT_AUTOREFERER,
-    CURLOPT_PROXYPORT,
-    CURLOPT_POSTFIELDSIZE,
-    CURLOPT_HTTPPROXYTUNNEL,
-    CURLOPT_INTERFACE,
-    CURLOPT_KRBLEVEL,
-    CURLOPT_SSL_VERIFYPEER,
-    CURLOPT_CAINFO,
-    CURLOPT_MAXREDIRS,
-    CURLOPT_FILETIME,
-    CURLOPT_TELNETOPTIONS,
-    CURLOPT_MAXCONNECTS,
-    CURLOPT_CLOSEPOLICY,
-    CURLOPT_FRESH_CONNECT,
-    CURLOPT_FORBID_REUSE,
-    CURLOPT_RANDOM_FILE,
-    CURLOPT_EGDSOCKET,
-    CURLOPT_CONNECTTIMEOUT,
-    CURLOPT_HEADERFUNCTION,
-    CURLOPT_HTTPGET,
-    CURLOPT_SSL_VERIFYHOST,
-    CURLOPT_COOKIEJAR,
-    CURLOPT_SSL_CIPHER_LIST,
-    CURLOPT_HTTP_VERSION,
-    CURLOPT_FTP_USE_EPSV,
-    CURLOPT_SSLCERTTYPE,
-    CURLOPT_SSLKEY,
-    CURLOPT_SSLKEYTYPE,
-    CURLOPT_SSLENGINE,
-    CURLOPT_SSLENGINE_DEFAULT,
-    CURLOPT_DNS_USE_GLOBAL_CACHE
+    CURLINFO_EFFECTIVE_URL,
+    CURLINFO_RESPONSE_CODE,
+    CURLINFO_TOTAL_TIME,
+    CURLINFO_NAMELOOKUP_TIME,
+    CURLINFO_CONNECT_TIME,
+    CURLINFO_PRETRANSFER_TIME,
+    CURLINFO_SIZE_UPLOAD,
+    CURLINFO_SIZE_DOWNLOAD,
+    CURLINFO_SPEED_DOWNLOAD,
+    CURLINFO_SPEED_UPLOAD,
+    CURLINFO_HEADER_SIZE,
+    CURLINFO_REQUEST_SIZE,
+    CURLINFO_SSL_VERIFYRESULT,
+    CURLINFO_FILETIME,
+    CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+    CURLINFO_CONTENT_LENGTH_UPLOAD,
+    CURLINFO_STARTTRANSFER_TIME,
+    CURLINFO_CONTENT_TYPE,
+    CURLINFO_REDIRECT_TIME,
+    CURLINFO_REDIRECT_COUNT,
+    CURLINFO_PRIVATE,
+    CURLINFO_HTTP_CONNECTCODE,
+    CURLINFO_HTTPAUTH_AVAIL,
+    CURLINFO_PROXYAUTH_AVAIL,
+    CURLINFO_OS_ERRNO,
+    CURLINFO_NUM_CONNECTS,
+    CURLINFO_SSL_ENGINES,
+    CURLINFO_COOKIELIST,
+    CURLINFO_FTP_ENTRY_PATH,
+    CURLINFO_REDIRECT_URL,
+    CURLINFO_PRIMARY_IP,
+    CURLINFO_APPCONNECT_TIME,
+    CURLINFO_CERTINFO,
+    CURLINFO_CONDITION_UNMET,
+    CURLINFO_RTSP_SESSION_ID,
+    CURLINFO_RTSP_CLIENT_CSEQ,
+    CURLINFO_RTSP_SERVER_CSEQ,
+    CURLINFO_RTSP_CSEQ_RECV,
+    CURLINFO_PRIMARY_PORT,
+    CURLINFO_LOCAL_IP,
+    CURLINFO_LOCAL_PORT,
+    CURLINFO_ACTIVESOCKET,
+    CURLINFO_TLS_SSL_PTR,
+    CURLINFO_HTTP_VERSION,
+    CURLINFO_PROXY_SSL_VERIFYRESULT,
+    CURLINFO_SCHEME,
+    CURLINFO_TOTAL_TIME_T,
+    CURLINFO_NAMELOOKUP_TIME_T,
+    CURLINFO_CONNECT_TIME_T,
+    CURLINFO_PRETRANSFER_TIME_T,
+    CURLINFO_STARTTRANSFER_TIME_T,
+    CURLINFO_REDIRECT_TIME_T,
+    CURLINFO_APPCONNECT_TIME_T,
+    CURLINFO_RETRY_AFTER,
+    CURLINFO_EFFECTIVE_METHOD,
+    CURLINFO_PROXY_ERROR,
+    CURLINFO_REFERER,
+    CURLINFO_CAINFO,
+    CURLINFO_CAPATH,
+    CURLINFO_XFER_ID,
+    CURLINFO_CONN_ID,
+    CURLINFO_QUEUE_TIME_T,
+    CURLINFO_USED_PROXY,
+    CURLINFO_POSTTRANSFER_TIME_T,
+    CURLINFO_EARLYDATA_SENT_T,
+    CURLINFO_HTTPAUTH_USED,
+    CURLINFO_PROXYAUTH_USED,
 )
-struct Option(Copyable, TrivialRegisterPassable):
-    """CURLoption values for setting options on CURL easy handles."""
+
+@fieldwise_init
+struct Info(Copyable, TrivialRegisterPassable):
+    """CURLINFO options for retrieving information from a CURL handle."""
+
     var value: c_int
     """Internal enum value."""
 
-    comptime WRITE_DATA: Self = Self.OBJECT_POINT + 1
-    comptime FILE: Self = CURLOPT_FILE
-    comptime URL: Self = CURLOPT_URL
-    comptime PORT: Self = CURLOPT_PORT
-    comptime PROXY: Self = CURLOPT_PROXY
-    comptime USER_PWD: Self = CURLOPT_USERPWD
-    comptime PROXY_USER_PWD: Self = CURLOPT_PROXYUSERPWD
-    comptime RANGE: Self = Self.OBJECT_POINT + 7
-    comptime IN_FILE: Self = Self.OBJECT_POINT + 9
-    comptime READ_DATA: Self = Self.OBJECT_POINT + 9
-    comptime ERROR_BUFFER: Self = Self.OBJECT_POINT + 10
-    comptime WRITE_FUNCTION: Self = Self.FUNCTION_POINT + 11
-    comptime READ_FUNCTION: Self = Self.FUNCTION_POINT + 12
-    comptime TIMEOUT: Self = Self.LONG + 13
-    comptime IN_FILE_SIZE: Self = Self.LONG + 14
-    comptime POST_FIELDS: Self = Self.OBJECT_POINT + 15
-    comptime REFERER: Self = Self.OBJECT_POINT + 16
-    comptime FTP_PORT: Self = Self.OBJECT_POINT + 17
-    comptime USERAGENT: Self = Self.OBJECT_POINT + 18
-    comptime LOW_SPEED_LIMIT: Self = Self.LONG + 19
-    comptime LOW_SPEED_TIME: Self = Self.LONG + 20
-    comptime RESUME_FROM: Self = Self.LONG + 21
-    comptime COOKIE: Self = Self.OBJECT_POINT + 22
-    comptime HTTP_HEADER: Self = Self.OBJECT_POINT + 23
-    comptime SSL_CERT: Self = Self.OBJECT_POINT + 25
-    comptime KEY_PASSWD: Self = Self.OBJECT_POINT + 26
-    comptime CRLF: Self = Self.LONG + 27
-    comptime QUOTE: Self = Self.OBJECT_POINT + 28
-    comptime WRITE_HEADER: Self = Self.OBJECT_POINT + 29
-    comptime COOKIE_FILE: Self = Self.OBJECT_POINT + 31
-    comptime SSL_VERSION: Self = Self.LONG + 32
-    comptime TIME_CONDITION: Self = Self.LONG + 33
-    comptime TIME_VALUE: Self = Self.LONG + 34
-    comptime CUSTOM_REQUEST: Self = Self.OBJECT_POINT + 36
-    comptime STDERR: Self = Self.OBJECT_POINT + 37
-    comptime POST_QUOTE: Self = Self.OBJECT_POINT + 39
-    comptime VERBOSE: Self = Self.LONG + 41
-    comptime HEADER: Self = Self.LONG + 42
-    comptime NO_PROGRESS: Self = Self.LONG + 43
-    comptime NO_BODY: Self = Self.LONG + 44
-    comptime FAIL_ON_ERROR: Self = Self.LONG + 45
-    comptime UPLOAD: Self = Self.LONG + 46
-    comptime POST: Self = Self.LONG + 47
-    comptime DIR_LIST_ONLY: Self = Self.LONG + 48
-    comptime APPEND: Self = Self.LONG + 50
-    comptime NETRC: Self = Self.LONG + 51
-    comptime FOLLOW_LOCATION: Self = Self.LONG + 52
-    comptime TRANSFER_TEXT: Self = Self.LONG + 53
-    comptime PROGRESS_DATA: Self = Self.OBJECT_POINT + 57
-    comptime AUTO_REFERER: Self = Self.LONG + 58
-    comptime PROXY_PORT: Self = Self.LONG + 59
-    comptime POST_FIELD_SIZE: Self = Self.LONG + 60
-    comptime HTTP_PROXY_TUNNEL: Self = Self.LONG + 61
-    comptime INTERFACE: Self = Self.OBJECT_POINT + 62
-    comptime KRB_LEVEL: Self = Self.OBJECT_POINT + 63
-    comptime SSL_VERIFYPEER: Self = Self.LONG + 64
-    comptime CAINFO: Self = Self.OBJECT_POINT + 65
-    comptime MAXREDIRS: Self = Self.LONG + 68
-    comptime FILE_TIME: Self = Self.LONG + 69
-    comptime TELNET_OPTIONS: Self = Self.OBJECT_POINT + 70
-    comptime MAX_CONNECTS: Self = Self.LONG + 71
-    comptime FRESH_CONNECT: Self = Self.LONG + 74
-    comptime FORBID_REUSE: Self = Self.LONG + 75
-    comptime RANDOM_FILE: Self = Self.OBJECT_POINT + 76
-    comptime EGD_SOCKET: Self = Self.OBJECT_POINT + 77
-    comptime CONNECT_TIMEOUT: Self = Self.LONG + 78
-    comptime HEADER_FUNCTION: Self = Self.FUNCTION_POINT + 79
-    comptime HTTPGET: Self = Self.LONG + 80
-    comptime SSL_VERIFY_HOST: Self = Self.LONG + 81
-    comptime COOKIEJAR: Self = Self.OBJECT_POINT + 82
-    comptime SSL_CIPHER_LIST: Self = Self.OBJECT_POINT + 83
-    comptime HTTP_VERSION: Self = Self.LONG + 84
-    comptime FTP_USE_EPSV: Self = Self.LONG + 85
-    comptime SSL_CERT_TYPE: Self = Self.OBJECT_POINT + 86
-    comptime SSL_KEY: Self = Self.OBJECT_POINT + 87
-    comptime SSL_KEY_TYPE: Self = Self.OBJECT_POINT + 88
-    comptime SSL_ENGINE: Self = Self.OBJECT_POINT + 89
-    comptime SSL_ENGINE_DEFAULT: Self = Self.LONG + 90
-    comptime DNS_USE_GLOBAL_CACHE: Self = CURLOPT_DNS_USE_GLOBAL_CACHE
-    comptime DNS_CACHE_TIMEOUT: Self = Self.LONG + 92
-    comptime PREQUOTE: Self = Self.OBJECT_POINT + 93
-    comptime DEBUG_FUNCTION: Self = Self.FUNCTION_POINT + 94
-    comptime DEBUG_DATA: Self = Self.OBJECT_POINT + 95
-    comptime COOKIE_SESSION: Self = Self.LONG + 96
-    comptime CAPATH: Self = Self.OBJECT_POINT + 97
-    comptime BUFFER_SIZE: Self = Self.LONG + 98
-    comptime NO_SIGNAL: Self = Self.LONG + 99
-    comptime SHARE: Self = Self.OBJECT_POINT + 100
-    comptime PROXY_TYPE: Self = Self.LONG + 101
-    comptime ACCEPT_ENCODING: Self = Self.OBJECT_POINT + 102
-    comptime PRIVATE: Self = Self.OBJECT_POINT + 103
-    comptime HTTP200_ALIASES: Self = Self.OBJECT_POINT + 104
-    comptime UNRESTRICTED_AUTH: Self = Self.LONG + 105
-    comptime FTP_USE_EPRT: Self = Self.LONG + 106
-    comptime HTTP_AUTH: Self = Self.LONG + 107
-    comptime SSL_CTX_FUNCTION: Self = Self.FUNCTION_POINT + 108
-    comptime SSL_CTX_DATA: Self = Self.OBJECT_POINT + 109
-    comptime FTP_CREATE_MISSING_DIRS: Self = Self.LONG + 110
-    comptime PROXY_AUTH: Self = Self.LONG + 111
-    comptime FTP_RESPONSE_TIMEOUT: Self = Self.LONG + 112
-    comptime IP_RESOLVE: Self = Self.LONG + 113
-    comptime MAX_FILE_SIZE: Self = Self.LONG + 114
-    comptime IN_FILE_SIZE_LARGE: Self = Self.OFF_T + 115
-    comptime RESUME_FROM_LARGE: Self = Self.OFF_T + 116
-    comptime MAX_FILE_SIZE_LARGE: Self = Self.OFF_T + 117
-    comptime NETRC_FILE: Self = Self.OBJECT_POINT + 118
-    comptime USE_SSL: Self = Self.LONG + 119
-    comptime POST_FIELD_SIZE_LARGE: Self = Self.OFF_T + 120
-    comptime TCP_NODELAY: Self = Self.LONG + 121
-    comptime FTP_SSL_AUTH: Self = Self.LONG + 129
-    comptime FTP_ACCOUNT: Self = Self.OBJECT_POINT + 134
-    comptime COOKIE_LIST: Self = Self.OBJECT_POINT + 135
-    comptime IGNORE_CONTENT_LENGTH: Self = Self.LONG + 136
-    comptime FTP_SKIP_PASV_IP: Self = Self.LONG + 137
-    comptime FTP_FILE_METHOD: Self = Self.LONG + 138
-    comptime LOCAL_PORT: Self = Self.LONG + 139
-    comptime LOCAL_PORT_RANGE: Self = Self.LONG + 140
-    comptime CONNECT_ONLY: Self = Self.LONG + 141
-    comptime MAX_SEND_SPEED_LARGE: Self = Self.OFF_T + 145
-    comptime MAX_RECV_SPEED_LARGE: Self = Self.OFF_T + 146
-    comptime FTP_ALTERNATIVE_TO_USER: Self = Self.OBJECT_POINT + 147
-    comptime SOCKOPT_FUNCTION: Self = Self.FUNCTION_POINT + 148
-    comptime SOCKOPT_DATA: Self = Self.OBJECT_POINT + 149
-    comptime SSL_SESSIONID_CACHE: Self = Self.LONG + 150
-    comptime SSH_AUTH_TYPES: Self = Self.LONG + 151
-    comptime SSH_PUBLIC_KEYFILE: Self = Self.OBJECT_POINT + 152
-    comptime SSH_PRIVATE_KEYFILE: Self = Self.OBJECT_POINT + 153
-    comptime FTP_SSL_CCC: Self = Self.LONG + 154
-    comptime TIMEOUT_MS: Self = Self.LONG + 155
-    comptime CONNECT_TIMEOUT_MS: Self = Self.LONG + 156
-    comptime HTTP_TRANSFER_DECODING: Self = Self.LONG + 157
-    comptime HTTP_CONTENT_DECODING: Self = Self.LONG + 158
-    comptime NEW_FILE_PERMS: Self = Self.LONG + 159
-    comptime NEW_DIRECTORY_PERMS: Self = Self.LONG + 160
-    comptime POST_REDIR: Self = Self.LONG + 161
-    comptime SSH_HOST_PUBLIC_KEY_MD5: Self = Self.OBJECT_POINT + 162
-    comptime OPEN_SOCKET_FUNCTION: Self = Self.FUNCTION_POINT + 163
-    comptime OPEN_SOCKET_DATA: Self = Self.OBJECT_POINT + 164
-    comptime COPY_POST_FIELDS: Self = Self.OBJECT_POINT + 165
-    comptime PROXY_TRANSFER_MODE: Self = Self.LONG + 166
-    comptime SEEK_FUNCTION: Self = Self.FUNCTION_POINT + 167
-    comptime SEEK_DATA: Self = Self.OBJECT_POINT + 168
-    comptime CRL_FILE: Self = Self.OBJECT_POINT + 169
-    comptime ISSUER_CERT: Self = Self.OBJECT_POINT + 170
-    comptime ADDRESS_SCOPE: Self = Self.LONG + 171
-    comptime CERT_INFO: Self = Self.LONG + 172
-    comptime USERNAME: Self = Self.OBJECT_POINT + 173
-    comptime PASSWORD: Self = Self.OBJECT_POINT + 174
-    comptime PROXY_USERNAME: Self = Self.OBJECT_POINT + 175
-    comptime PROXY_PASSWORD: Self = Self.OBJECT_POINT + 176
-    comptime NO_PROXY: Self = Self.OBJECT_POINT + 177
-    comptime TFTP_BLK_SIZE: Self = Self.LONG + 178
-    comptime SOCKS5_GSSAPI_NEC: Self = Self.LONG + 180
-    comptime SSH_KNOWNHOSTS: Self = Self.OBJECT_POINT + 183
-    comptime SSH_KEY_FUNCTION: Self = Self.FUNCTION_POINT + 184
-    comptime SSH_KEY_DATA: Self = Self.OBJECT_POINT + 185
-    comptime MAIL_FROM: Self = Self.OBJECT_POINT + 186
-    comptime MAIL_RCPT: Self = Self.OBJECT_POINT + 187
-    comptime FTP_USE_PRET: Self = Self.LONG + 188
-    comptime RTSP_REQUEST: Self = Self.LONG + 189
-    comptime RTSP_SESSION_ID: Self = Self.OBJECT_POINT + 190
-    comptime RTSP_STREAM_URI: Self = Self.OBJECT_POINT + 191
-    comptime RTSP_TRANSPORT: Self = Self.OBJECT_POINT + 192
-    comptime RTSP_CLIENT_CSEQ: Self = Self.LONG + 193
-    comptime RTSP_SERVER_CSEQ: Self = Self.LONG + 194
-    comptime INTERLEAVE_DATA: Self = Self.OBJECT_POINT + 195
-    comptime INTERLEAVE_FUNCTION: Self = Self.FUNCTION_POINT + 196
-    comptime WILDCARD_MATCH: Self = Self.LONG + 197
-    comptime CHUNK_BGN_FUNCTION: Self = Self.FUNCTION_POINT + 198
-    comptime CHUNK_END_FUNCTION: Self = Self.FUNCTION_POINT + 199
-    comptime FN_MATCH_FUNCTION: Self = Self.FUNCTION_POINT + 200
-    comptime CHUNK_DATA: Self = Self.OBJECT_POINT + 201
-    comptime FN_MATCH_DATA: Self = Self.OBJECT_POINT + 202
-    comptime RESOLVE: Self = Self.OBJECT_POINT + 203
-    comptime TLS_AUTH_USERNAME: Self = Self.OBJECT_POINT + 204
-    comptime TLS_AUTH_PASSWORD: Self = Self.OBJECT_POINT + 205
-    comptime TLS_AUTH_TYPE: Self = Self.OBJECT_POINT + 206
-    comptime TRANSFER_ENCODING: Self = Self.LONG + 207
-    comptime CLOSE_SOCKET_FUNCTION: Self = Self.FUNCTION_POINT + 208
-    comptime CLOSE_SOCKET_DATA: Self = Self.OBJECT_POINT + 209
-    comptime GSSAPI_DELEGATION: Self = Self.LONG + 210
-    comptime DNS_SERVERS: Self = Self.OBJECT_POINT + 211
-    comptime TCP_KEEPALIVE: Self = Self.LONG + 213
-    comptime TCP_KEEPIDLE: Self = Self.LONG + 214
-    comptime TCP_KEEPINTVL: Self = Self.LONG + 215
-    comptime SSL_OPTIONS: Self = Self.LONG + 216
-    comptime EXPECT_100_TIMEOUT_MS: Self = Self.LONG + 227
-    comptime PINNED_PUBLIC_KEY: Self = Self.OBJECT_POINT + 230
-    comptime UNIX_SOCKET_PATH: Self = Self.OBJECT_POINT + 231
-    comptime PATH_AS_IS: Self = Self.LONG + 234
-    comptime PIPE_WAIT: Self = Self.LONG + 237
-    comptime CONNECT_TO: Self = Self.OBJECT_POINT + 243
-    comptime PROXY_CAINFO: Self = Self.OBJECT_POINT + 246
-    comptime PROXY_CAPATH: Self = Self.OBJECT_POINT + 247
-    comptime PROXY_SSL_VERIFYPEER: Self = Self.LONG + 248
-    comptime PROXY_SSL_VERIFYHOST: Self = Self.LONG + 249
-    comptime PROXY_SSL_VERSION: Self = Self.VALUES + 250
-    comptime PROXY_SSL_CERT: Self = Self.OBJECT_POINT + 254
-    comptime PROXY_SSL_CERT_TYPE: Self = Self.OBJECT_POINT + 255
-    comptime PROXY_SSL_KEY: Self = Self.OBJECT_POINT + 256
-    comptime PROXY_SSL_KEY_TYPE: Self = Self.OBJECT_POINT + 257
-    comptime PROXY_KEYPASSWD: Self = Self.OBJECT_POINT + 258
-    comptime PROXY_SSL_CIPHER_LIST: Self = Self.OBJECT_POINT + 259
-    comptime PROXY_CRL_FILE: Self = Self.OBJECT_POINT + 260
-    comptime PROXY_SSL_OPTIONS: Self = Self.LONG + 261
-    comptime ABSTRACT_UNIX_SOCKET: Self = Self.OBJECT_POINT + 264
-    comptime DOH_URL: Self = Self.OBJECT_POINT + 279
-    comptime UPLOAD_BUFFER_SIZE: Self = Self.LONG + 280
-    comptime HTTP09_ALLOWED: Self = Self.LONG + 285
-    comptime MAX_AGE_CONN: Self = Self.LONG + 288
-    comptime SSL_CERT_BLOB: Self = Self.BLOB + 291
-    comptime SSL_KEY_BLOB: Self = Self.BLOB + 292
-    comptime PROXY_SSL_CERT_BLOB: Self = Self.BLOB + 293
-    comptime PROXY_SSL_KEY_BLOB: Self = Self.BLOB + 294
-    comptime ISSUER_CERT_BLOB: Self = Self.BLOB + 295
-    comptime PROXY_ISSUER_CERT: Self = Self.OBJECT_POINT + 296
-    comptime PROXY_ISSUER_CERT_BLOB: Self = Self.BLOB + 297
-    comptime AWS_SIGV4: Self = Self.OBJECT_POINT + 305
-    comptime DOH_SSL_VERIFY_PEER: Self = Self.LONG + 306
-    comptime DOH_SSL_VERIFY_HOST: Self = Self.LONG + 307
-    comptime DOH_SSL_VERIFY_STATUS: Self = Self.LONG + 308
-    comptime CAINFO_BLOB: Self = Self.BLOB + 309
-    comptime PROXY_CAINFO_BLOB: Self = Self.BLOB + 310
-    comptime SSH_HOST_PUBLIC_KEY_SHA256: Self = Self.OBJECT_POINT + 311
-    comptime PREREQ_FUNCTION: Self = Self.FUNCTION_POINT + 312
-    comptime PREREQ_DATA: Self = Self.OBJECT_POINT + 313
-    comptime MAX_LIFETIME_CONN: Self = Self.LONG + 314
-    comptime MIME_OPTIONS: Self = Self.LONG + 315
-    comptime SSH_HOST_KEY_FUNCTION: Self = Self.FUNCTION_POINT + 316
-    comptime SSH_HOST_KEY_DATA: Self = Self.OBJECT_POINT + 317
-    comptime PROTOCOLS_STR: Self = Self.OBJECT_POINT + 318
-    comptime REDIR_PROTOCOLS_STR: Self = Self.OBJECT_POINT + 319
-    comptime WS_OPTIONS: Self = Self.LONG + 320
-    comptime CA_CACHE_TIMEOUT: Self = Self.LONG + 321
-    comptime QUICK_EXIT: Self = Self.LONG + 322
-    comptime HAPROXY_CLIENT_IP: Self = Self.OBJECT_POINT + 323
-    comptime SERVER_RESPONSE_TIMEOUT_MS: Self = Self.LONG + 324
-    comptime ECH: Self = Self.OBJECT_POINT + 325
-    comptime TCP_KEEPCNT: Self = Self.LONG + 326
-    comptime UPLOAD_FLAGS: Self = Self.LONG + 327
-    comptime SSL_SIGNATURE_ALGORITHMS: Self = Self.OBJECT_POINT + 328
-
-    @implicit
-    def __init__(out self, value: Int):
-        self.value = c_int(value)
-
-    @implicit
-    def __init__(out self, value: c_int):
-        self.value = value
+    comptime EFFECTIVE_URL = CURLINFO_EFFECTIVE_URL
+    """[CURLINFO_EFFECTIVE_URL] Get the last used effective URL."""
+    comptime RESPONSE_CODE = CURLINFO_RESPONSE_CODE
+    """[CURLINFO_RESPONSE_CODE] Get the last received response code."""
+    comptime TOTAL_TIME = CURLINFO_TOTAL_TIME
+    """[CURLINFO_TOTAL_TIME] Get total time of previous transfer."""
+    comptime NAME_LOOKUP_TIME = CURLINFO_NAMELOOKUP_TIME
+    """[CURLINFO_NAMELOOKUP_TIME] Get time from start until name resolving completed."""
+    comptime CONNECT_TIME = CURLINFO_CONNECT_TIME
+    """[CURLINFO_CONNECT_TIME] Get time from start until connect to remote host completed."""
+    comptime PRE_TRANSFER_TIME = CURLINFO_PRETRANSFER_TIME
+    """[CURLINFO_PRETRANSFER_TIME] Get time from start until file transfer is just about to begin."""
+    comptime SIZE_UPLOAD = CURLINFO_SIZE_UPLOAD
+    """[CURLINFO_SIZE_UPLOAD] Get number of bytes uploaded."""
+    comptime SIZE_DOWNLOAD = CURLINFO_SIZE_DOWNLOAD
+    """[CURLINFO_SIZE_DOWNLOAD] Get number of bytes downloaded."""
+    comptime SPEED_DOWNLOAD = CURLINFO_SPEED_DOWNLOAD
+    """[CURLINFO_SPEED_DOWNLOAD] Get average download speed in number of bytes per second."""
+    comptime SPEED_UPLOAD = CURLINFO_SPEED_UPLOAD
+    """[CURLINFO_SPEED_UPLOAD] Get average upload speed in number of bytes per second."""
+    comptime HEADER_SIZE = CURLINFO_HEADER_SIZE
+    """[CURLINFO_HEADER_SIZE] Get number of bytes of all headers received."""
+    comptime REQUEST_SIZE = CURLINFO_REQUEST_SIZE
+    """[CURLINFO_REQUEST_SIZE] Get number of bytes sent in the issued HTTP requests."""
+    comptime SSL_VERIFY_RESULT = CURLINFO_SSL_VERIFYRESULT
+    """[CURLINFO_SSL_VERIFY_RESULT] Get certificate verification result."""
+    comptime FILE_TIME = CURLINFO_FILETIME
+    """[CURLINFO_FILE_TIME] Get remote time of the retrieved document."""
+    comptime CONTENT_LENGTH_DOWNLOAD_T = CURLINFO_CONTENT_LENGTH_DOWNLOAD
+    """[CURLINFO_CONTENT_LENGTH_DOWNLOAD_T] Get content length from the Content-Length header."""
+    comptime CONTENT_LENGTH_UPLOAD_T = CURLINFO_CONTENT_LENGTH_UPLOAD
+    """[CURLINFO_CONTENT_LENGTH_UPLOAD_T] Get upload size."""
+    comptime START_TRANSFER_TIME = CURLINFO_STARTTRANSFER_TIME
+    """[CURLINFO_STARTTRANSFER_TIME] Get time from start until first byte is received by libmojo_curl."""
+    comptime CONTENT_TYPE = CURLINFO_CONTENT_TYPE
+    """[CURLINFO_CONTENT_TYPE] Get content type from the Content-Type: header."""
+    comptime REDIRECT_TIME = CURLINFO_REDIRECT_TIME
+    """[CURLINFO_REDIRECT_TIME] Get time for all redirection steps before final transaction started."""
+    comptime REDIRECT_COUNT = CURLINFO_REDIRECT_COUNT
+    """[CURLINFO_REDIRECT_COUNT] Get total number of redirects that were followed."""
+    comptime PRIVATE = CURLINFO_PRIVATE
+    """[CURLINFO_PRIVATE] Get user's private data pointer."""
+    comptime HTTP_CONNECT_CODE = CURLINFO_HTTP_CONNECTCODE
+    """[CURLINFO_HTTP_CONNECTCODE] Get last proxy CONNECT response code."""
+    comptime HTTP_AUTH_AVAIL = CURLINFO_HTTPAUTH_AVAIL
+    """[CURLINFO_HTTPAUTH_AVAIL] Get available HTTP authentication methods."""
+    comptime PROXY_AUTH_AVAIL = CURLINFO_PROXYAUTH_AVAIL
+    """[CURLINFO_PROXYAUTH_AVAIL] Get available HTTP proxy authentication methods."""
+    comptime OS_ERRNO = CURLINFO_OS_ERRNO
+    """[CURLINFO_OS_ERRNO] Get the errno from the last failure to connect."""
+    comptime NUM_CONNECTS = CURLINFO_NUM_CONNECTS
+    """[CURLINFO_NUM_CONNECTS] Get number of new successful connections used for previous transfer."""
+    comptime SSL_ENGINES = CURLINFO_SSL_ENGINES
+    """[CURLINFO_SSL_ENGINES] Get a list of OpenSSL crypto engines."""
+    comptime COOKIE_LIST = CURLINFO_COOKIELIST
+    """[CURLINFO_COOKIELIST] Get list of all known cookies."""
+    comptime FTP_ENTRY_PATH = CURLINFO_FTP_ENTRY_PATH
+    """[CURLINFO_FTP_ENTRY_PATH] Get the entry path after logging in to an FTP server."""
+    comptime REDIRECT_URL = CURLINFO_REDIRECT_URL
+    """[CURLINFO_REDIRECT_URL] Get URL a redirect would take you to, had you enabled redirects."""
+    comptime PRIMARY_IP = CURLINFO_PRIMARY_IP
+    """[CURLINFO_PRIMARY_IP] Get destination IP address of the last connection."""
+    comptime APP_CONNECT_TIME = CURLINFO_APPCONNECT_TIME
+    """[CURLINFO_APPCONNECT_TIME] Get time from start until SSL connect/handshake completed."""
+    comptime CERTINFO = CURLINFO_CERTINFO
+    """[CURLINFO_CERTINFO] Get certificate chain."""
+    comptime CONDITION_UNMET = CURLINFO_CONDITION_UNMET
+    """[CURLINFO_CONDITION_UNMET] Get whether or not a time conditional was met or 304 HTTP response."""
+    comptime RTSP_SESSION_ID = CURLINFO_RTSP_SESSION_ID
+    """[CURLINFO_RTSP_SESSION_ID] Get RTSP session ID."""
+    comptime RTSP_CLIENT_CSEQ = CURLINFO_RTSP_CLIENT_CSEQ
+    """[CURLINFO_RTSP_CLIENT_CSEQ] Get the RTSP client CSeq that is expected next."""
+    comptime RTSP_SERVER_CSEQ = CURLINFO_RTSP_SERVER_CSEQ
+    """[CURLINFO_RTSP_SERVER_CSEQ] Get the RTSP server CSeq that is expected next."""
+    comptime RTSP_CSEQ_RECV = CURLINFO_RTSP_CSEQ_RECV
+    """[CURLINFO_RTSP_CSEQ_RECV] Get RTSP CSeq last received."""
+    comptime PRIMARY_PORT = CURLINFO_PRIMARY_PORT
+    """[CURLINFO_PRIMARY_PORT] Get destination port of the last connection."""
+    comptime LOCAL_IP = CURLINFO_LOCAL_IP
+    """[CURLINFO_LOCAL_IP] Get source IP address of the last connection."""
+    comptime LOCAL_PORT = CURLINFO_LOCAL_PORT
+    """[CURLINFO_LOCAL_PORT] Get source port number of the last connection."""
+    comptime ACTIVE_SOCKET = CURLINFO_ACTIVESOCKET
+    """[CURLINFO_ACTIVESOCKET] Get the session's active socket."""
+    comptime TLS_SSL_PTR = CURLINFO_TLS_SSL_PTR
+    """[CURLINFO_TLS_SSL_PTR] Get TLS session info that can be used for further processing."""
+    comptime HTTP_VERSION = CURLINFO_HTTP_VERSION
+    """[CURLINFO_HTTP_VERSION] Get the http version used in the connection."""
+    comptime PROXY_SSL_VERIFY_RESULT = CURLINFO_PROXY_SSL_VERIFYRESULT
+    """[CURLINFO_PROXY_SSL_VERIFYRESULT] Get proxy certificate verification result."""
+    comptime SCHEME = CURLINFO_SCHEME
+    """[CURLINFO_SCHEME] Get the scheme used for the connection."""
+    comptime TOTAL_TIME_T = CURLINFO_TOTAL_TIME_T
+    """[CURLINFO_TOTAL_TIME_T] Get total time of previous transfer in microseconds."""
+    comptime NAMELOOKUP_TIME_T = CURLINFO_NAMELOOKUP_TIME_T
+    """[CURLINFO_NAMELOOKUP_TIME_T] Get time from start until name resolving completed in microseconds."""
+    comptime CONNECT_TIME_T = CURLINFO_CONNECT_TIME_T
+    """[CURLINFO_CONNECT_TIME_T] Get time from start until connect to remote host completed in microseconds."""
+    comptime PRETRANSFER_TIME_T = CURLINFO_PRETRANSFER_TIME_T
+    """[CURLINFO_PRETRANSFER_TIME_T] Get time from start until file transfer is just about to begin in microseconds."""
+    comptime STARTTRANSFER_TIME_T = CURLINFO_STARTTRANSFER_TIME_T
+    """[CURLINFO_STARTTRANSFER_TIME_T] Get time from start until first byte is received by libcurl in microseconds."""
+    comptime REDIRECT_TIME_T = CURLINFO_REDIRECT_TIME_T
+    """[CURLINFO_REDIRECT_TIME_T] Get time for all redirection steps before final transaction started in microseconds."""
+    comptime APP_CONNECT_TIME_T = CURLINFO_APPCONNECT_TIME_T
+    """[CURLINFO_APPCONNECT_TIME_T] Get time from start until SSL connect/handshake completed in microseconds."""
+    comptime RETRY_AFTER = CURLINFO_RETRY_AFTER
+    """[CURLINFO_RETRY_AFTER] Get the value from the Retry-After header."""
+    comptime EFFECTIVE_METHOD = CURLINFO_EFFECTIVE_METHOD
+    """[CURLINFO_EFFECTIVE_METHOD] Get last used HTTP method."""
+    comptime PROXY_ERROR = CURLINFO_PROXY_ERROR
+    """[CURLINFO_PROXY_ERROR] Get detailed proxy error."""
+    comptime REFERER = CURLINFO_REFERER
+    """[CURLINFO_REFERER] Get referrer header."""
+    comptime CA_INFO = CURLINFO_CAINFO
+    """[CURLINFO_CAINFO] Get the default value for CURLOPT_CAINFO."""
+    comptime CA_PATH = CURLINFO_CAPATH
+    """[CURLINFO_CAPATH] Get the default value for CURLOPT_CAPATH."""
+    comptime XFER_ID = CURLINFO_XFER_ID
+    """[CURLINFO_XFER_ID] Get the ID of the transfer."""
+    comptime CONN_ID = CURLINFO_CONN_ID
+    """[CURLINFO_CONN_ID] Get the ID of the last connection used by the transfer."""
+    comptime QUEUE_TIME_T = CURLINFO_QUEUE_TIME_T
+    """[CURLINFO_QUEUE_TIME_T] Get the time the transfer was held in a waiting queue before it could start in microseconds."""
+    comptime USED_PROXY = CURLINFO_USED_PROXY
+    """[CURLINFO_USED_PROXY] Get whether the proxy was used."""
+    comptime POST_TRANSFER_TIME_T = CURLINFO_POSTTRANSFER_TIME_T
+    """[CURLINFO_POSTTRANSFER_TIME_T] Get the time from start until the last byte is sent by libcurl in microseconds."""
+    comptime EARLY_DATA_SENT_T = CURLINFO_EARLYDATA_SENT_T
+    """[CURLINFO_EARLYDATA_SENT_T] Get amount of TLS early data sent in number of bytes."""
+    comptime HTTP_AUTH_USED = CURLINFO_HTTPAUTH_USED
+    """[CURLINFO_HTTPAUTH_USED] Get used HTTP authentication method."""
+    comptime PROXY_AUTH_USED = CURLINFO_PROXYAUTH_USED
+    """[CURLINFO_PROXYAUTH_USED] Get used HTTP proxy authentication methods."""

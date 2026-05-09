@@ -4,9 +4,13 @@ from std.collections.string.string import CStringSlice
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
-from mojo_curl.c import HeaderOrigin, Info, Option, Result, WriteCallbackFn, ReadCallbackFn
+from mojo_curl.c import HeaderOrigin
+from mojo_curl.c.types import curl_write_callback, curl_read_callback
+from mojo_curl.info import Info
+from mojo_curl.option import Option
+from mojo_curl.result import Result
 from mojo_curl.c.header import curl_header
-from mojo_curl.c.ssl_options import SSLOption
+from mojo_curl.ssl_options import SSLOption
 
 
 struct Easy(Movable):
