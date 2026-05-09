@@ -3,8 +3,8 @@
 
 from std.ffi import c_char, c_size_t
 
-from mojo_curl import Easy
-from mojo_curl.c.types import MutExternalPointer, Result
+from mojo_curl import Easy, Result
+from mojo_curl.c.types import MutExternalPointer
 
 
 def write_callback(

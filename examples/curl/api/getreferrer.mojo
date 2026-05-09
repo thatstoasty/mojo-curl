@@ -1,9 +1,7 @@
 # Converted from allexamples/getreferrer.c
 # Show how to extract the referrer header sent in a request.
 
-from mojo_curl import Easy
-from mojo_curl.c.types import Info, Result
-
+from mojo_curl import Easy, Info, Result
 
 def main() raises:
     var easy = Easy()
