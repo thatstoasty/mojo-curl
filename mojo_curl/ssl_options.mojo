@@ -1,4 +1,10 @@
 from std.ffi import c_long
+from mojo_curl.c.types import CURLSSLOPT_ALLOW_BEAST,
+CURLSSLOPT_NO_REVOKE,
+CURLSSLOPT_NO_PARTIALCHAIN,
+CURLSSLOPT_REVOKE_BEST_EFFORT,
+CURLSSLOPT_NATIVE_CA,
+CURLSSLOPT_AUTO_CLIENT_CERT
 
 
 @fieldwise_init
@@ -6,7 +12,7 @@ struct SSLOption(TrivialRegisterPassable):
     var bits: c_long
     """Struct representing SSL options for the CURLSSLOPT option in libcurl."""
 
-    comptime REVOKE_BEST_EFFORT = Self(1 << 0)
+    comptime REVOKE_BEST_EFFORT = Self(CURLSSLOPT_REVOKE_BEST_EFFORT)
     """
     Tells libcurl to ignore certificate revocation checks in case of missing or
     offline distribution points for those SSL backends where such behavior is present.
@@ -15,7 +21,7 @@ struct SSLOption(TrivialRegisterPassable):
 
     If combined with CURLSSLOPT_NO_REVOKE, the latter takes precedence. (Added in 7.70.0)
     """
-    comptime ALLOW_BEAST = Self(1 << 1)
+    comptime ALLOW_BEAST = Self(CURLSSLOPT_ALLOW_BEAST)
     """Tells libcurl to not attempt to use any workarounds for a security flaw
     in the SSL3 and TLS1.0 protocols.
 
@@ -27,21 +33,21 @@ struct SSLOption(TrivialRegisterPassable):
     > setting this option to 1 you ask for exactly that. This option is only
     > supported for DarwinSSL, NSS and OpenSSL.
     """
-    comptime NO_PARTIALCHAIN = Self(1 << 2)
+    comptime NO_PARTIALCHAIN = Self(CURLSSLOPT_NO_PARTIALCHAIN)
     """Tells libcurl to not accept "partial" certificate chains, which it otherwise does by default.
 
     This option is only supported for OpenSSL and will fail the certificate verification
     if the chain ends with an intermediate certificate and not with a root cert.
     (Added in 7.68.0)
     """
-    comptime NATIVE_CA = Self(1 << 4)
+    comptime NATIVE_CA = Self(CURLSSLOPT_NATIVE_CA)
     """Tell libcurl to use the operating system's native CA store for certificate verification.
 
     Works only on Windows when built to use OpenSSL.
 
     This option is experimental and behavior is subject to change. (Added in 7.71.0).
     """
-    comptime AUTO_CLIENT_CERT = Self(1 << 5)
+    comptime AUTO_CLIENT_CERT = Self(CURLSSLOPT_AUTO_CLIENT_CERT)
     """Tell libcurl to automatically locate and use a client certificate for authentication,
     when requested by the server.
 

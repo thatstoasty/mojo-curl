@@ -11,15 +11,13 @@ def main() raises:
     # Each entry uses the format HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT
     # This connects to example.com:443 while the URL says curl.se:443.
     var host = CurlList()
-    var entry: String = "curl.se:443:example.com:443"
-
     try:
-        host.append(entry.as_c_string_slice())
+        host.append("curl.se:443:example.com:443")
         _ = easy.connect_to(host)
     except e:
         host^.free()
         raise e^
-    _ = easy.verbose(verbose=True)
+    _ = easy.verbose()
     _ = easy.url("https://curl.se/")
 
     # The TLS certificate belongs to example.com, not curl.se — disable host

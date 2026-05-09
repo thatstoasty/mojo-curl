@@ -65,6 +65,12 @@ struct CurlList(Movable):
 
     def __bool__(self) -> Bool:
         return Bool(self.data)
+    
+    def append(mut self, var header: String) raises:
+        var ptr = curl_ffi()[].slist_append(self.data, header.as_c_string_slice().unsafe_ptr())
+        if not ptr:
+            raise Error("Failed to append to curl_slist")
+        self.data = ptr
 
     def append(mut self, header: CStringSlice) raises:
         var ptr = curl_ffi()[].slist_append(self.data, header.unsafe_ptr())

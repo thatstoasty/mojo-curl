@@ -36,6 +36,6 @@ def main() raises:
     if result != Result.OK:
         raise Error(easy.describe_error(result))
 
-    print("Downloaded", len(chunk), "bytes")
+    print(t"Downloaded {len(chunk)} bytes")
     # Print the downloaded content as a string
-    print(String(unsafe_from_utf8=Span[UInt8](chunk)))
+    print(StringSlice(unsafe_from_utf8=Span(chunk)))

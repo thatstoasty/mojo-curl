@@ -22,7 +22,7 @@ def main() raises:
     _ = easy.http_headers(headers)
 
     _ = easy.url("localhost")
-    _ = easy.verbose(verbose=True)
+    _ = easy.verbose()
 
     var result = easy.perform()
     if result != Result.OK:

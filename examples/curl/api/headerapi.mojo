@@ -22,7 +22,7 @@ def main() raises:
 
     _ = easy.url("https://example.com")
     # Follow any redirect so we see the final response headers
-    _ = easy.follow_location(enable=True)
+    _ = easy.follow_location()
     # Suppress body output; all data goes to the discard callback
     _ = easy.write_function(write_callback)
 
@@ -33,8 +33,8 @@ def main() raises:
     # Retrieve all server response headers as a dict
     var hdrs = easy.headers()
     if "content-type" in hdrs:
-        print("Got content-type:", hdrs["content-type"])
+        print(t"Got content-type: {hdrs["content-type"]}")
 
     print("All server headers:")
     for entry in hdrs.items():
-        print(" ", entry.key + ": " + entry.value)
+        print(t" {entry.key}: {entry.value}")

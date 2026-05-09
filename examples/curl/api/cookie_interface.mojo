@@ -9,7 +9,7 @@ def main() raises:
     var easy = Easy()
 
     _ = easy.url("https://www.example.com/")
-    _ = easy.verbose(verbose=True)
+    _ = easy.verbose()
     # Enable the cookie engine by providing an empty cookie file path
     _ = easy.cookie_file()
 
@@ -23,7 +23,7 @@ def main() raises:
     var count = 0
     for cookie in jar:
         count += 1
-        print("[", count, "]:", cookie)
+        print(t"[{count}]: {cookie}")
     if count == 0:
         print("(none)")
     jar^.free()
@@ -35,7 +35,7 @@ def main() raises:
     count = 0
     for cookie in jar2:
         count += 1
-        print("[", count, "]:", cookie)
+        print(t"[{count}]: {cookie}")
     if count == 0:
         print("(none)")
     jar2^.free()
@@ -56,7 +56,7 @@ def main() raises:
     count = 0
     for cookie in jar3:
         count += 1
-        print("[", count, "]:", cookie)
+        print(t"[{count}]: {cookie}")
     if count == 0:
         print("(none)")
     jar3^.free()

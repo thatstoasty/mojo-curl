@@ -22,5 +22,4 @@ def main() raises:
     else:
         # CURLINFO_REDIRECT_URL gives the absolute URL of the redirect target,
         # even when the server responded with a relative Location: header.
-        var location = easy.redirect_url()
-        print("Redirected to:", location)
+        print(t"Redirected to: {easy.redirect_url()}")

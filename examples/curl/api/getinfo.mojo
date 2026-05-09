@@ -14,5 +14,4 @@ def main() raises:
         raise Error(easy.describe_error(result))
 
     # Ask for the content-type of the received response
-    var ct = easy.content_type()
-    print("We received Content-Type:", ct)
+    print(t"We received Content-Type: {easy.content_type()}")

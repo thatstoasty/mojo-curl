@@ -17,5 +17,4 @@ def main() raises:
         raise Error(easy.describe_error(result))
 
     # CURLINFO_REFERER returns the Referer: header actually sent in the request
-    var hdr = easy.get_info(Info.REFERER)
-    print("Referrer header:", hdr)
+    print(t"Referrer header: {easy.get_info(Info.REFERER)}")
