@@ -2,7 +2,7 @@
 # Show how to extract Location: header and URL to redirect to.
 
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

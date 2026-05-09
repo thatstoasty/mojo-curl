@@ -2,7 +2,7 @@
 # Set maximum number of persistent connections to 1 and loop over several URLs
 
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

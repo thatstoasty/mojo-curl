@@ -100,7 +100,7 @@ Compile-time defines take priority over environment variables. If neither is set
 
 ```mojo
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 def main() raises:
     var easy = Easy()
@@ -149,7 +149,7 @@ Use `CurlList` to attach headers to your request:
 
 ```mojo
 from mojo_curl import Easy, CurlList
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 def main() raises:
     var easy = Easy()
@@ -177,7 +177,7 @@ After performing a request, you can read the response headers:
 
 ```mojo
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 def main() raises:
     var easy = Easy()
@@ -196,7 +196,7 @@ def main() raises:
 
 ```mojo
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 def main() raises:
     var easy = Easy()
@@ -215,7 +215,7 @@ Useful for debugging requests and seeing the full protocol exchange:
 
 ```mojo
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 def main() raises:
     var easy = Easy()

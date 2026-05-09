@@ -2,7 +2,7 @@
 # HTTP request with custom modified, removed and added headers
 
 from mojo_curl import Easy, CurlList
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

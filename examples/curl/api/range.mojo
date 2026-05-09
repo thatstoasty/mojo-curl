@@ -2,7 +2,7 @@
 # GET only a byte range of an HTTP resource
 
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

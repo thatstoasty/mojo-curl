@@ -2,7 +2,7 @@
 # Use CURLOPT_CONNECT_TO to physically connect to a different host than the URL
 
 from mojo_curl import Easy, CurlList
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

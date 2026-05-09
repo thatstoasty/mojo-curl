@@ -2,7 +2,7 @@
 # Import and export cookies using the CURLOPT_COOKIELIST interface
 
 from mojo_curl import Easy
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

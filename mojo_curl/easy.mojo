@@ -4,12 +4,11 @@ from std.collections.string.string import CStringSlice
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
-from mojo_curl.c import HeaderOrigin
 from mojo_curl.c.types import curl_write_callback, curl_read_callback
 from mojo_curl.info import Info
 from mojo_curl.option import Option
 from mojo_curl.result import Result
-from mojo_curl.c.header import curl_header
+from mojo_curl.header import HeaderOrigin
 from mojo_curl.ssl_options import SSLOption
 
 
@@ -98,7 +97,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    def set_option(self, option: Option, parameter: WriteCallbackFn) -> Result:
+    def set_option(self, option: Option, parameter: curl_write_callback) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:
@@ -3014,7 +3013,7 @@ struct Easy(Movable):
     # =========================================================================
     # Callback options
 
-    def write_function(self, callback: WriteCallbackFn) -> Result:
+    def write_function(self, callback: curl_write_callback) -> Result:
         """Set callback for writing received data.
 
         This callback function gets called by libcurl as soon as there is data
@@ -3039,7 +3038,7 @@ struct Easy(Movable):
         By default data is sent into the void, and this corresponds to the
         `CURLOPT_WRITEFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the WriteCallbackFn
+        Note: In Mojo, the callback function must match the curl_write_callback
         signature defined in the bindings.
 
         Args:
@@ -3067,7 +3066,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.WRITE_DATA, data)
 
-    def read_function(self, callback: ReadCallbackFn) -> Result:
+    def read_function(self, callback: curl_read_callback) -> Result:
         """Set callback for reading data to upload.
 
         This callback function gets called by libcurl when it needs to read
@@ -3082,7 +3081,7 @@ struct Easy(Movable):
         By default data is read from /dev/null, and this corresponds to the
         `CURLOPT_READFUNCTION` option.
 
-        Note: In Mojo, the callback function must match the ReadCallbackFn
+        Note: In Mojo, the callback function must match the curl_read_callback
         signature defined in the bindings.
 
         Args:

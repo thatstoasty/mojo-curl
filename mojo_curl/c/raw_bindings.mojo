@@ -5,12 +5,7 @@ from std.ffi import OwnedDLHandle, RTLD, c_char, c_int, c_long, c_uint, c_size_t
 from std.sys import get_defined_string
 from std.memory import MutPointer
 
-from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, WriteCallbackFn
-from mojo_curl.c.header import curl_header
-
-comptime CURLcode = c_int
-comptime CURLoption = c_int
-comptime CURLINFO = c_int
+from mojo_curl.c.types import curl_slist, CURL, ImmutExternalPointer, MutExternalPointer, curl_write_callback, curl_header, CURLcode, CURLoption, CURLINFO
 
 
 def _find_libcurl_library() raises -> String:
@@ -77,7 +72,7 @@ comptime curl_easy_setopt_string = def(CURL, CURLoption, ImmutExternalPointer[c_
 comptime curl_easy_setopt_long = def(CURL, CURLoption, c_long) abi("C") thin -> CURLcode
 comptime curl_easy_setopt_pointer = def(CURL, CURLoption, Optional[ImmutExternalPointer[NoneType]]) abi("C") thin -> CURLcode
 comptime curl_easy_setopt_pointer_mut = def(CURL, CURLoption, Optional[MutExternalPointer[NoneType]]) abi("C") thin -> CURLcode
-comptime curl_easy_setopt_callback = def(CURL, CURLoption, WriteCallbackFn) abi("C") thin -> CURLcode
+comptime curl_easy_setopt_callback = def(CURL, CURLoption, curl_write_callback) abi("C") thin -> CURLcode
 comptime curl_easy_getinfo_string = def(CURL, CURLINFO, MutExternalPointer[MutExternalPointer[c_char]]) abi("C") thin -> CURLcode
 comptime curl_easy_getinfo_long = def(CURL, CURLINFO, MutExternalPointer[c_long]) abi("C") thin -> CURLcode
 comptime curl_easy_getinfo_double = def(CURL, CURLINFO, MutExternalPointer[c_double]) abi("C") thin -> CURLcode
@@ -272,7 +267,7 @@ struct _curl(Movable):
         
         return self._fn_curl_easy_setopt_pointer_mut(easy, option, parameter.value().unsafe_origin_cast[MutExternalOrigin]())
     
-    def curl_easy_setopt_callback(self, easy: CURL, option: CURLoption, parameter: WriteCallbackFn) -> CURLcode:
+    def curl_easy_setopt_callback(self, easy: CURL, option: CURLoption, parameter: curl_write_callback) -> CURLcode:
         """Set a callback function for a curl easy handle using safe wrapper.
 
         Args:

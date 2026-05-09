@@ -2,8 +2,12 @@ from std.pathlib import Path
 from std.ffi import c_long, c_char
 from std.collections.string.string import CStringSlice
 
-from mojo_curl.c import curl_ffi, curl, CURL, Info, Option, Result, WriteCallbackFn, ReadCallbackFn, HeaderOrigin, curl_header
-from mojo_curl.c.types import MutExternalPointer, curl_slist
+from mojo_curl.c import curl_ffi, curl, CURL
+from mojo_curl.info import Info
+from mojo_curl.option import Option
+from mojo_curl.result import Result
+from mojo_curl.c.types import MutExternalPointer, curl_slist, curl_write_callback, curl_read_callback, curl_header
+from mojo_curl.header import HeaderOrigin
 
 
 @explicit_destroy("The easy handle must be explicitly destroyed by calling `close()` to free resources.")
@@ -33,14 +37,14 @@ struct InnerEasy(Movable):
     def set_option[origin: MutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    def set_option(self, option: Option, parameter: WriteCallbackFn) -> Result:
+    def set_option(self, option: Option, parameter: curl_write_callback) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     def get_info(self, info: Info) raises -> String:
         # Data is filled by data owned curl and must not be freed by the caller (this library) :)
         var data = MutExternalPointer[c_char].unsafe_dangling()
         var result = curl_ffi()[].easy_getinfo(self.easy, info, data)
-        if result.value != 0:
+        if result != 0:
             raise Error(t"Failed to get info: {self.describe_error(result)}")
 
         return String(StringSlice(unsafe_from_utf8_ptr=data))
@@ -48,7 +52,7 @@ struct InnerEasy(Movable):
     def get_info_long(self, info: Info) raises -> c_long:
         var response: c_long = 0
         var result = curl_ffi()[].easy_getinfo(self.easy, info, response)
-        if result.value != 0:
+        if result != 0:
             raise Error(t"Failed to get info: {self.describe_error(result)}")
 
         return response
@@ -56,20 +60,20 @@ struct InnerEasy(Movable):
     def get_info_float(self, info: Info) raises -> Float64:
         var response: Float64 = 0
         var result = curl_ffi()[].easy_getinfo(self.easy, info, response)
-        if result.value != 0:
+        if result != 0:
             raise Error(t"Failed to get info: {self.describe_error(result)}")
 
         return response
 
     def get_info_ptr[origin: MutOrigin, //](self, info: Info, mut ptr: MutOpaquePointer[origin]) raises:
         var result = curl_ffi()[].easy_getinfo(self.easy, info, ptr)
-        if result.value != 0:
+        if result != 0:
             raise Error(t"Failed to get info: {self.describe_error(result)}")
 
     def get_info_curl_slist(self, info: Info) raises -> CurlList:
         var list = CurlList()
         var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data.value())
-        if result.value != 0:
+        if result != 0:
             list^.free()
             raise Error(t"Failed to get info: {self.describe_error(result)}")
 
@@ -87,7 +91,7 @@ struct InnerEasy(Movable):
     def describe_error(self, code: Result) -> String:
         # TODO: StringSlice crashes, probably getting skill issued by
         # pointer lifetime. Theoretically StringSlice[ImmutAnyOrigin] should work.
-        return String(unsafe_from_utf8_ptr=curl_ffi()[].easy_strerror(code))
+        return String(unsafe_from_utf8_ptr=curl_ffi()[].easy_strerror(code.value))
 
     def headers(self, origin: HeaderOrigin) -> Dict[String, String]:
         var headers = Dict[String, String]()

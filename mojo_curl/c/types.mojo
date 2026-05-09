@@ -1204,3 +1204,19 @@ struct curl_sockaddr():
     """Length of the address in bytes. This was a `socklen_t` type before 7.18.0 but it turned really ugly and painful on the systems that lack this type."""
     var addr: sockaddr
     """The actual address. The size of this field is determined by the `addrlen` field."""
+
+
+struct curl_header:
+    """Struct representing a single header in the CURLH API."""
+    var name: MutExternalPointer[c_char]
+    """Pointer to the header name string."""
+    var value: MutExternalPointer[c_char]
+    """Pointer to the header value string."""
+    var amount: c_size_t
+    """Amount of data in the header."""
+    var index: c_size_t
+    """Index of the header."""
+    var origin: c_uint
+    """Origin of the header."""
+    var anchor: MutExternalPointer[NoneType]
+    """Pointer to the anchor."""

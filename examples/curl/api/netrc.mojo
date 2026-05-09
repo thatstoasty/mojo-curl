@@ -1,8 +1,7 @@
 # Converted from allexamples/netrc.c
 # Use credentials stored in a .netrc file
 
-from mojo_curl import Easy
-from mojo_curl.c.types import Option, Result
+from mojo_curl import Easy, Option, Result
 
 
 def main() raises:

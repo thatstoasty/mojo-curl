@@ -778,7 +778,7 @@ comptime CURL_WRITEFUNC_ERROR = 0xFFFFFFFF
 """This is a return code for the write callback that, when returned,
 will signal an error from the callback."""
 
-comptime WriteCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_size_t
+comptime curl_write_callback = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_size_t
 """This is the prototype for the write callback function used by curl. It matches the `CURLOPT_WRITEFUNCTION` prototype and can also be used where a generic read/write signature is needed."""
 
 comptime ResolverStartCallbackFn = def(MutExternalPointer[NoneType], MutExternalPointer[NoneType], MutExternalPointer[NoneType]) abi("C") thin -> c_int
@@ -931,7 +931,7 @@ comptime CURL_TRAILERFUNC_OK = 0
 comptime CURL_TRAILERFUNC_ABORT = 1
 """Return code for when there was an error in the trailing header's list and we want to abort the request."""
 
-comptime ReadCallbackFn = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_size_t
+comptime curl_read_callback = def(MutExternalPointer[c_char], c_size_t, c_size_t, MutExternalPointer[NoneType]) abi("C") thin -> c_size_t
 """This is the prototype for the read callback function used by curl. It matches the `CURLOPT_READFUNCTION` prototype, where the first argument is a writable buffer that the callback must fill."""
 comptime TrailerCallbackFn = def(MutExternalPointer[MutExternalPointer[curl_slist]], MutExternalPointer[NoneType]) abi("C") thin -> c_int
 """This is the prototype for the trailing headers callback function used by curl. It matches the `CURLOPT_TRAILERFUNCTION` prototype, where the first argument is a pointer to a pointer to a curl_slist that the callback must fill with the trailing headers."""

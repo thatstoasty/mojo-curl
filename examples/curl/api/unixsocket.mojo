@@ -1,8 +1,7 @@
 # Converted from allexamples/unixsocket.c
 # Access an HTTP server over a Unix domain socket
 
-from mojo_curl import Easy
-from mojo_curl.c.types import Option, Result
+from mojo_curl import Easy, Option, Result
 
 
 def main() raises:

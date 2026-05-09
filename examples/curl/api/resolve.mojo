@@ -2,7 +2,7 @@
 # Use CURLOPT_RESOLVE to provide custom IP addresses for hostname:port pairs
 
 from mojo_curl import Easy, CurlList
-from mojo_curl.c.types import Result
+from mojo_curl.result import Result
 
 
 def main() raises:

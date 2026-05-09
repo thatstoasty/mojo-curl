@@ -1,21 +1,4 @@
-from std.ffi import c_size_t, c_uint, c_char, c_int
-from mojo_curl.c.types import MutExternalPointer
-
-
-struct curl_header:
-    """Struct representing a single header in the CURLH API."""
-    var name: MutExternalPointer[c_char]
-    """Pointer to the header name string."""
-    var value: MutExternalPointer[c_char]
-    """Pointer to the header value string."""
-    var amount: c_size_t
-    """Amount of data in the header."""
-    var index: c_size_t
-    """Index of the header."""
-    var origin: c_uint
-    """Origin of the header."""
-    var anchor: MutExternalPointer[NoneType]
-    """Pointer to the anchor."""
+from std.ffi import c_uint, c_int
 
 
 struct HeaderOrigin(TrivialRegisterPassable):
