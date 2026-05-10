@@ -233,7 +233,7 @@ struct curl(Movable):
 
     def easy_getinfo[
         origin: MutOrigin, //
-    ](self, easy: CURL, info: Info, mut ptr: MutUnsafePointer[curl_slist, origin]) -> c_int:
+    ](self, easy: CURL, info: Info, mut ptr: Optional[MutUnsafePointer[curl_slist, origin]]) -> c_int:
         """Get long info from a curl easy handle using safe wrapper.
 
         Parameters:

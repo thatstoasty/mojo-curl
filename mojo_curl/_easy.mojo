@@ -72,7 +72,7 @@ struct InnerEasy(Movable):
 
     def get_info_curl_slist(self, info: Info) raises -> CurlList:
         var list = CurlList()
-        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data.value())
+        var result = curl_ffi()[].easy_getinfo(self.easy, info, list.data)
         if result != 0:
             list^.free()
             raise Error(t"Failed to get info: {self.describe_error(result)}")

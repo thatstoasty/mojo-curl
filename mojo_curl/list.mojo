@@ -66,19 +66,44 @@ struct CurlList(Movable):
     def __bool__(self) -> Bool:
         return Bool(self.data)
     
-    def append(mut self, var header: String) raises:
-        var ptr = curl_ffi()[].slist_append(self.data, header.as_c_string_slice().unsafe_ptr())
+    def is_empty(self) -> Bool:
+        """Checks if the list is empty.
+
+        Returns:
+            True if the list is empty, False otherwise.
+        """
+        return not self.data
+    
+    def append(mut self, var value: String) raises:
+        """Appends a value to the string list.
+
+        Args:
+            value: The string value to append.
+        
+        Raises:
+            Error: If appending to the list fails.
+        """
+        var ptr = curl_ffi()[].slist_append(self.data, value.as_c_string_slice().unsafe_ptr())
         if not ptr:
             raise Error("Failed to append to curl_slist")
         self.data = ptr
 
-    def append(mut self, header: CStringSlice) raises:
-        var ptr = curl_ffi()[].slist_append(self.data, header.unsafe_ptr())
+    def append(mut self, value: CStringSlice) raises:
+        """Appends a value to the string list.
+
+        Args:
+            value: The string value to append.
+        
+        Raises:
+            Error: If appending to the list fails.
+        """
+        var ptr = curl_ffi()[].slist_append(self.data, value.unsafe_ptr())
         if not ptr:
             raise Error("Failed to append to curl_slist")
         self.data = ptr
 
     def free(deinit self):
+        """Frees the memory allocated for the string list."""
         if self.data:
             curl_ffi()[].slist_free_all(self.data.value())
 

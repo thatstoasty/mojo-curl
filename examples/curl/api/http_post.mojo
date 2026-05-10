@@ -9,7 +9,7 @@ def main() raises:
     var easy = Easy()
 
     # First set the URL that is about to receive our POST
-    _ = easy.url("http://postit.example.com/moo.cgi")
+    _ = easy.url("https://httpbingo.org/post")
     # Now specify the POST data
     _ = easy.post_fields("name=daniel&project=curl".as_bytes())
 

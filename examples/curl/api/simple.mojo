@@ -10,7 +10,7 @@ def main() raises:
 
     _ = easy.url("https://example.com")
     # example.com is redirected, so we tell libcurl to follow redirection
-    _ = easy.follow_location(enable=True)
+    _ = easy.follow_location()
 
     # Perform the request; response is written to stdout by default
     var result = easy.perform()

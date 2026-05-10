@@ -8,7 +8,7 @@ from mojo_curl.result import Result
 def main() raises:
     var easy = Easy()
 
-    _ = easy.url("https://example.com")
+    _ = easy.url("https://jsonplaceholder.typicode.com/posts")
     # Issue an OPTIONS request instead of the default GET
     _ = easy.custom_request("OPTIONS")
 

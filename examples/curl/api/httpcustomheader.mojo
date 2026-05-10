@@ -20,7 +20,6 @@ def main() raises:
     # The CurlList constructor uses ";" suffix for empty values automatically
     # For CURLOPT_HTTPHEADER, "Header;" means a header with no value at all
     _ = easy.http_headers(headers)
-
     _ = easy.url("localhost")
     _ = easy.verbose()
 

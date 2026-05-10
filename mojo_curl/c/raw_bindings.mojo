@@ -362,7 +362,7 @@ struct _curl(Movable):
         origin: MutOrigin,
         ptr_origin: MutOrigin,
         //
-    ](self, easy: CURL, info: CURLINFO, ptr: Pointer[MutUnsafePointer[curl_slist, origin], ptr_origin]) -> CURLcode:
+    ](self, easy: CURL, info: CURLINFO, ptr: Pointer[Optional[MutUnsafePointer[curl_slist, origin]], ptr_origin]) -> CURLcode:
         """Get long info from a curl easy handle using safe wrapper.
 
         Parameters:

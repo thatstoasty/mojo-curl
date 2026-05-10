@@ -2237,8 +2237,8 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        var val = 2 if verify else 0
-        return self.set_option(Option.SSL_VERIFY_HOST, c_long(val))
+        var val: c_long = 2 if verify else 0
+        return self.set_option(Option.SSL_VERIFY_HOST, val)
 
     def proxy_ssl_verify_host(self, *, verify: Bool = True) -> Result:
         """Verify the certificate's name against host for HTTPS proxy.
@@ -2255,8 +2255,8 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        var val = 2 if verify else 0
-        return self.set_option(Option.PROXY_SSL_VERIFYHOST, c_long(val))
+        var val: c_long = 2 if verify else 0
+        return self.set_option(Option.PROXY_SSL_VERIFYHOST, val)
 
     def ssl_verify_peer(self, *, verify: Bool = True) -> Result:
         """Verify the peer's SSL certificate.

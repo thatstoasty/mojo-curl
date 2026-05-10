@@ -17,8 +17,7 @@ def write_callback(
     var realsize = size * nmemb
     # Cast the userdata pointer back to our List[UInt8] buffer and append bytes
     var buf = userdata.bitcast[List[UInt8]]()
-    for i in range(Int(realsize)):
-        buf[].append(UInt8(contents[i]))
+    buf[].extend(Span(ptr=contents.bitcast[UInt8](), length=Int(realsize)))
     return realsize
 
 
