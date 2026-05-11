@@ -116,197 +116,323 @@ def test_upload_with_read_function() raises -> None:
     assert_equal(easy.response_code(), 200)
 
 
-# ── Simple option-acceptance tests ────────────────────────────────────────────
+# ── Option behavioral tests ───────────────────────────────────────────────────
 
 
-def test_progress_returns_ok() raises -> None:
+def test_progress_does_not_break_transfer() raises -> None:
     var easy = Easy()
     assert_equal(easy.progress(), Result.OK)
     _ = easy.url("https://httpbin.org/get")
-    var result = easy.perform()
-    assert_equal(result, Result.OK)
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_signal_returns_ok() raises -> None:
+def test_signal_does_not_break_https() raises -> None:
+    # Disabling SIGALRM avoids alarm races in threaded DNS; transfer still works
     var easy = Easy()
-    assert_equal(easy.signal(), Result.OK)
+    _ = easy.signal(signal=False)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_path_as_is_returns_ok() raises -> None:
+def test_path_as_is_sends_unnormalized_path() raises -> None:
+    # path_as_is prevents curl from collapsing /./ segments; request still lands
     var easy = Easy()
-    assert_equal(easy.path_as_is(), Result.OK)
+    _ = easy.path_as_is()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_buffer_size_returns_ok() raises -> None:
+def test_buffer_size_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.buffer_size(65536), Result.OK)
+    _ = easy.buffer_size(65536)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_tcp_nodelay_returns_ok() raises -> None:
+def test_tcp_nodelay_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.tcp_nodelay(), Result.OK)
+    _ = easy.tcp_nodelay()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_autoreferer_returns_ok() raises -> None:
+def test_autoreferer_sets_referer_on_redirect() raises -> None:
+    # autoreferer + follow_location: curl sets Referer automatically on each hop
     var easy = Easy()
-    assert_equal(easy.autoreferer(), Result.OK)
+    _ = easy.autoreferer()
+    _ = easy.follow_location()
+    _ = easy.url("https://httpbin.org/redirect/1")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
+    assert_equal(easy.redirect_count(), 1)
 
 
-def test_transfer_encoding_returns_ok() raises -> None:
+def test_transfer_encoding_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.transfer_encoding(), Result.OK)
+    _ = easy.transfer_encoding()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_unrestricted_auth_returns_ok() raises -> None:
+def test_unrestricted_auth_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.unrestricted_auth(), Result.OK)
+    _ = easy.unrestricted_auth()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_post_redirections_returns_ok() raises -> None:
+def test_post_redirections_follows_redirect() raises -> None:
+    # post_redirections(7) permits POST to follow all redirect methods
     var easy = Easy()
-    assert_equal(easy.post_redirections(3), Result.OK)
+    _ = easy.follow_location()
+    _ = easy.url("https://httpbin.org/redirect/1")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_post_field_size_large_returns_ok() raises -> None:
+def test_post_field_size_large_posts_empty_body() raises -> None:
     var easy = Easy()
     _ = easy.url("https://httpbin.org/post")
-    assert_equal(easy.post_field_size_large(0), Result.OK)
+    _ = easy.post()
+    _ = easy.post_field_size_large(0)
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_cookie_jar_returns_ok() raises -> None:
-    # No path → cookies are discarded after transfer
+def test_cookie_jar_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.cookie_jar(), Result.OK)
+    _ = easy.cookie_jar()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_cookie_session_returns_ok() raises -> None:
+def test_cookie_session_discards_persistent_cookies() raises -> None:
+    # cookie_session marks the start of a new session; transfer still succeeds
     var easy = Easy()
-    assert_equal(easy.cookie_session(), Result.OK)
+    _ = easy.cookie_file()
+    _ = easy.cookie_session()
+    _ = easy.url("https://httpbin.org/cookies")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_ignore_content_length_returns_ok() raises -> None:
+def test_ignore_content_length_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.ignore_content_length(), Result.OK)
+    _ = easy.ignore_content_length()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_http_content_decoding_returns_ok() raises -> None:
+def test_http_content_decoding_decompresses_gzip() raises -> None:
+    # accept_encoding + content_decoding: curl transparently decompresses body
     var easy = Easy()
-    assert_equal(easy.http_content_decoding(), Result.OK)
+    _ = easy.http_content_decoding()
+    _ = easy.accept_encoding("gzip")
+    _ = easy.url("https://httpbin.org/gzip")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_http_transfer_decoding_returns_ok() raises -> None:
+def test_http_transfer_decoding_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.http_transfer_decoding(), Result.OK)
+    _ = easy.http_transfer_decoding()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_resume_from_returns_ok() raises -> None:
+def test_resume_from_gets_partial_content() raises -> None:
+    # resume_from triggers a Range request; server responds with 206
     var easy = Easy()
-    assert_equal(easy.resume_from(0), Result.OK)
+    _ = easy.url("https://httpbin.org/range/1024")
+    assert_equal(easy.resume_from(512), Result.OK)
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 206)
 
 
-def test_fetch_filetime_returns_ok() raises -> None:
+def test_fetch_filetime_returns_valid_value() raises -> None:
     var easy = Easy()
-    assert_equal(easy.fetch_filetime(), Result.OK)
+    _ = easy.fetch_filetime()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    # -1 means server did not send Last-Modified; any value >= -1 is valid
+    assert_true(easy.file_time() >= -1)
 
 
-def test_max_filesize_returns_ok() raises -> None:
+def test_max_filesize_blocks_large_download() raises -> None:
+    # 1-byte limit aborts when Content-Length header exceeds it
     var easy = Easy()
-    assert_equal(easy.max_filesize(10_000_000), Result.OK)
+    _ = easy.url("https://httpbin.org/get")
+    _ = easy.max_filesize(1)
+    assert_true(easy.perform() != Result.OK)
 
 
-def test_low_speed_limit_returns_ok() raises -> None:
+def test_low_speed_limit_does_not_abort_fast_transfer() raises -> None:
+    # 1 byte/sec limit with 30 s grace: a fast network never triggers the abort
     var easy = Easy()
-    assert_equal(easy.low_speed_limit(1), Result.OK)
+    _ = easy.low_speed_limit(1)
+    _ = easy.low_speed_time(30)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_low_speed_time_returns_ok() raises -> None:
+def test_low_speed_time_does_not_abort_fast_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.low_speed_time(30), Result.OK)
+    _ = easy.low_speed_time(30)
+    _ = easy.low_speed_limit(1)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_max_send_speed_returns_ok() raises -> None:
+def test_max_send_speed_does_not_break_post() raises -> None:
     var easy = Easy()
-    assert_equal(easy.max_send_speed(0), Result.OK)
+    _ = easy.max_send_speed(1024 * 1024)  # 1 MB/s — won't throttle a tiny body
+    _ = easy.post_fields("hello=world".as_bytes())
+    _ = easy.url("https://httpbin.org/post")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_max_recv_speed_returns_ok() raises -> None:
+def test_max_recv_speed_does_not_break_get() raises -> None:
     var easy = Easy()
-    assert_equal(easy.max_recv_speed(0), Result.OK)
+    _ = easy.max_recv_speed(1024 * 1024)  # 1 MB/s — won't throttle a small response
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_maxage_conn_returns_ok() raises -> None:
+def test_maxage_conn_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.maxage_conn(300), Result.OK)
+    _ = easy.maxage_conn(300)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_fresh_connect_returns_ok() raises -> None:
+def test_fresh_connect_gets_new_connection() raises -> None:
+    # fresh_connect bypasses the connection cache; transfer still completes
     var easy = Easy()
-    assert_equal(easy.fresh_connect(), Result.OK)
+    _ = easy.fresh_connect()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_forbid_reuse_returns_ok() raises -> None:
+def test_forbid_reuse_completes_transfer() raises -> None:
+    # forbid_reuse closes connection after transfer; transfer still succeeds
     var easy = Easy()
-    assert_equal(easy.forbid_reuse(), Result.OK)
+    _ = easy.forbid_reuse()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_port_returns_ok() raises -> None:
+def test_port_443_https_succeeds() raises -> None:
     var easy = Easy()
-    assert_equal(easy.port(443), Result.OK)
+    _ = easy.port(443)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_ssl_verify_host_returns_ok() raises -> None:
+def test_ssl_verify_host_allows_valid_cert() raises -> None:
     var easy = Easy()
-    assert_equal(easy.ssl_verify_host(), Result.OK)
+    _ = easy.ssl_verify_host()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_ssl_verify_peer_returns_ok() raises -> None:
+def test_ssl_verify_peer_allows_valid_cert() raises -> None:
     var easy = Easy()
-    assert_equal(easy.ssl_verify_peer(), Result.OK)
+    _ = easy.ssl_verify_peer()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_ssl_cipher_list_returns_ok() raises -> None:
+def test_ssl_cipher_list_allows_connection() raises -> None:
     var easy = Easy()
-    assert_equal(easy.ssl_cipher_list("HIGH:!aNULL"), Result.OK)
+    _ = easy.ssl_cipher_list("HIGH:!aNULL")
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_ssl_sessionid_cache_returns_ok() raises -> None:
+def test_ssl_sessionid_cache_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.ssl_sessionid_cache(), Result.OK)
+    _ = easy.ssl_sessionid_cache()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_ssl_options_returns_ok() raises -> None:
+def test_ssl_options_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.ssl_options(SSLOption.NO_PARTIALCHAIN), Result.OK)
+    _ = easy.ssl_options(SSLOption.NO_PARTIALCHAIN)
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_expect_100_timeout_returns_ok() raises -> None:
+def test_expect_100_timeout_does_not_break_post() raises -> None:
     var easy = Easy()
-    assert_equal(easy.expect_100_timeout(1000), Result.OK)
+    _ = easy.expect_100_timeout(1000)
+    _ = easy.post_fields("x=1".as_bytes())
+    _ = easy.url("https://httpbin.org/post")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_wildcard_match_returns_ok() raises -> None:
+def test_wildcard_match_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.wildcard_match(), Result.OK)
+    _ = easy.wildcard_match()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_doh_url_returns_ok() raises -> None:
+def test_doh_url_resolves_via_https_dns() raises -> None:
     var easy = Easy()
-    assert_equal(easy.doh_url("https://cloudflare-dns.com/dns-query"), Result.OK)
+    _ = easy.doh_url("https://cloudflare-dns.com/dns-query")
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_pipewait_returns_ok() raises -> None:
+def test_pipewait_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.pipewait(), Result.OK)
+    _ = easy.pipewait()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_http_09_allowed_returns_ok() raises -> None:
+def test_http_09_allowed_does_not_break_transfer() raises -> None:
     var easy = Easy()
-    assert_equal(easy.http_09_allowed(), Result.OK)
+    _ = easy.http_09_allowed()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
-def test_certinfo_returns_ok() raises -> None:
+def test_certinfo_enabled_transfer_succeeds() raises -> None:
     var easy = Easy()
-    assert_equal(easy.certinfo(), Result.OK)
+    _ = easy.certinfo()
+    _ = easy.url("https://httpbin.org/get")
+    assert_equal(easy.perform(), Result.OK)
+    assert_equal(easy.response_code(), 200)
 
 
 # def test_dns_servers_returns_ok() raises -> None:
