@@ -1,37 +1,13 @@
 # mojo-curl
 
-![Mojo Version](https://img.shields.io/badge/Mojo%F0%9F%94%A5-26.2-orange)
+![Mojo Version](https://img.shields.io/badge/Mojo%F0%9F%94%A5-1.0.0b1-orange)
 ![Build Status](https://github.com/thatstoasty/mojo-curl/actions/workflows/build.yml/badge.svg)
 ![Test Status](https://github.com/thatstoasty/mojo-curl/actions/workflows/test.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Adding the `mojo-curl` package to your project
 
-First, you'll need to configure your `pixi.toml` file to include a few community Conda channels. Add both Modular (`"https://repo.prefix.dev/modular-community"`) and my (`"https://repo.prefix.dev/mojo-community"`) Conda channels to the list of channels. 
-
-### Installing it from the `mojo-community` Conda channel
-
-First, you'll need to install the `curl_wrapper` library, which provides a thin wrapper around libcurl to avoid issues with variadic arguments. You'll need to enable the `pixi-build` preview by adding this to the `workspace section of your `pixi.toml` file.
-
-```bash
-preview = ["pixi-build"]
-```
-
-Next, you can add `curl_wrapper` by running:
-
-```bash
-pixi add curl_wrapper -g "https://github.com/thatstoasty/mojo-curl.git" --subdir shim --branch main
-```
-
-> Note: Mojo cannot currently support calling C functions with variadic arguments, and the libcurl client interface makes heavy use of them. The `curl_wrapper` library provides a thin wrapper around libcurl to avoid this issue. Remember to always validate the code you're pulling from third-party sources!
-
-Next, run the following commands in your terminal:
-
-```bash
-pixi add mojo-curl && pixi install
-```
-
-This will add `mojo-curl` to your project's dependencies and install it along with its dependencies.
+First, you'll need to configure your `pixi.toml` file to include a few community Conda channels. Add both Modular (`"https://repo.prefix.dev/modular-community"`) and my (`"https://repo.prefix.dev/mojo-community"`) Conda channels to the list of channels.
 
 ### Building it from source
 
@@ -42,7 +18,7 @@ There's two ways to build `mojo-curl` from source: directly from the Git reposit
 Run the following commands in your terminal:
 
 ```bash
-pixi add -g "https://github.com/thatstoasty/mojo-curl.git" && pixi install
+pixi add -g "https://github.com/thatstoasty/mojo-curl.git" --tag v0.3.0 && pixi install
 ```
 
 #### Building from source: Local
