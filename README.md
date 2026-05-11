@@ -7,9 +7,33 @@
 
 ## Adding the `mojo-curl` package to your project
 
-First, you'll need to configure your `pixi.toml` file to include a few community Conda channels. Add both Modular (`"https://repo.prefix.dev/modular-community"`) and my (`"https://repo.prefix.dev/mojo-community"`) Conda channels to the list of channels.
+### Prerequisite: Enabling `pixi-build` backends
 
-### Building it from source
+First, you'll need to enable `pixi-build` backends for your project. Add the following to your `pixi.toml` under the workspace key:
+
+```toml
+preview = ["pixi-build"]
+```
+
+### Prerequisite: Adding the `curl_wrapper` dependency
+
+> Note: Mojo cannot currently support calling C functions with variadic arguments, and the libcurl client interface makes heavy use of them. The `curl_wrapper` library provides a thin wrapper around libcurl to avoid this issue. Remember to always validate the code you're pulling from third-party sources!
+
+Next, you can add `curl_wrapper` by running:
+
+```bash
+pixi add curl_wrapper -g "https://github.com/thatstoasty/mojo-curl.git" --subdir shim --branch main
+```
+
+Next, run the following commands in your terminal:
+
+```bash
+pixi add mojo-curl && pixi install
+```
+
+This will add `mojo-curl` to your project's dependencies and install it along with its dependencies.
+
+### Building mojo-curl from source
 
 There's two ways to build `mojo-curl` from source: directly from the Git repository or by cloning the repository locally.
 
