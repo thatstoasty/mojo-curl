@@ -9,6 +9,7 @@ from mojo_curl.info import Info
 from mojo_curl.option import Option
 from mojo_curl.result import Result
 from mojo_curl.header import HeaderOrigin
+from mojo_curl.http import HTTPVersion
 from mojo_curl.ssl_options import SSLOption
 
 
@@ -2031,8 +2032,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.SSL_KEY, key)
 
-    # TODO: ssl_key_blob - needs byte array handling
-    def ssl_key_blob[origin: ImmutOrigin](self, blob: Span[UInt8, origin]) -> Result:
+    def ssl_key_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Specify an SSL private key using an in-memory blob.
 
         The specified byte buffer should contain the binary content of your
@@ -2147,7 +2147,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.SSL_ENGINE_DEFAULT, c_long(Int(enable)))
 
-    def http_version(self, version: Int) -> Result:
+    def http_version(self, version: HTTPVersion) -> Result:
         """Set preferred HTTP version.
 
         By default this option is not set and corresponds to
@@ -2159,7 +2159,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.HTTP_VERSION, c_long(version))
+        return self.set_option(Option.HTTP_VERSION, version.value)
 
     def ssl_version(self, version: Int) -> Result:
         """Set preferred TLS/SSL version.
