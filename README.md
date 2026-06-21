@@ -121,6 +121,7 @@ Define a callback function to handle received data instead of printing to stdout
 
 ```mojo
 from std.ffi import c_char, c_size_t
+from std.ffi.cstring import CStringSlice
 
 from mojo_curl import Easy
 from mojo_curl.c.types import MutExternalOpaquePointer, MutExternalPointer, Result
@@ -131,7 +132,7 @@ def write_callback(
     nmemb: c_size_t,
     userdata: MutExternalOpaquePointer,
 ) -> c_size_t:
-    print(StringSlice(unsafe_from_utf8_ptr=ptr))
+    print(CStringSlice(unsafe_from_ptr=ptr))
     return size * nmemb
 
 def main() raises:
