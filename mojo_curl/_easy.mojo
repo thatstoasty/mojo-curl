@@ -13,6 +13,7 @@ from mojo_curl.header import HeaderOrigin
 @explicit_destroy("The easy handle must be explicitly destroyed by calling `close()` to free resources.")
 struct InnerEasy(Movable):
     """Represents a libcurl easy handle, which is used to perform individual transfers."""
+
     var easy: CURL
     """Internal external pointer to the libcurl easy handle."""
 
@@ -47,7 +48,7 @@ struct InnerEasy(Movable):
         if result != 0:
             raise Error(t"Failed to get info: {self.describe_error(result)}")
 
-        return String(StringSlice(unsafe_from_utf8_ptr=data))
+        return String(unsafe_from_utf8_ptr=data)
 
     def get_info_long(self, info: Info) raises -> c_long:
         var response: c_long = 0

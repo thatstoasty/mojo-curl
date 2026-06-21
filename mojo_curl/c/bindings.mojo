@@ -1,3 +1,5 @@
+"""Safe wrapper layer around raw libcurl C bindings."""
+
 from std.ffi import c_char, c_uchar, c_int, c_long, c_size_t, c_uint
 from std.collections.string.string import CStringSlice
 
@@ -12,17 +14,23 @@ from mojo_curl.c.types import (
     curl_header,
     CURLcode,
     CURLoption,
-    CURLINFO
+    CURLINFO,
 )
 
 
 @fieldwise_init
 struct curl(Movable):
     """Struct representing the libcurl library and its functions."""
+
     var lib: _curl
     """The raw libcurl bindings. DO NOT USE THIS DIRECTLY. Use the safe wrapper functions instead."""
 
     def __init__(out self) raises:
+        """Initialize the curl struct by loading the libcurl library.
+
+        Raises:
+            Error: If the libcurl library fails to load.
+        """
         self.lib = _curl()
 
     # Global libcurl functions
@@ -59,7 +67,7 @@ struct curl(Movable):
 
         Returns:
             A new curl easy handle.
-        
+
         Raises:
             Error: If initialization fails.
         """
@@ -128,7 +136,7 @@ struct curl(Movable):
             CURLcode result code.
         """
         return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
-    
+
     def easy_setopt[
         origin: MutOrigin, //
     ](self, easy: CURL, option: Option, parameter: Optional[OpaquePointer[origin]]) -> c_int:
@@ -213,9 +221,7 @@ struct curl(Movable):
         """
         return self.lib.curl_easy_getinfo_double(easy, info.value, UnsafePointer(to=parameter))
 
-    def easy_getinfo[
-        origin: MutOrigin, //
-    ](self, easy: CURL, info: Info, mut ptr: MutOpaquePointer[origin]) -> c_int:
+    def easy_getinfo[origin: MutOrigin, //](self, easy: CURL, info: Info, mut ptr: MutOpaquePointer[origin]) -> c_int:
         """Get long info from a curl easy handle using safe wrapper.
 
         Parameters:
@@ -295,7 +301,10 @@ struct curl(Movable):
             string: The string to append.
 
         Returns:
-            A pointer to the new list, or NULL on error.
+            A pointer to the new list.
+
+        Raises:
+            Error: If appending to the list fails and a `NULL` pointer is returned.
         """
         var data = self.lib.curl_slist_append(list, string)
         if not data:
@@ -371,7 +380,7 @@ struct curl(Movable):
 
         Returns:
             A pointer to the URL-encoded string.
-        
+
         Raises:
             Error: If encoding fails and a `NULL` pointer is returned.
         """
@@ -404,7 +413,7 @@ struct curl(Movable):
 
     def easy_reset(self, easy: CURL):
         """Reset a curl easy handle to its default state.
-        
+
         Args:
             easy: The curl easy handle to reset.
         """

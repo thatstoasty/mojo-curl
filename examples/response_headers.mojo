@@ -11,4 +11,4 @@ def main() raises:
 
     var response_headers = easy.headers()
     for pair in response_headers.items():
-        print(String(pair.key, ": ", pair.value))
+        print(t"{pair.key}: {pair.value}")

@@ -1,3 +1,5 @@
+"""CURL info types for retrieving transfer information."""
+
 from std.ffi import c_int
 from mojo_curl.c.types import (
     CURLINFO_EFFECTIVE_URL,
@@ -68,6 +70,7 @@ from mojo_curl.c.types import (
     CURLINFO_HTTPAUTH_USED,
     CURLINFO_PROXYAUTH_USED,
 )
+
 
 @fieldwise_init
 struct Info(TrivialRegisterPassable):

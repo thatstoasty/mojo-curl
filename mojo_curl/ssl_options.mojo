@@ -1,16 +1,22 @@
+"""SSL/TLS options configuration for CURL operations."""
+
 from std.ffi import c_long
-from mojo_curl.c.types import CURLSSLOPT_ALLOW_BEAST,
-CURLSSLOPT_NO_REVOKE,
-CURLSSLOPT_NO_PARTIALCHAIN,
-CURLSSLOPT_REVOKE_BEST_EFFORT,
-CURLSSLOPT_NATIVE_CA,
-CURLSSLOPT_AUTO_CLIENT_CERT
+from mojo_curl.c.types import (
+    CURLSSLOPT_ALLOW_BEAST,
+    CURLSSLOPT_NO_REVOKE,
+    CURLSSLOPT_NO_PARTIALCHAIN,
+    CURLSSLOPT_REVOKE_BEST_EFFORT,
+    CURLSSLOPT_NATIVE_CA,
+    CURLSSLOPT_AUTO_CLIENT_CERT,
+)
 
 
 @fieldwise_init
 struct SSLOption(TrivialRegisterPassable):
-    var bits: c_long
     """Struct representing SSL options for the CURLSSLOPT option in libcurl."""
+
+    var bits: c_long
+    """The bits representing the SSL options."""
 
     comptime REVOKE_BEST_EFFORT = Self(CURLSSLOPT_REVOKE_BEST_EFFORT)
     """
