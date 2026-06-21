@@ -1,3 +1,5 @@
+"""CURL header information and origin bits."""
+
 from std.ffi import c_uint, c_int
 
 
@@ -20,6 +22,11 @@ struct HeaderOrigin(TrivialRegisterPassable):
 
     @implicit
     def __init__(out self, value: Int):
+        """Implicit conversion from Int.
+
+        Args:
+            value: The integer value to convert to HeaderOrigin.
+        """
         self.value = c_uint(value)
 
 
@@ -48,4 +55,9 @@ struct CurlHeaderResult(TrivialRegisterPassable):
 
     @implicit
     def __init__(out self, value: Int):
+        """Implicit conversion from Int.
+
+        Args:
+            value: The integer value to convert to CurlHeaderResult.
+        """
         self.value = c_int(value)

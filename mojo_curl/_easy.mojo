@@ -13,6 +13,7 @@ from mojo_curl.header import HeaderOrigin
 @explicit_destroy("The easy handle must be explicitly destroyed by calling `close()` to free resources.")
 struct InnerEasy(Movable):
     """Represents a libcurl easy handle, which is used to perform individual transfers."""
+
     var easy: CURL
     """Internal external pointer to the libcurl easy handle."""
 

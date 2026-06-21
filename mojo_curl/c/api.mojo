@@ -1,3 +1,5 @@
+"""Global CURL FFI API singleton instance."""
+
 from std.ffi import _get_global, _Global
 from std.sys import stderr
 from std import os
@@ -17,6 +19,7 @@ def _init_global() -> Optional[MutExternalPointer[NoneType]]:
 
     _ = ptr[].global_init(CURL_GLOBAL_DEFAULT)
     return ptr.bitcast[NoneType]()
+
 
 def _destroy_global(lib: Optional[MutExternalPointer[NoneType]]):
     if not lib:

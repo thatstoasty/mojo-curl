@@ -1,3 +1,5 @@
+"""CURL easy interface for performing HTTP requests."""
+
 from std.ffi import c_long
 from std.pathlib import Path
 from std.collections.string.string import CStringSlice
@@ -15,10 +17,16 @@ from mojo_curl.ssl_options import SSLOption
 
 struct Easy(Movable):
     """A handle for performing file transfers with libcurl."""
+
     var inner: InnerEasy
     """The inner easy handle that manages the libcurl resources."""
 
     def __init__(out self) raises:
+        """Initialize an Easy handle for performing HTTP requests.
+
+        Raises:
+            Error: If initialization of the underlying easy handle fails.
+        """
         self.inner = InnerEasy()
 
     def __del__(deinit self):
@@ -67,7 +75,7 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         return self.inner.set_option(option.value, parameter)
-    
+
     def set_option[origin: MutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
@@ -82,7 +90,7 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         return self.inner.set_option(option.value, parameter)
-    
+
     def set_option[origin: Origin, //](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
         """Set a bytes option for a curl easy handle using safe wrapper.
 
@@ -109,7 +117,7 @@ struct Easy(Movable):
             Result: The result of setting the option.
         """
         return self.inner.set_option(option, parameter)
-    
+
     def set_option(self, option: Option, parameter: Path) -> Result:
         """Set a callback function for a curl easy handle using safe wrapper.
 
@@ -122,20 +130,76 @@ struct Easy(Movable):
         """
         var path = String(parameter)
         return self.set_option(option, path.as_c_string_slice())
-    
+
     def get_info(self, info: Info) raises -> String:
+        """Get string information from the curl handle.
+
+        Args:
+            info: The info type to retrieve.
+
+        Returns:
+            The requested string information.
+
+        Raises:
+            Error: If retrieving the info fails.
+        """
         return self.inner.get_info(info)
 
     def get_info_long(self, info: Info) raises -> c_long:
+        """Get long/integer information from the curl handle.
+
+        Args:
+            info: The info type to retrieve.
+
+        Returns:
+            The requested long/integer information.
+
+        Raises:
+            Error: If retrieving the info fails.
+        """
         return self.inner.get_info_long(info)
 
     def get_info_float(self, info: Info) raises -> Float64:
+        """Get floating-point information from the curl handle.
+
+        Args:
+            info: The info type to retrieve.
+
+        Returns:
+            The requested floating-point information.
+
+        Raises:
+            Error: If retrieving the info fails.
+        """
         return self.inner.get_info_float(info)
 
     def get_info_ptr[origin: MutOrigin, //](self, info: Info, mut ptr: MutOpaquePointer[origin]) raises:
+        """Get pointer information from the curl handle.
+
+        Parameters:
+            origin: The origin of the pointer.
+
+        Args:
+            info: The info type to retrieve.
+            ptr: Output parameter to receive the pointer.
+
+        Raises:
+            Error: If retrieving the info fails.
+        """
         return self.inner.get_info_ptr(info, ptr)
 
     def get_info_curl_slist(self, info: Info) raises -> CurlList:
+        """Get curl slist information from the curl handle.
+
+        Args:
+            info: The info type to retrieve.
+
+        Returns:
+            The requested curl slist as a CurlList.
+
+        Raises:
+            Error: If retrieving the info fails.
+        """
         return self.inner.get_info_curl_slist(info)
 
     def perform(self) -> Result:
@@ -1456,6 +1520,9 @@ struct Easy(Movable):
 
         Returns:
             A `CurlList` containing all known cookies.
+
+        Raises:
+            Error: If retrieving cookies information fails.
         """
         return self.get_info_curl_slist(Info.COOKIE_LIST)
 
@@ -2026,7 +2093,7 @@ struct Easy(Movable):
 
         Args:
             key: The path to the private key file.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2044,7 +2111,7 @@ struct Easy(Movable):
 
         Args:
             blob: The byte buffer containing the private key.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2093,26 +2160,38 @@ struct Easy(Movable):
 
     def ssl_cainfo_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Set the SSL Certificate Authorities using an in-memory blob.
-    
+
         The specified byte buffer should contain the binary content of one
         or more PEM-encoded CA certificates, which will be copied into
         the handle.
-    
+
         By default this option is not set and corresponds to
         `CURLOPT_CAINFO_BLOB`.
+
+        Args:
+            blob: A byte span containing the PEM-encoded CA certificates.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
         """
         return self.set_option(Option.CAINFO_BLOB, blob)
 
     def proxy_ssl_cainfo_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Set the SSL Certificate Authorities for HTTPS proxies using an in-memory
         blob.
-    
+
         The specified byte buffer should contain the binary content of one
         or more PEM-encoded CA certificates, which will be copied into
         the handle.
-    
+
         By default this option is not set and corresponds to
         `CURLOPT_PROXY_CAINFO_BLOB`.
+
+        Args:
+            blob: A byte span containing the PEM-encoded CA certificates.
+
+        Returns:
+            A `Result` indicating success or failure of the operation.
         """
         return self.set_option(Option.PROXY_CAINFO_BLOB, blob)
 
@@ -2330,7 +2409,7 @@ struct Easy(Movable):
 
         Args:
             path: The path to the issuer certificate file.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2353,7 +2432,7 @@ struct Easy(Movable):
 
         Args:
             path: The path to the issuer certificate file for HTTPS proxy.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2369,7 +2448,7 @@ struct Easy(Movable):
 
         Args:
             blob: The byte buffer containing the issuer certificate.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2385,7 +2464,7 @@ struct Easy(Movable):
 
         Args:
             blob: The byte buffer containing the issuer certificate for HTTPS proxy.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2401,7 +2480,7 @@ struct Easy(Movable):
 
         Args:
             path: The path to the directory containing CA certificates.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2511,7 +2590,7 @@ struct Easy(Movable):
 
         Args:
             path: The path to the random file.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2526,7 +2605,7 @@ struct Easy(Movable):
 
         Args:
             path: The path to the EGD socket.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2619,7 +2698,7 @@ struct Easy(Movable):
 
         Args:
             option: The SSL option to set.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2632,7 +2711,7 @@ struct Easy(Movable):
 
         Args:
             option: The SSL option to set for HTTPS proxy.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2662,7 +2741,7 @@ struct Easy(Movable):
 
         Args:
             timeout_ms: The timeout in milliseconds.
-        
+
         Returns:
             A `Result` indicating success or failure of the operation.
         """
@@ -2676,6 +2755,9 @@ struct Easy(Movable):
 
         Returns:
             The last used effective URL as a string.
+
+        Raises:
+            Error: If retrieving the URL fails.
         """
         return self.get_info(Info.EFFECTIVE_URL)
 
@@ -2687,6 +2769,9 @@ struct Easy(Movable):
 
         Returns:
             The last response code.
+
+        Raises:
+            Error: If retrieving the response code fails.
         """
         return self.get_info_long(Info.RESPONSE_CODE)
 
@@ -2698,6 +2783,9 @@ struct Easy(Movable):
 
         Returns:
             The CONNECT response code.
+
+        Raises:
+            Error: If retrieving the response code fails.
         """
         return self.get_info_long(Info.HTTP_CONNECT_CODE)
 
@@ -2709,6 +2797,9 @@ struct Easy(Movable):
 
         Returns:
             The remote time of the retrieved document.
+
+        Raises:
+            Error: If retrieving the file time fails.
         """
         return self.get_info_long(Info.FILE_TIME)
 
@@ -2720,6 +2811,9 @@ struct Easy(Movable):
 
         Returns:
             The number of redirects.
+
+        Raises:
+            Error: If retrieving the redirect count fails.
         """
         return self.get_info_long(Info.REDIRECT_COUNT)
 
@@ -2731,6 +2825,9 @@ struct Easy(Movable):
 
         Returns:
             The URL a redirect would go to.
+
+        Raises:
+            Error: If retrieving the redirect URL fails.
         """
         return self.get_info(Info.REDIRECT_URL)
 
@@ -2742,6 +2839,9 @@ struct Easy(Movable):
 
         Returns:
             The total number of bytes of all headers received.
+
+        Raises:
+            Error: If retrieving the header size fails.
         """
         return self.get_info_long(Info.HEADER_SIZE)
 
@@ -2753,6 +2853,9 @@ struct Easy(Movable):
 
         Returns:
             The total number of bytes sent in the request.
+
+        Raises:
+            Error: If retrieving the request size fails.
         """
         return self.get_info_long(Info.REQUEST_SIZE)
 
@@ -2764,6 +2867,9 @@ struct Easy(Movable):
 
         Returns:
             The content-type of the downloaded object.
+
+        Raises:
+            Error: If retrieving the content type fails.
         """
         return self.get_info(Info.CONTENT_TYPE)
 
@@ -2775,6 +2881,9 @@ struct Easy(Movable):
 
         Returns:
             The errno number from the last connect failure.
+
+        Raises:
+            Error: If retrieving the errno fails.
         """
         return self.get_info_long(Info.OS_ERRNO)
 
@@ -2786,6 +2895,9 @@ struct Easy(Movable):
 
         Returns:
             The IP address of the most recent connection.
+
+        Raises:
+            Error: If retrieving the primary IP fails.
         """
         return self.get_info(Info.PRIMARY_IP)
 
@@ -2797,6 +2909,9 @@ struct Easy(Movable):
 
         Returns:
             The destination port of the most recent connection.
+
+        Raises:
+            Error: If retrieving the primary port fails.
         """
         return self.get_info_long(Info.PRIMARY_PORT)
 
@@ -2808,6 +2923,9 @@ struct Easy(Movable):
 
         Returns:
             The local IP address of the most recent connection.
+
+        Raises:
+            Error: If retrieving the local IP fails.
         """
         return self.get_info(Info.LOCAL_IP)
 
@@ -2819,6 +2937,9 @@ struct Easy(Movable):
 
         Returns:
             The local port of the most recent connection.
+
+        Raises:
+            Error: If retrieving the local port fails.
         """
         return self.get_info_long(Info.LOCAL_PORT)
 
@@ -2830,6 +2951,9 @@ struct Easy(Movable):
 
         Returns:
             Non-zero if the time condition was not met.
+
+        Raises:
+            Error: If retrieving the time condition status fails.
         """
         return self.get_info_long(Info.CONDITION_UNMET)
 
@@ -2843,6 +2967,9 @@ struct Easy(Movable):
 
         Returns:
             The content-length of the download.
+
+        Raises:
+            Error: If retrieving the download size fails.
         """
         return self.get_info_float(Info.CONTENT_LENGTH_DOWNLOAD_T)
 
@@ -2854,6 +2981,9 @@ struct Easy(Movable):
 
         Returns:
             The specified size of the upload.
+
+        Raises:
+            Error: If retrieving the upload size fails.
         """
         return self.get_info_float(Info.CONTENT_LENGTH_UPLOAD_T)
 
@@ -2865,6 +2995,9 @@ struct Easy(Movable):
 
         Returns:
             The total time of the previous transfer in seconds.
+
+        Raises:
+            Error: If retrieving the total time fails.
         """
         return self.get_info_float(Info.TOTAL_TIME)
 
@@ -2876,6 +3009,9 @@ struct Easy(Movable):
 
         Returns:
             The name lookup time in seconds.
+
+        Raises:
+            Error: If retrieving the name lookup time fails.
         """
         return self.get_info_float(Info.NAME_LOOKUP_TIME)
 
@@ -2887,6 +3023,9 @@ struct Easy(Movable):
 
         Returns:
             The time until connect in seconds.
+
+        Raises:
+            Error: If retrieving the connect time fails.
         """
         return self.get_info_float(Info.CONNECT_TIME)
 
@@ -2898,6 +3037,9 @@ struct Easy(Movable):
 
         Returns:
             The time until the SSL/SSH handshake is completed in seconds.
+
+        Raises:
+            Error: If retrieving the app connect time fails.
         """
         return self.get_info_float(Info.APP_CONNECT_TIME)
 
@@ -2909,6 +3051,9 @@ struct Easy(Movable):
 
         Returns:
             The time until the file transfer start in seconds.
+
+        Raises:
+            Error: If retrieving the pre-transfer time fails.
         """
         return self.get_info_float(Info.PRE_TRANSFER_TIME)
 
@@ -2920,6 +3065,9 @@ struct Easy(Movable):
 
         Returns:
             The time until the first byte is received in seconds.
+
+        Raises:
+            Error: If retrieving the start transfer time fails.
         """
         return self.get_info_float(Info.START_TRANSFER_TIME)
 
@@ -2931,6 +3079,9 @@ struct Easy(Movable):
 
         Returns:
             The time for all redirection steps in seconds.
+
+        Raises:
+            Error: If retrieving the redirect time fails.
         """
         return self.get_info_float(Info.REDIRECT_TIME)
 
@@ -2942,6 +3093,9 @@ struct Easy(Movable):
 
         Returns:
             The average download speed in bytes per second.
+
+        Raises:
+            Error: If retrieving the download speed fails.
         """
         return self.get_info_float(Info.SPEED_DOWNLOAD_T)
 
@@ -2953,6 +3107,9 @@ struct Easy(Movable):
 
         Returns:
             The average upload speed in bytes per second.
+
+        Raises:
+            Error: If retrieving the upload speed fails.
         """
         return self.get_info_float(Info.SPEED_UPLOAD_T)
 
@@ -3135,6 +3292,9 @@ struct Easy(Movable):
 
         Returns:
             The URL scheme used in the transfer.
+
+        Raises:
+            Error: If the information is not available. This can happen if the transfer has not completed or if the information is not supported by the protocol used.
         """
         return self.get_info(Info.SCHEME)
 
@@ -3153,5 +3313,8 @@ struct Easy(Movable):
 
         Returns:
             The URL-encoded version of the input string.
+
+        Raises:
+            Error: If the encoding fails. This can happen if the input string is too long or if there is insufficient memory to allocate the output string.
         """
         return self.inner.escape(string)
