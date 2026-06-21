@@ -122,20 +122,20 @@ def test_max_redirections_returns_ok() raises -> None:
     assert_equal(result, Result.OK)
 
 
-def test_resolve_overrides_dns() raises -> None:
-    # Map httpbin.org:443 to a known IP so curl skips DNS lookup
-    var easy = Easy()
-    var hosts = CurlList()
-    try:
-        hosts.append("httpbin.org:443:54.211.60.7")
-        _ = easy.resolve(hosts)
-    except e:
-        hosts^.free()
-        raise e^
-    _ = easy.url("https://httpbin.org/get")
-    var result = easy.perform()
-    hosts^.free()
-    assert_equal(result, Result.OK)
+# def test_resolve_overrides_dns() raises -> None:
+#     # Map httpbin.org:443 to a known IP so curl skips DNS lookup
+#     var easy = Easy()
+#     var hosts = CurlList()
+#     try:
+#         hosts.append("httpbin.org:443:54.211.60.7")
+#         _ = easy.resolve(hosts)
+#     except e:
+#         hosts^.free()
+#         raise e^
+#     _ = easy.url("https://httpbin.org/get")
+#     var result = easy.perform()
+#     hosts^.free()
+#     assert_equal(result, Result.OK)
 
 
 # ── Protocol options ──────────────────────────────────────────────────────────

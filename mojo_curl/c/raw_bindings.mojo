@@ -214,7 +214,7 @@ struct _curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self._fn_curl_easy_setopt_string(easy, option, parameter.unsafe_origin_cast[ImmutExternalOrigin]())
+        return self._fn_curl_easy_setopt_string(easy, option, parameter.unsafe_origin_cast[ImmutUntrackedOrigin]())
 
     def curl_easy_setopt_long(self, easy: CURL, option: CURLoption, parameter: c_long) -> CURLcode:
         """Set a long/integer option for a curl easy handle using safe wrapper.
@@ -246,7 +246,7 @@ struct _curl(Movable):
         if parameter is None:
             return self._fn_curl_easy_setopt_pointer(easy, option, None)
         
-        return self._fn_curl_easy_setopt_pointer(easy, option, parameter.value().unsafe_origin_cast[ImmutExternalOrigin]())
+        return self._fn_curl_easy_setopt_pointer(easy, option, parameter.value().unsafe_origin_cast[ImmutUntrackedOrigin]())
     
     def curl_easy_setopt_pointer_mut[origin: MutOrigin, //](self, easy: CURL, option: CURLoption, parameter: Optional[UnsafePointer[NoneType, origin]]) -> CURLcode:
         """Set a pointer option for a curl easy handle using safe wrapper.
@@ -265,7 +265,7 @@ struct _curl(Movable):
         if parameter is None:
             return self._fn_curl_easy_setopt_pointer_mut(easy, option, None)
         
-        return self._fn_curl_easy_setopt_pointer_mut(easy, option, parameter.value().unsafe_origin_cast[MutExternalOrigin]())
+        return self._fn_curl_easy_setopt_pointer_mut(easy, option, parameter.value().unsafe_origin_cast[MutUntrackedOrigin]())
     
     def curl_easy_setopt_callback(self, easy: CURL, option: CURLoption, parameter: curl_write_callback) -> CURLcode:
         """Set a callback function for a curl easy handle using safe wrapper.
@@ -297,7 +297,7 @@ struct _curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self._fn_curl_easy_getinfo_string(easy, info, parameter.unsafe_origin_cast[MutExternalOrigin]())
+        return self._fn_curl_easy_getinfo_string(easy, info, parameter.unsafe_origin_cast[MutUntrackedOrigin]())
 
     def curl_easy_getinfo_long[
         origin: MutOrigin, //
@@ -315,7 +315,7 @@ struct _curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self._fn_curl_easy_getinfo_long(easy, info, parameter.unsafe_origin_cast[MutExternalOrigin]())
+        return self._fn_curl_easy_getinfo_long(easy, info, parameter.unsafe_origin_cast[MutUntrackedOrigin]())
 
     def curl_easy_getinfo_double[
         origin: MutOrigin, //
@@ -333,7 +333,7 @@ struct _curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self._fn_curl_easy_getinfo_float(easy, info, parameter.unsafe_origin_cast[MutExternalOrigin]())
+        return self._fn_curl_easy_getinfo_float(easy, info, parameter.unsafe_origin_cast[MutUntrackedOrigin]())
 
     def curl_easy_getinfo_ptr[
         origin: MutOrigin,
@@ -427,7 +427,7 @@ struct _curl(Movable):
         Returns:
             A pointer to the new list, or NULL on error.
         """
-        return self._fn_curl_slist_append(list, string.unsafe_origin_cast[ImmutExternalOrigin]())
+        return self._fn_curl_slist_append(list, string.unsafe_origin_cast[ImmutUntrackedOrigin]())
 
     def curl_slist_free_all(self, list: MutExternalPointer[curl_slist]):
         """Free an entire curl string list.
@@ -505,7 +505,7 @@ struct _curl(Movable):
         Returns:
             A pointer to the URL-encoded string, or NULL on error.
         """
-        return self._fn_curl_easy_escape(easy, string.unsafe_origin_cast[ImmutExternalOrigin](), length)
+        return self._fn_curl_easy_escape(easy, string.unsafe_origin_cast[ImmutUntrackedOrigin](), length)
 
     def curl_easy_duphandle(self, easy: CURL) -> Optional[CURL]:
         """Creates a new curl session handle with the same options set for the handle
@@ -560,7 +560,7 @@ struct _curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self._fn_curl_easy_recv(easy, buffer.unsafe_origin_cast[MutExternalOrigin](), buflen, n.unsafe_origin_cast[MutExternalOrigin]())
+        return self._fn_curl_easy_recv(easy, buffer.unsafe_origin_cast[MutUntrackedOrigin](), buflen, n.unsafe_origin_cast[MutUntrackedOrigin]())
 
     def curl_easy_send[
         origin: ImmutOrigin, n_origin: MutOrigin, //
@@ -587,7 +587,7 @@ struct _curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self._fn_curl_easy_send(easy, buffer.unsafe_origin_cast[ImmutExternalOrigin](), buflen, n.unsafe_origin_cast[MutExternalOrigin]())
+        return self._fn_curl_easy_send(easy, buffer.unsafe_origin_cast[ImmutUntrackedOrigin](), buflen, n.unsafe_origin_cast[MutUntrackedOrigin]())
 
     def curl_easy_upkeep(self, easy: CURL) -> CURLcode:
         """Performs connection upkeep for the given session handle.

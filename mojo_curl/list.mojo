@@ -1,4 +1,4 @@
-from std.collections.string.string import CStringSlice
+from std.ffi.cstring import CStringSlice
 from mojo_curl.c.types import curl_slist, MutExternalPointer
 from mojo_curl.c.api import curl_ffi
 
@@ -26,10 +26,8 @@ def _build_header_string(key: String, value: String) -> String:
     return header^
 
 
-# TODO: Add Boolable and Defaultable back in the next release, at the moment
-# they conform to ImplicitlyDestructible, but that's been removed in the next Mojo release.
 @explicit_destroy("CurlList must be explicitly destroyed using the `free` method.")
-struct CurlList(Movable):
+struct CurlList(Movable, Boolable, Defaultable):
     """Represents a linked list of HTTP headers for use with libcurl."""
 
     var data: Optional[MutExternalPointer[curl_slist]]
@@ -127,7 +125,7 @@ struct CurlList(Movable):
 @fieldwise_init
 struct _CurlListIterator[origin: Origin](Copyable, Iterable, Iterator):
     # TODO: Not sure if it's safe to use external origin string slices?
-    comptime Element = StringSlice[MutExternalOrigin]
+    comptime Element = CStringSlice[MutUntrackedOrigin]
     comptime IteratorType[iterable_mut: Bool, //, iterable_origin: Origin[mut=iterable_mut]]: Iterator = Self
 
     var src: Pointer[CurlList, Self.origin]
@@ -152,7 +150,7 @@ struct _CurlListIterator[origin: Origin](Copyable, Iterable, Iterator):
         var old = self.curr
         self.curr = self.curr.value()[].next if self.curr else None
 
-        return StringSlice(unsafe_from_utf8_ptr=old.value()[].data)
+        return CStringSlice(unsafe_from_ptr=old.value()[].data)
 
     def __next__(mut self) -> Self.Element:
         """Returns the next row in the result set.

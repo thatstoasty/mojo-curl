@@ -1,8 +1,8 @@
 from std.ffi import c_char, c_int, c_long, c_size_t, c_uint, c_ulong, c_short, c_ushort
 from std.utils import StaticTuple
 
-comptime ImmutExternalPointer = ImmutUnsafePointer[origin=ImmutExternalOrigin, ...]
-comptime MutExternalPointer = MutUnsafePointer[origin=MutExternalOrigin, ...]
+comptime ImmutExternalPointer = ImmutUnsafePointer[origin=ImmutUntrackedOrigin, ...]
+comptime MutExternalPointer = MutUnsafePointer[origin=MutUntrackedOrigin, ...]
 
 # Type aliases for curl
 comptime CURL = MutExternalPointer[NoneType]
