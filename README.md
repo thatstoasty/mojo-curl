@@ -42,7 +42,7 @@ There's two ways to build `mojo-curl` from source: directly from the Git reposit
 Run the following commands in your terminal:
 
 ```bash
-pixi add mojo-curl --git "https://github.com/thatstoasty/mojo-curl.git" --tag "v0.4.0" && pixi install
+pixi add mojo-curl --git "https://github.com/thatstoasty/mojo-curl.git" --tag "v0.4.2" && pixi install
 ```
 
 #### Building from source: Local

@@ -24,10 +24,10 @@ format = [{ task = "mojo_format" }]
 
 [package]
 name = "mojo-curl"
-version = "0.4.1"
+version = "0.4.2"
 
 [package.build]
-backend = { name = "pixi-build-mojo", version = "0.1.*" }
+backend = { name = "pixi-build-mojo", version = "0.2.*" }
 
 [dependencies]
 mojo = ">=1.0.0,<1.1.0"
