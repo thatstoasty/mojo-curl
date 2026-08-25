@@ -7,7 +7,7 @@ from mojo_curl.c.raw_bindings import _curl
 from mojo_curl.c.types import (
     CURL,
     MutExternalPointer,
-    ImmutExternalPointer,
+    ImmExternalPointer,
     curl_write_callback,
     curl_read_callback,
     curl_slist,
@@ -16,6 +16,8 @@ from mojo_curl.c.types import (
     CURLoption,
     CURLINFO,
 )
+from mojo_curl.option import Option
+from mojo_curl.info import Info
 
 
 @fieldwise_init
@@ -55,7 +57,7 @@ struct curl(Movable):
         Returns:
             The version string of libcurl.
         """
-        # TODO: Constructing StringSlice should technically work? Seems like an issue with
+        # TODO: Constructing StringSpan should technically work? Seems like an issue with
         # ExternalPointer external origins. It's not an AnyOrigin,
         # so there's probably some issue there that I'm not aware of.
         # It's ok, just allocate a small string here.
@@ -89,7 +91,7 @@ struct curl(Movable):
         """
         return self.lib.curl_easy_setopt_string(easy, option.value, parameter.unsafe_ptr())
 
-    def easy_setopt[origin: ImmutOrigin, //](self, easy: CURL, option: Option, parameter: Span[UInt8, origin]) -> c_int:
+    def easy_setopt[origin: ImmOrigin, //](self, easy: CURL, option: Option, parameter: Span[UInt8, origin]) -> c_int:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -103,7 +105,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        var ptr = parameter.unsafe_ptr().bitcast[c_char]()
+        var ptr = parameter.unsafe_ptr().unsafe_bitcast[c_char]()
         return self.lib.curl_easy_setopt_string(easy, option.value, ptr)
 
     def easy_setopt(self, easy: CURL, option: Option, parameter: c_long) -> c_int:
@@ -120,7 +122,7 @@ struct curl(Movable):
         return self.lib.curl_easy_setopt_long(easy, option.value, parameter)
 
     def easy_setopt[
-        origin: ImmutOrigin, //
+        origin: ImmOrigin, //
     ](self, easy: CURL, option: Option, parameter: Optional[OpaquePointer[origin]]) -> c_int:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
@@ -153,7 +155,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_setopt_pointer_mut(easy, option.value, parameter)
+        return self.lib.curl_easy_setopt_pointer(easy, option.value, parameter)
 
     def easy_setopt(self, easy: CURL, option: Option, parameter: curl_write_callback) -> c_int:
         """Set a callback function for a curl easy handle using safe wrapper.
@@ -183,7 +185,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_getinfo_string(easy, info.value, UnsafePointer(to=parameter))
+        return self.lib.curl_easy_getinfo_string(easy, info.value, Pointer(to=parameter))
 
     def easy_getinfo(
         self,
@@ -201,7 +203,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_getinfo_long(easy, info.value, UnsafePointer(to=parameter))
+        return self.lib.curl_easy_getinfo_long(easy, info.value, Pointer(to=parameter))
 
     def easy_getinfo(
         self,
@@ -219,7 +221,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_getinfo_double(easy, info.value, UnsafePointer(to=parameter))
+        return self.lib.curl_easy_getinfo_double(easy, info.value, Pointer(to=parameter))
 
     def easy_getinfo[origin: MutOrigin, //](self, easy: CURL, info: Info, mut ptr: MutOpaquePointer[origin]) -> c_int:
         """Get long info from a curl easy handle using safe wrapper.
@@ -239,7 +241,7 @@ struct curl(Movable):
 
     def easy_getinfo[
         origin: MutOrigin, //
-    ](self, easy: CURL, info: Info, mut ptr: Optional[MutUnsafePointer[curl_slist, origin]]) -> c_int:
+    ](self, easy: CURL, info: Info, mut ptr: Optional[MutPointer[curl_slist, origin]]) -> c_int:
         """Get long info from a curl easy handle using safe wrapper.
 
         Parameters:
@@ -274,7 +276,7 @@ struct curl(Movable):
         """
         self.lib.curl_easy_cleanup(easy)
 
-    def easy_strerror(self, code: c_int) -> ImmutExternalPointer[c_char]:
+    def easy_strerror(self, code: c_int) -> ImmExternalPointer[c_char]:
         """Return string describing error code.
 
         Args:
@@ -287,10 +289,10 @@ struct curl(Movable):
 
     # String list functions
     def slist_append[
-        origin: ImmutOrigin, //
-    ](
-        self, list: Optional[MutExternalPointer[curl_slist]], string: ImmutUnsafePointer[c_char, origin]
-    ) raises -> Optional[MutExternalPointer[curl_slist]]:
+        origin: ImmOrigin, //
+    ](self, list: Optional[MutExternalPointer[curl_slist]], string: ImmPointer[c_char, origin]) raises -> Optional[
+        MutExternalPointer[curl_slist]
+    ]:
         """Append a string to a curl string list.
 
         Parameters:
@@ -434,11 +436,11 @@ struct curl(Movable):
         """
         var bytes_received: c_size_t = 0
         var result = self.lib.curl_easy_recv(
-            easy, buffer.unsafe_ptr().bitcast[NoneType](), capacity, UnsafePointer(to=bytes_received)
+            easy, buffer.unsafe_ptr().unsafe_bitcast[NoneType](), capacity, Pointer(to=bytes_received)
         )
         return result, bytes_received
 
-    def easy_send[origin: ImmutOrigin, //](self, easy: CURL, buffer: Span[c_uchar, origin]) -> Tuple[c_int, c_size_t]:
+    def easy_send[origin: ImmOrigin, //](self, easy: CURL, buffer: Span[c_uchar, origin]) -> Tuple[c_int, c_size_t]:
         """Send data to the connected peer.
 
         Args:
@@ -450,7 +452,7 @@ struct curl(Movable):
         """
         var bytes_sent: c_size_t = 0
         var result = self.lib.curl_easy_send(
-            easy, buffer.unsafe_ptr().bitcast[NoneType](), UInt(len(buffer)), UnsafePointer(to=bytes_sent)
+            easy, buffer.unsafe_ptr().unsafe_bitcast[NoneType](), UInt(len(buffer)), Pointer(to=bytes_sent)
         )
         return result, bytes_sent
 

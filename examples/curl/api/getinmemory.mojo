@@ -16,8 +16,8 @@ def write_callback(
 ) abi("C") -> c_size_t:
     var realsize = size * nmemb
     # Cast the userdata pointer back to our List[UInt8] buffer and append bytes
-    var buf = userdata.bitcast[List[UInt8]]()
-    buf[].extend(Span(ptr=contents.bitcast[UInt8](), length=Int(realsize)))
+    var buf = userdata.unsafe_bitcast[List[UInt8]]()
+    buf[].extend(Span(unsafe_ptr=contents.unsafe_bitcast[UInt8](), length=Int(realsize)))
     return realsize
 
 
@@ -28,7 +28,7 @@ def main() raises:
     _ = easy.url("https://www.example.com/")
     _ = easy.write_function(write_callback)
     # Pass a pointer to our buffer so the callback can append data into it
-    _ = easy.write_data(UnsafePointer(to=chunk).bitcast[NoneType]())
+    _ = easy.write_data(Pointer(to=chunk).unsafe_bitcast[NoneType]())
     _ = easy.useragent("libcurl-agent/1.0")
 
     var result = easy.perform()
@@ -37,4 +37,4 @@ def main() raises:
 
     print(t"Downloaded {len(chunk)} bytes")
     # Print the downloaded content as a string
-    print(StringSlice(unsafe_from_utf8=Span(chunk)))
+    print(StringSpan(unsafe_from_utf8=Span(chunk)))

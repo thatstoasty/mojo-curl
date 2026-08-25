@@ -3,19 +3,17 @@
 from std.ffi import c_char, c_int, c_long, c_size_t, c_uint, c_ulong, c_short, c_ushort
 from std.utils import StaticTuple
 
-comptime ImmutExternalPointer = ImmutUnsafePointer[origin=ImmutUntrackedOrigin, ...]
+comptime ImmExternalPointer[T: AnyType] = ImmPointer[T=T, origin=ImmUntrackedOrigin]
 """Type alias for immutable external pointers to untrackedorigin memory.
 
 Parameters:
-    type: The pointee type, inferred from usage context.
-    address_space: The address space, fixed to untracked origin.
+    T: The pointee type, inferred from usage context.
 """
-comptime MutExternalPointer = MutUnsafePointer[origin=MutUntrackedOrigin, ...]
+comptime MutExternalPointer[T: AnyType] = MutPointer[T=T, origin=MutUntrackedOrigin]
 """Type alias for mutable external pointers to untracked origin memory.
 
 Parameters:
-    type: The pointee type, inferred from usage context.
-    address_space: The address space, fixed to untracked origin.
+    T: The pointee type, inferred from usage context.
 """
 
 # Type aliases for curl
@@ -27,6 +25,8 @@ comptime CURLoption = c_int
 comptime CURLINFO = c_int
 """Type alias for CURL info enumeration."""
 comptime CURLcode = c_int
+"""Type alias for CURL result codes."""
+comptime CURLHcode = c_int
 """Type alias for CURL result codes."""
 comptime CURLversion = c_int
 """Type alias for CURL version enumeration."""
@@ -91,13 +91,13 @@ comptime HTTPPOST_CALLBACK: c_long = (1 << 6)
 comptime HTTPPOST_LARGE: c_long = (1 << 7)
 """Use size in 'contentlen', added in 7.46.0."""
 
-comptime curl_progress_callback = def(ImmutExternalPointer[NoneType], Float64, Float64, Float64, Float64) abi(
+comptime curl_progress_callback = def(ImmExternalPointer[NoneType], Float64, Float64, Float64, Float64) abi(
     "C"
 ) thin -> c_int
 """This is the prototype for the progress callback function used by curl. It was deprecated in favor of `TransferInfoCallbackFn` but is still supported for backward compatibility."""
-comptime curl_xferinfo_callback = def(
-    ImmutExternalPointer[NoneType], curl_off_t, curl_off_t, curl_off_t, curl_off_t
-) abi("C") thin -> c_int
+comptime curl_xferinfo_callback = def(ImmExternalPointer[NoneType], curl_off_t, curl_off_t, curl_off_t, curl_off_t) abi(
+    "C"
+) thin -> c_int
 """This is the XFERINFOFUNCTION callback prototype. It was introduced
 in 7.32.0, avoids the use of floating point numbers and provides more
 detailed information."""
@@ -237,7 +237,7 @@ comptime CURL_CHUNK_BGN_FUNC_FAIL: c_long = 1
 comptime CURL_CHUNK_BGN_FUNC_SKIP: c_long = 2
 """Skip this chunk over. Note that if this is returned, then the CHUNK_END_FUNCTION callback will not be called for this chunk."""
 
-comptime curl_chunk_bgn_callback = def(ImmutExternalPointer[NoneType], MutExternalPointer[NoneType], c_int) abi(
+comptime curl_chunk_bgn_callback = def(ImmExternalPointer[NoneType], MutExternalPointer[NoneType], c_int) abi(
     "C"
 ) thin -> c_long
 """If splitting of data transfer is enabled, this callback is called before
@@ -267,7 +267,7 @@ comptime CURL_FNMATCHFUNC_FAIL: c_int = 2
 """An error occurred."""
 
 comptime curl_fnmatch_callback = def(
-    MutExternalPointer[NoneType], ImmutExternalPointer[c_char], ImmutExternalPointer[c_char]
+    MutExternalPointer[NoneType], ImmExternalPointer[c_char], ImmExternalPointer[c_char]
 ) abi("C") thin -> c_int
 """Callback type for wildcard downloading pattern matching. If the
 string matches the pattern, return CURL_FNMATCHFUNC_MATCH value, etc."""
@@ -347,7 +347,7 @@ comptime curl_realloc_callback = def(ptr: MutExternalPointer[NoneType], size: c_
     "C"
 ) thin -> MutExternalPointer[NoneType]
 """Callback for realloc memory reallocation."""
-comptime curl_strdup_callback = def(str: ImmutExternalPointer[c_char]) abi("C") thin -> MutExternalPointer[c_char]
+comptime curl_strdup_callback = def(str: ImmExternalPointer[c_char]) abi("C") thin -> MutExternalPointer[c_char]
 """Callback for strdup string duplication."""
 comptime curl_calloc_callback = def(nmemb: c_size_t, size: c_size_t) abi("C") thin -> MutExternalPointer[NoneType]
 """Callback for calloc memory allocation with initialization."""
@@ -1335,11 +1335,11 @@ struct curl_forms:
 
     var option: CURLformoption
     """The form option."""
-    var value: ImmutExternalPointer[c_char]
+    var value: ImmExternalPointer[c_char]
     """The value for the form option."""
 
 
-comptime curl_formget_callback = def(MutExternalPointer[c_char], ImmutExternalPointer[NoneType], c_size_t) abi(
+comptime curl_formget_callback = def(MutExternalPointer[c_char], ImmExternalPointer[NoneType], c_size_t) abi(
     "C"
 ) thin -> c_int
 """Callback function for curl_formget to receive form data as it is serialized."""
@@ -1684,57 +1684,57 @@ struct curl_version_info_data:
 
     var age: c_int
     """The size of this struct, allowing for future expansion without breaking old programs."""
-    var version: ImmutExternalPointer[c_char]
+    var version: ImmExternalPointer[c_char]
     """The version of libcurl in use."""
     var version_num: c_uint
     """Numeric version of libcurl multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var host: ImmutExternalPointer[c_char]
+    var host: ImmExternalPointer[c_char]
     """Host name libcurl was built for."""
     var features: c_int
     """Bitmask of available features, see below."""
-    var ssl_version: ImmutExternalPointer[c_char]
+    var ssl_version: ImmExternalPointer[c_char]
     """Version of SSL library in use, or "none" if no SSL support was compiled in."""
     var ssl_version_num: c_long
     """Numeric version of SSL library multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var libz_version: ImmutExternalPointer[c_char]
+    var libz_version: ImmExternalPointer[c_char]
     """Version of libz in use, or "none" if no libz support was compiled in."""
-    var protocols: ImmutExternalPointer[ImmutExternalPointer[c_char]]
+    var protocols: ImmExternalPointer[ImmExternalPointer[c_char]]
     """Protocols supported by libcurl, null-terminated array of null-terminated strings."""
-    var ares: ImmutExternalPointer[c_char]
+    var ares: ImmExternalPointer[c_char]
     """Version of c-ares in use, or "none" if no c-ares support was compiled in."""
     var ares_num: c_int
     """Numeric version of c-ares multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var libidn: ImmutExternalPointer[c_char]
+    var libidn: ImmExternalPointer[c_char]
     """Version of libidn in use, or "none" if no libidn support was compiled in."""
     var iconv_ver_num: c_int
     """Numeric version of iconv multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var libssh_version: ImmutExternalPointer[c_char]
+    var libssh_version: ImmExternalPointer[c_char]
     """Version of libssh in use, or "none" if no libssh support was compiled in."""
     var brotli_ver_num: c_uint
     """Numeric version of brotli multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var brotli_version: ImmutExternalPointer[c_char]
+    var brotli_version: ImmExternalPointer[c_char]
     """Version of brotli in use, or "none" if no brotli support was compiled in."""
     var nghttp2_ver_num: c_uint
     """Numeric version of nghttp2 multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var nghttp2_version: ImmutExternalPointer[c_char]
+    var nghttp2_version: ImmExternalPointer[c_char]
     """Version of nghttp2 in use, or "none" if no nghttp2 support was compiled in."""
-    var quic_version: ImmutExternalPointer[c_char]
+    var quic_version: ImmExternalPointer[c_char]
     """Version of quic in use, or "none" if no quic support was compiled in."""
-    var cainfo: ImmutExternalPointer[c_char]
+    var cainfo: ImmExternalPointer[c_char]
     """CA bundle version. It is the file name of the CA bundle in use, or "none" if no CA bundle is in use."""
-    var capath: ImmutExternalPointer[c_char]
+    var capath: ImmExternalPointer[c_char]
     """CA path version. It is the directory name of the CA path in use, or "none" if no CA path is in use."""
     var zstd_ver_num: c_uint
     """Numeric version of zstd multiplied by 100000. It makes it easy to compare versions, without needing to parse a string and to deal with alpha/beta suffixes."""
-    var zstd_version: ImmutExternalPointer[c_char]
+    var zstd_version: ImmExternalPointer[c_char]
     """Version of zstd in use, or "none" if no zstd support was compiled in."""
-    var hyper_version: ImmutExternalPointer[c_char]
+    var hyper_version: ImmExternalPointer[c_char]
     """Version of hyper in use, or "none" if no hyper support was compiled in."""
-    var gsasl_version: ImmutExternalPointer[c_char]
+    var gsasl_version: ImmExternalPointer[c_char]
     """Version of gsasl in use, or "none" if no gsasl support was compiled in."""
-    var feature_names: ImmutExternalPointer[ImmutExternalPointer[c_char]]
+    var feature_names: ImmExternalPointer[ImmExternalPointer[c_char]]
     """Null-terminated array of null-terminated strings, each describing a feature that libcurl supports. The features are described in the same order as the bits in the features field, so if the first bit in features is set, the first string in this array describes that feature."""
-    var rtmp_version: ImmutExternalPointer[c_char]
+    var rtmp_version: ImmExternalPointer[c_char]
     """Version of RTMP in use, or "none" if no RTMP support was compiled in."""
 
 

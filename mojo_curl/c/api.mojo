@@ -3,13 +3,14 @@
 from std.ffi import _get_global, _Global
 from std.sys import stderr
 from std import os
+from std.memory.alloc import unsafe_alloc
 
 from mojo_curl.c.bindings import curl
 from mojo_curl.c.types import CURL_GLOBAL_DEFAULT, MutExternalPointer
 
 
 def _init_global() -> Optional[MutExternalPointer[NoneType]]:
-    var ptr = alloc[curl](1)
+    var ptr = unsafe_alloc[curl](1)
     try:
         ptr[] = curl()
     except e:
@@ -18,16 +19,17 @@ def _init_global() -> Optional[MutExternalPointer[NoneType]]:
         os.abort()
 
     _ = ptr[].global_init(CURL_GLOBAL_DEFAULT)
-    return ptr.bitcast[NoneType]()
+    return ptr.unsafe_bitcast[NoneType]()
 
 
 def _destroy_global(lib: Optional[MutExternalPointer[NoneType]]):
     if not lib:
         return
 
-    var p = lib.value().bitcast[curl]()
+    var p = lib.value().unsafe_bitcast[curl]()
     p[].global_cleanup()
-    lib.value().free()
+    p.unsafe_deinit_pointee()
+    p.unsafe_free()
 
 
 @always_inline
@@ -39,4 +41,4 @@ def curl_ffi() -> MutExternalPointer[curl]:
     Returns:
         A pointer to the global curl handle.
     """
-    return _get_global["curl", _init_global, _destroy_global]().value().bitcast[curl]()
+    return _get_global["curl", _init_global, _destroy_global]().value().unsafe_bitcast[curl]()

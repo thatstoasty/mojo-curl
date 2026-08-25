@@ -14,7 +14,7 @@ def _count_callback(
     userdata: MutExternalPointer[NoneType],
 ) abi("C") -> c_size_t:
     var total = size * nmemb
-    var counter = userdata.bitcast[Int]()
+    var counter = userdata.unsafe_bitcast[Int]()
     counter[] += Int(total)
     return total
 
@@ -26,8 +26,8 @@ def _buffer_callback(
     userdata: MutExternalPointer[NoneType],
 ) abi("C") -> c_size_t:
     var realsize = size * nmemb
-    var buf = userdata.bitcast[List[UInt8]]()
-    buf[].extend(Span(ptr=contents.bitcast[UInt8](), length=Int(realsize)))
+    var buf = userdata.unsafe_bitcast[List[UInt8]]()
+    buf[].extend(Span(unsafe_ptr=contents.unsafe_bitcast[UInt8](), length=Int(realsize)))
     return realsize
 
 
@@ -38,7 +38,7 @@ def test_write_function_receives_bytes() raises -> None:
     var byte_count: Int = 0
     _ = easy.url("https://httpbin.org/get")
     _ = easy.write_function(_count_callback)
-    _ = easy.write_data(UnsafePointer(to=byte_count).bitcast[NoneType]())
+    _ = easy.write_data(Pointer(to=byte_count).unsafe_bitcast[NoneType]())
     var result = easy.perform()
     assert_equal(result, Result.OK)
     assert_true(byte_count > 0)
@@ -49,7 +49,7 @@ def test_write_function_and_write_data_fill_buffer() raises -> None:
     var chunk = List[UInt8]()
     _ = easy.url("https://httpbin.org/get")
     _ = easy.write_function(_buffer_callback)
-    _ = easy.write_data(UnsafePointer(to=chunk).bitcast[NoneType]())
+    _ = easy.write_data(Pointer(to=chunk).unsafe_bitcast[NoneType]())
     var result = easy.perform()
     assert_equal(result, Result.OK)
     assert_true(len(chunk) > 0)

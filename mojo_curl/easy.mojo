@@ -29,7 +29,7 @@ struct Easy(Movable):
         """
         self.inner = InnerEasy()
 
-    def __del__(deinit self):
+    def __deinit__(deinit self):
         """Destructor to ensure resources are cleaned up."""
         self^.close()
 
@@ -61,7 +61,7 @@ struct Easy(Movable):
         """
         return self.inner.set_option(option.value, parameter)
 
-    def set_option[origin: ImmutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
+    def set_option[origin: ImmOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         """Set a pointer option for a curl easy handle using safe wrapper.
 
         Parameters:
@@ -414,7 +414,7 @@ struct Easy(Movable):
         """
         if not list.unsafe_ptr():
             raise Error(t"Failed to set `connect_to` option: `list` cannot be empty.")
-        return self.set_option(Option.CONNECT_TO, list.unsafe_ptr().value().bitcast[NoneType]())
+        return self.set_option(Option.CONNECT_TO, list.unsafe_ptr().value().unsafe_bitcast[NoneType]())
 
     def path_as_is(self, *, as_is: Bool = True) -> Result:
         """Indicates whether sequences of `/../` and `/./` will be squashed or not.
@@ -1235,7 +1235,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.POST, c_long(Int(enable)))
 
-    def post_fields[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
+    def post_fields[origin: ImmOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         Pass a char pointer as parameter, pointing to the data buffer to use in an HTTP POST
@@ -1261,7 +1261,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.POST_FIELDS, data)
 
-    def post_fields_copy[origin: ImmutOrigin, //](self, data: Span[UInt8, origin]) -> Result:
+    def post_fields_copy[origin: ImmOrigin, //](self, data: Span[UInt8, origin]) -> Result:
         """Configures the data that will be uploaded as part of a POST.
 
         Note that the data is copied into this handle and if that's not desired
@@ -1380,7 +1380,7 @@ struct Easy(Movable):
         var ptr = headers.unsafe_ptr()
         if not ptr:
             return Result.OK
-        return self.set_option(Option.HTTP_HEADER, ptr.value().bitcast[NoneType]())
+        return self.set_option(Option.HTTP_HEADER, ptr.value().unsafe_bitcast[NoneType]())
 
     def cookie(self, var cookie: String) -> Result:
         """Set the contents of the HTTP Cookie header.
@@ -1991,7 +1991,7 @@ struct Easy(Movable):
         var ptr = list.unsafe_ptr()
         if not ptr:
             raise Error(t"Failed to set `resolve` option: `list` should not be empty.")
-        return self.set_option(Option.RESOLVE, list.unsafe_ptr().value().bitcast[NoneType]())
+        return self.set_option(Option.RESOLVE, list.unsafe_ptr().value().unsafe_bitcast[NoneType]())
 
     def connect_only(self, *, enable: Bool = True) -> Result:
         """Configure whether to stop when connected to target server.
@@ -2042,7 +2042,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.SSL_CERT, cert)
 
-    def ssl_cert_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+    def ssl_cert_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Set the SSL client certificate using an in-memory blob.
 
         The specified byte buffer should contain the binary content of your
@@ -2099,7 +2099,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.SSL_KEY, key)
 
-    def ssl_key_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+    def ssl_key_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Specify an SSL private key using an in-memory blob.
 
         The specified byte buffer should contain the binary content of your
@@ -2158,7 +2158,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.KEY_PASSWD, password.as_c_string_slice())
 
-    def ssl_cainfo_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+    def ssl_cainfo_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Set the SSL Certificate Authorities using an in-memory blob.
 
         The specified byte buffer should contain the binary content of one
@@ -2176,7 +2176,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.CAINFO_BLOB, blob)
 
-    def proxy_ssl_cainfo_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+    def proxy_ssl_cainfo_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Set the SSL Certificate Authorities for HTTPS proxies using an in-memory
         blob.
 
@@ -2438,7 +2438,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.PROXY_ISSUER_CERT, path)
 
-    def issuer_cert_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+    def issuer_cert_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """The specified byte buffer should contain the binary content of a CA
         certificate in the PEM format. The certificate will be copied into the
         handle.
@@ -2454,7 +2454,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.ISSUER_CERT_BLOB, blob)
 
-    def proxy_issuer_cert_blob[origin: ImmutOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
+    def proxy_issuer_cert_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """The specified byte buffer should contain the binary content of a CA
         certificate in the PEM format. The certificate will be copied into the
         handle.
@@ -3249,7 +3249,7 @@ struct Easy(Movable):
         """
         return self.set_option(Option.READ_FUNCTION, callback)
 
-    def read_data[origin: ImmutOrigin, //](self, data: ImmutOpaquePointer[origin]) -> Result:
+    def read_data[origin: ImmOrigin, //](self, data: ImmOpaquePointer[origin]) -> Result:
         """Set custom pointer to pass to read callback.
 
         By default this option is not set and corresponds to
