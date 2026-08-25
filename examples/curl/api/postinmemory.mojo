@@ -14,9 +14,9 @@ def write_callback(
     userdata: MutExternalPointer[NoneType],
 ) abi("C") -> c_size_t:
     var realsize = size * nmemb
-    var buf = userdata.bitcast[List[UInt8]]()
+    var buf = userdata.unsafe_bitcast[List[UInt8]]()
     for i in range(Int(realsize)):
-        buf[].append(UInt8(Int(contents[i])))
+        buf[].append(UInt8(contents[unsafe_offset=i]))
     return realsize
 
 
@@ -27,7 +27,7 @@ def main() raises:
 
     _ = easy.url("https://www.example.org/")
     _ = easy.write_function(write_callback)
-    _ = easy.write_data(UnsafePointer(to=chunk).bitcast[NoneType]())
+    _ = easy.write_data(Pointer(to=chunk).unsafe_bitcast[NoneType]())
     # Set POST data; postdata must remain alive through perform()
     _ = easy.post_fields(postdata.as_bytes())
 

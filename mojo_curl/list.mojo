@@ -31,7 +31,7 @@ def _build_header_string(key: String, value: String) -> String:
 
 
 @explicit_destroy("CurlList must be explicitly destroyed using the `free` method.")
-struct CurlList(Boolable, Defaultable, Movable):
+struct CurlList(Boolable, Defaultable, Deinitable where False, Movable):
     """Represents a linked list of HTTP headers for use with libcurl."""
 
     var data: Optional[MutExternalPointer[curl_slist]]
@@ -133,7 +133,7 @@ struct CurlList(Boolable, Defaultable, Movable):
         if self.data:
             curl_ffi()[].slist_free_all(self.data.value())
 
-    def unsafe_ptr[origin: Origin, //](ref[origin] self) -> Optional[UnsafePointer[curl_slist, origin]]:
+    def unsafe_ptr[origin: Origin, //](ref[origin] self) -> Optional[Pointer[curl_slist, origin]]:
         """Retrieves a pointer to the underlying memory.
 
         Parameters:

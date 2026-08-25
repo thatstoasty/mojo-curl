@@ -13,7 +13,7 @@ def main() raises:
     })
     _ = easy.http_headers(headers)
 
-    result = easy.perform()
+    var result = easy.perform()
     if result != Result.OK:
         headers^.free()
         raise Error(easy.describe_error(result))

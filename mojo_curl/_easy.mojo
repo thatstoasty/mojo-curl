@@ -3,6 +3,7 @@ from std.ffi import c_long, c_char
 from std.collections.string.string import CStringSlice
 
 from mojo_curl.c import curl_ffi, curl, CURL
+from mojo_curl.list import CurlList
 from mojo_curl.info import Info
 from mojo_curl.option import Option
 from mojo_curl.result import Result
@@ -11,7 +12,7 @@ from mojo_curl.header import HeaderOrigin
 
 
 @explicit_destroy("The easy handle must be explicitly destroyed by calling `close()` to free resources.")
-struct InnerEasy(Movable):
+struct InnerEasy(Deinitable where False, Movable):
     """Represents a libcurl easy handle, which is used to perform individual transfers."""
 
     var easy: CURL
@@ -32,7 +33,7 @@ struct InnerEasy(Movable):
     def set_option(self, option: Option, parameter: c_long) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
-    def set_option[origin: ImmutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
+    def set_option[origin: ImmOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     def set_option[origin: MutOrigin, //](self, option: Option, parameter: Optional[OpaquePointer[origin]]) -> Result:
@@ -90,8 +91,8 @@ struct InnerEasy(Movable):
         curl_ffi()[].easy_reset(self.easy)
 
     def describe_error(self, code: Result) -> String:
-        # TODO: StringSlice crashes, probably getting skill issued by
-        # pointer lifetime. Theoretically StringSlice[ImmutAnyOrigin] should work.
+        # TODO: StringSpan crashes, probably getting skill issued by
+        # pointer lifetime. Theoretically StringSpan[ImmAnyOrigin] should work.
         return String(unsafe_from_utf8_ptr=curl_ffi()[].easy_strerror(code.value))
 
     def headers(self, origin: HeaderOrigin) -> Dict[String, String]:

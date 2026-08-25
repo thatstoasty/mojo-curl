@@ -15,7 +15,7 @@ def main() raises:
     var easy = Easy()
 
     # Set the url
-    result = easy.url("https://google.com")
+    var result = easy.url("https://google.com")
     print("URL set Result:", result)
 
     # Set the callback function to handle received data
