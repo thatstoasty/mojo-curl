@@ -12,7 +12,7 @@ from mojo_curl.c.types import CURL_GLOBAL_DEFAULT, MutExternalPointer
 def _init_global() -> Optional[MutExternalPointer[NoneType]]:
     var ptr = unsafe_alloc[curl](1)
     try:
-        ptr[] = curl()
+        ptr.unsafe_write(curl())
     except e:
         # TODO: I'd like to remove aborting, but it'll make curl_ffi raising and viral.
         print("Failed to initialize global curl handle:", e, file=stderr)
