@@ -24,14 +24,15 @@ format = [{ task = "mojo_format" }]
 
 [package]
 name = "mojo-curl"
-version = "0.4.2"
+version = "0.4.3"
+publish = true
 
 [package.build]
-backend = { name = "pixi-build-mojo", version = "0.2.*" }
+backend = { name = "pixi-build-mojo", version = "0.*" }
 
 [dependencies]
 mojo = ">=1.0.0,<1.1.0"
-curl_wrapper = { git = "https://github.com/thatstoasty/mojo-curl.git", subdirectory = "shim", branch = "main" }
+curl_wrapper = { path = "shim" }
 
 [package.build-dependencies]
 mojo-compiler = ">=1.0.0,<1.1.0"

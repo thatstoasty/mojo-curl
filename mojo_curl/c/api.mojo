@@ -28,7 +28,12 @@ def _destroy_global(lib: Optional[MutExternalPointer[NoneType]]):
 
     var p = lib.value().unsafe_bitcast[curl]()
     p[].global_cleanup()
-    p.unsafe_deinit_pointee()
+    # Deliberately leak the OwnedDLHandles held by `curl` by freeing the
+    # allocation without running the destructor. `dlclose()`ing libcurl at
+    # process exit unloads it and its TLS backend on Linux, whose ELF
+    # destructors then run after `curl_global_cleanup()` has already torn that
+    # state down, crashing inside ld.so. The OS reclaims the mappings at exit
+    # anyway; this is the standard treatment for dlopen'd libs with global state.
     p.unsafe_free()
 
 
