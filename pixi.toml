@@ -24,7 +24,7 @@ format = [{ task = "mojo_format" }]
 
 [package]
 name = "mojo-curl"
-version = "0.4.3"
+version = "0.4.4"
 publish = true
 
 [package.build]

@@ -22,7 +22,7 @@ preview = ["pixi-build"]
 Next, you can add `curl_wrapper` by running:
 
 ```bash
-pixi add curl_wrapper --git "https://github.com/thatstoasty/mojo-curl.git" --subdir shim --branch main
+pixi add curl_wrapper --git "https://github.com/thatstoasty/mojo-curl.git" --subdir shim --tag "v0.4.4"
 ```
 
 Next, run the following commands in your terminal:
@@ -42,7 +42,7 @@ There's two ways to build `mojo-curl` from source: directly from the Git reposit
 Run the following commands in your terminal:
 
 ```bash
-pixi add mojo-curl --git "https://github.com/thatstoasty/mojo-curl.git" --tag "v0.4.3" && pixi install
+pixi add mojo-curl --git "https://github.com/thatstoasty/mojo-curl.git" --tag "v0.4.4" && pixi install
 ```
 
 #### Building from source: Local
