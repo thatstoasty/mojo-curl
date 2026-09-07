@@ -20,7 +20,8 @@ def _build_header_string(key: String, value: String) -> String:
     var capacity_to_reserve = (key_byte_length + 2) if value_byte_length == 0 else (
         value_byte_length + key_byte_length + 2
     )
-    var header = String(capacity=capacity_to_reserve)  # +2 for ": " or ";"
+    var header = String()
+    header.reserve_bytes(capacity_to_reserve)  # +2 for ": " or ";"
     header.write(key)
     if value_byte_length > 0:
         header.write(": ")
