@@ -24,25 +24,25 @@ format = [{ task = "mojo_format" }]
 
 [package]
 name = "mojo-curl"
-version = "0.4.4"
+version = "0.4.5"
 publish = true
 
 [package.build]
 backend = { name = "pixi-build-mojo", version = "0.*" }
 
 [dependencies]
-mojo = ">=1.0.0,<1.1.0"
+mojo = ">=1.1.0,<1.2.0"
 curl_wrapper = { path = "shim" }
 
 [package.build-dependencies]
-mojo-compiler = ">=1.0.0,<1.1.0"
+mojo-compiler = ">=1.1.0,<1.2.0"
 
 [package.host-dependencies]
-mojo-compiler = ">=1.0.0,<1.1.0"
+mojo-compiler = ">=1.1.0,<1.2.0"
 libcurl = ">=8.17.0,<9.0.0"
 curl_wrapper = { path = "shim" }
 
 [package.run-dependencies]
-mojo-compiler = ">=1.0.0,<1.1.0"
+mojo-compiler = ">=1.1.0,<1.2.0"
 libcurl = ">=8.17.0,<9.0.0"
 curl_wrapper = { path = "shim" }

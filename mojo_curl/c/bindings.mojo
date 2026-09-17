@@ -1,7 +1,7 @@
 """Safe wrapper layer around raw libcurl C bindings."""
 
 from std.ffi import c_char, c_uchar, c_int, c_long, c_size_t, c_uint
-from std.collections.string.string import CStringSlice
+from std.collections.string.string import CStringSpan
 
 from mojo_curl.c.raw_bindings import _curl
 from mojo_curl.c.types import (
@@ -78,7 +78,7 @@ struct curl(Movable):
             raise Error("Failed to initialize curl easy handle.")
         return easy.value()
 
-    def easy_setopt(self, easy: CURL, option: Option, parameter: CStringSlice) -> c_int:
+    def easy_setopt(self, easy: CURL, option: Option, parameter: CStringSpan) -> c_int:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -89,7 +89,7 @@ struct curl(Movable):
         Returns:
             CURLcode result code.
         """
-        return self.lib.curl_easy_setopt_string(easy, option.value, parameter.unsafe_ptr())
+        return self.lib.curl_easy_setopt_string(easy, option.value, parameter.ptr())
 
     def easy_setopt[origin: ImmOrigin, //](self, easy: CURL, option: Option, parameter: Span[UInt8, origin]) -> c_int:
         """Set a pointer option for a curl easy handle using safe wrapper.
@@ -343,9 +343,7 @@ struct curl(Movable):
         Returns:
             CURLHcode result code.
         """
-        return self.lib.curl_easy_header(
-            easy, name.as_c_string_slice().unsafe_ptr(), index, origin, request, Pointer(to=hout)
-        )
+        return self.lib.curl_easy_header(easy, name.as_c_string_span().ptr(), index, origin, request, Pointer(to=hout))
 
     def easy_nextheader(
         self,
@@ -386,7 +384,7 @@ struct curl(Movable):
         Raises:
             Error: If encoding fails and a `NULL` pointer is returned.
         """
-        var result = self.lib.curl_easy_escape(easy, string.as_c_string_slice().unsafe_ptr(), length)
+        var result = self.lib.curl_easy_escape(easy, string.as_c_string_span().ptr(), length)
         if not result:
             raise Error("Failed to URL-encode string")
         return result.value()

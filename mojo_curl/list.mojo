@@ -1,6 +1,6 @@
 """CURL linked list structure for HTTP headers."""
 
-from std.ffi.cstring import CStringSlice
+from std.ffi.cstring import CStringSpan
 from mojo_curl.c.types import curl_slist, MutExternalPointer
 from mojo_curl.c.api import curl_ffi
 
@@ -20,7 +20,7 @@ def _build_header_string(key: String, value: String) -> String:
     var capacity_to_reserve = (key_byte_length + 2) if value_byte_length == 0 else (
         value_byte_length + key_byte_length + 2
     )
-    var header = String(capacity=capacity_to_reserve)  # +2 for ": " or ";"
+    var header = String(capacity_bytes=capacity_to_reserve)  # +2 for ": " or ";"
     header.write(key)
     if value_byte_length > 0:
         header.write(": ")
@@ -54,7 +54,7 @@ struct CurlList(Boolable, Defaultable, Deinitable where False, Movable):
         for pair in headers.items():
             var header = _build_header_string(pair.key, pair.value)
             try:
-                self.append(header.as_c_string_slice())
+                self.append(header.as_c_string_span())
             except e:
                 self^.free()
                 raise e^
@@ -79,7 +79,7 @@ struct CurlList(Boolable, Defaultable, Deinitable where False, Movable):
         for pair in zip(headers, values):
             var header = _build_header_string(pair[0], pair[1])
             try:
-                self.append(header.as_c_string_slice())
+                self.append(header.as_c_string_span())
             except e:
                 self^.free()
                 raise e^
@@ -109,12 +109,12 @@ struct CurlList(Boolable, Defaultable, Deinitable where False, Movable):
         Raises:
             Error: If appending to the list fails.
         """
-        var ptr = curl_ffi()[].slist_append(self.data, value.as_c_string_slice().unsafe_ptr())
+        var ptr = curl_ffi()[].slist_append(self.data, value.as_c_string_span().ptr())
         if not ptr:
             raise Error("Failed to append to curl_slist")
         self.data = ptr
 
-    def append(mut self, value: CStringSlice) raises:
+    def append(mut self, value: CStringSpan) raises:
         """Appends a value to the string list.
 
         Args:
@@ -123,7 +123,7 @@ struct CurlList(Boolable, Defaultable, Deinitable where False, Movable):
         Raises:
             Error: If appending to the list fails.
         """
-        var ptr = curl_ffi()[].slist_append(self.data, value.unsafe_ptr())
+        var ptr = curl_ffi()[].slist_append(self.data, value.ptr())
         if not ptr:
             raise Error("Failed to append to curl_slist")
         self.data = ptr
@@ -165,7 +165,7 @@ struct _CurlListIterator[origin: Origin](Copyable, Iterable, Iterator):
     """
 
     # TODO: Not sure if it's safe to use external origin string slices?
-    comptime Element = CStringSlice[MutUntrackedOrigin]
+    comptime Element = CStringSpan[MutUntrackedOrigin]
     """The element type yielded by this iterator."""
     comptime IteratorType[iterable_mut: Bool, //, iterable_origin: Origin[mut=iterable_mut]]: Iterator = Self
     """The iterator type for the associated iterable."""
@@ -204,12 +204,12 @@ struct _CurlListIterator[origin: Origin](Copyable, Iterable, Iterator):
         """Get the next element in the iteration without consuming it.
 
         Returns:
-            A CStringSlice pointing to the current header string.
+            A CStringSpan pointing to the current header string.
         """
         var old = self.curr
         self.curr = self.curr.value()[].next if self.curr else None
 
-        return CStringSlice(unsafe_from_ptr=old.value()[].data)
+        return CStringSpan(unsafe_from_ptr=old.value()[].data)
 
     def __next__(mut self) -> Self.Element:
         """Returns the next row in the result set.

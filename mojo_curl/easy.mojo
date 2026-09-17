@@ -2,7 +2,7 @@
 
 from std.ffi import c_long
 from std.pathlib import Path
-from std.collections.string.string import CStringSlice
+from std.collections.string.string import CStringSpan
 
 from mojo_curl._easy import InnerEasy
 from mojo_curl.list import CurlList
@@ -37,7 +37,7 @@ struct Easy(Movable):
         """Explicitly clean up the easy handle."""
         self.inner^.close()
 
-    def set_option(self, option: Option, parameter: CStringSlice) -> Result:
+    def set_option(self, option: Option, parameter: CStringSpan) -> Result:
         """Set a string option for a curl easy handle using safe wrapper.
 
         Args:
@@ -129,7 +129,7 @@ struct Easy(Movable):
             Result: The result of setting the option.
         """
         var path = String(parameter)
-        return self.set_option(option, path.as_c_string_slice())
+        return self.set_option(option, path.as_c_string_span())
 
     def get_info(self, info: Info) raises -> String:
         """Get string information from the curl handle.
@@ -372,7 +372,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.URL, url.as_c_string_slice())
+        return self.set_option(Option.URL, url.as_c_string_span())
 
     def port(self, port: Int) -> Result:
         """Configures the port number to connect to, instead of the one specified
@@ -441,7 +441,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY, url.as_c_string_slice())
+        return self.set_option(Option.PROXY, url.as_c_string_span())
 
     def proxy_port(self, port: Int) -> Result:
         """Provide port number the proxy is listening on.
@@ -473,7 +473,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.NO_PROXY, skip.as_c_string_slice())
+        return self.set_option(Option.NO_PROXY, skip.as_c_string_span())
 
     def http_proxy_tunnel(self, *, tunnel: Bool = True) -> Result:
         """Inform curl whether it should tunnel all operations through the proxy.
@@ -506,7 +506,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.INTERFACE, interface.as_c_string_slice())
+        return self.set_option(Option.INTERFACE, interface.as_c_string_span())
 
     def set_local_port(self, port: Int) -> Result:
         """Indicate which port should be bound to locally for this connection.
@@ -552,7 +552,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.DNS_SERVERS, servers.as_c_string_slice())
+        return self.set_option(Option.DNS_SERVERS, servers.as_c_string_span())
 
     def dns_cache_timeout(self, seconds: Int) -> Result:
         """Sets the timeout of how long name resolves will be kept in memory.
@@ -597,7 +597,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.DOH_URL, url.as_c_string_slice())
+        return self.set_option(Option.DOH_URL, url.as_c_string_span())
 
     def doh_ssl_verify_peer(self, *, verify: Bool = True) -> Result:
         """This option tells curl to verify the authenticity of the DoH
@@ -691,7 +691,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_CAINFO, cainfo.as_c_string_slice())
+        return self.set_option(Option.PROXY_CAINFO, cainfo.as_c_string_span())
 
     def proxy_capath(self, var path: String) -> Result:
         """Specify a directory holding CA certificates for proxy.
@@ -710,7 +710,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_CAPATH, path.as_c_string_slice())
+        return self.set_option(Option.PROXY_CAPATH, path.as_c_string_span())
 
     def proxy_sslcert(self, var sslcert: String) -> Result:
         """Set client certificate for proxy.
@@ -724,7 +724,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_SSL_CERT, sslcert.as_c_string_slice())
+        return self.set_option(Option.PROXY_SSL_CERT, sslcert.as_c_string_span())
 
     def proxy_sslcert_type(self, var kind: String) -> Result:
         """Set the type of client certificate for proxy.
@@ -738,7 +738,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_SSL_CERT_TYPE, kind.as_c_string_slice())
+        return self.set_option(Option.PROXY_SSL_CERT_TYPE, kind.as_c_string_span())
 
     def proxy_sslkey(self, var sslkey: String) -> Result:
         """Set private key for HTTPS proxy.
@@ -752,7 +752,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_SSL_KEY, sslkey.as_c_string_slice())
+        return self.set_option(Option.PROXY_SSL_KEY, sslkey.as_c_string_span())
 
     def proxy_sslkey_type(self, var kind: String) -> Result:
         """Set type of the private key file for HTTPS proxy.
@@ -775,7 +775,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_SSL_KEY_TYPE, kind.as_c_string_slice())
+        return self.set_option(Option.PROXY_SSL_KEY_TYPE, kind.as_c_string_span())
 
     def proxy_key_password(self, var password: String) -> Result:
         """Set passphrase to private key for HTTPS proxy.
@@ -793,7 +793,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_KEYPASSWD, password.as_c_string_slice())
+        return self.set_option(Option.PROXY_KEYPASSWD, password.as_c_string_span())
 
     def proxy_type(self, kind: Int) -> Result:
         """Indicates the type of proxy being used.
@@ -963,7 +963,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.USERNAME, user.as_c_string_slice())
+        return self.set_option(Option.USERNAME, user.as_c_string_span())
 
     def password(self, var password: String) -> Result:
         """Configures the password to pass as authentication for this connection.
@@ -976,7 +976,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PASSWORD, password.as_c_string_slice())
+        return self.set_option(Option.PASSWORD, password.as_c_string_span())
 
     def http_auth(self, auth: Int) -> Result:
         """Set HTTP server authentication methods to try.
@@ -1029,7 +1029,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.AWS_SIGV4, param.as_c_string_slice())
+        return self.set_option(Option.AWS_SIGV4, param.as_c_string_span())
 
     def proxy_username(self, var user: String) -> Result:
         """Configures the proxy username to pass as authentication for this
@@ -1044,7 +1044,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_USERNAME, user.as_c_string_slice())
+        return self.set_option(Option.PROXY_USERNAME, user.as_c_string_span())
 
     def proxy_password(self, var password: String) -> Result:
         """Configures the proxy password to pass as authentication for this
@@ -1059,7 +1059,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_PASSWORD, password.as_c_string_slice())
+        return self.set_option(Option.PROXY_PASSWORD, password.as_c_string_span())
 
     def proxy_auth(self, auth: Int) -> Result:
         """Set HTTP proxy authentication methods to try.
@@ -1128,7 +1128,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.ACCEPT_ENCODING, encoding.as_c_string_slice())
+        return self.set_option(Option.ACCEPT_ENCODING, encoding.as_c_string_span())
 
     def transfer_encoding(self, *, enable: Bool = True) -> Result:
         """Request the HTTP Transfer Encoding.
@@ -1341,7 +1341,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.REFERER, referer.as_c_string_slice())
+        return self.set_option(Option.REFERER, referer.as_c_string_span())
 
     def useragent(self, var useragent: String) -> Result:
         """Sets the HTTP user-agent header.
@@ -1355,7 +1355,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.USERAGENT, useragent.as_c_string_slice())
+        return self.set_option(Option.USERAGENT, useragent.as_c_string_span())
 
     def http_headers(self, headers: CurlList) -> Result:
         """Add some headers to this HTTP request.
@@ -1400,7 +1400,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.COOKIE, cookie.as_c_string_slice())
+        return self.set_option(Option.COOKIE, cookie.as_c_string_span())
 
     def cookie_file(self, path: Optional[Path] = None) -> Result:
         """Set the file name to read cookies from.
@@ -1428,7 +1428,7 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         var file = String(path.value()) if path else ""
-        return self.set_option(Option.COOKIE_FILE, file.as_c_string_slice())
+        return self.set_option(Option.COOKIE_FILE, file.as_c_string_span())
 
     def cookie_jar(self, path: Optional[Path] = None) -> Result:
         """Set the file name to store cookies to.
@@ -1453,7 +1453,7 @@ struct Easy(Movable):
             A `Result` indicating success or failure of the operation.
         """
         var file = String(path.value()) if path else "-"  # default to stdout
-        return self.set_option(Option.COOKIEJAR, file.as_c_string_slice())
+        return self.set_option(Option.COOKIEJAR, file.as_c_string_span())
 
     def cookie_session(self, *, session: Bool = True) -> Result:
         """Start a new cookie session.
@@ -1509,7 +1509,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.COOKIE_LIST, cookie.as_c_string_slice())
+        return self.set_option(Option.COOKIE_LIST, cookie.as_c_string_span())
 
     def cookies(self) raises -> CurlList:
         """Get all known cookies.
@@ -1605,7 +1605,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.RANGE, range.as_c_string_slice())
+        return self.set_option(Option.RANGE, range.as_c_string_span())
 
     def resume_from(self, from_byte: Int) -> Result:
         """Set a point to resume transfer from.
@@ -1639,7 +1639,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.CUSTOM_REQUEST, request.as_c_string_slice())
+        return self.set_option(Option.CUSTOM_REQUEST, request.as_c_string_span())
 
     def fetch_filetime(self, *, fetch: Bool = True) -> Result:
         """Get the modification time of the remote resource.
@@ -2077,7 +2077,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.SSL_CERT_TYPE, kind.as_c_string_slice())
+        return self.set_option(Option.SSL_CERT_TYPE, kind.as_c_string_span())
 
     def ssl_key(self, key: Path) -> Result:
         """Specify private keyfile for TLS and SSL client cert.
@@ -2138,7 +2138,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.SSL_KEY_TYPE, kind.as_c_string_slice())
+        return self.set_option(Option.SSL_KEY_TYPE, kind.as_c_string_span())
 
     def key_password(self, var password: String) -> Result:
         """Set passphrase to private key.
@@ -2156,7 +2156,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.KEY_PASSWD, password.as_c_string_slice())
+        return self.set_option(Option.KEY_PASSWD, password.as_c_string_span())
 
     def ssl_cainfo_blob[origin: ImmOrigin, //](self, blob: Span[UInt8, origin]) -> Result:
         """Set the SSL Certificate Authorities using an in-memory blob.
@@ -2210,7 +2210,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.SSL_ENGINE, engine.as_c_string_slice())
+        return self.set_option(Option.SSL_ENGINE, engine.as_c_string_span())
 
     def ssl_engine_default(self, *, enable: Bool = True) -> Result:
         """Make this handle's SSL engine the default.
@@ -2579,7 +2579,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PINNED_PUBLIC_KEY, pubkey.as_c_string_slice())
+        return self.set_option(Option.PINNED_PUBLIC_KEY, pubkey.as_c_string_span())
 
     def random_file(self, path: Path) -> Result:
         """The file will be used to read from to seed the random engine for SSL and
@@ -2640,7 +2640,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.SSL_CIPHER_LIST, ciphers.as_c_string_slice())
+        return self.set_option(Option.SSL_CIPHER_LIST, ciphers.as_c_string_span())
 
     def proxy_ssl_cipher_list(self, var ciphers: String) -> Result:
         """Specify ciphers to use for TLS for an HTTPS proxy.
@@ -2671,7 +2671,7 @@ struct Easy(Movable):
         Returns:
             A `Result` indicating success or failure of the operation.
         """
-        return self.set_option(Option.PROXY_SSL_CIPHER_LIST, ciphers.as_c_string_slice())
+        return self.set_option(Option.PROXY_SSL_CIPHER_LIST, ciphers.as_c_string_span())
 
     def ssl_sessionid_cache(self, *, enable: Bool = True) -> Result:
         """Enable or disable use of the SSL session-ID cache.

@@ -1,6 +1,6 @@
 # mojo-curl
 
-![Mojo Version](https://img.shields.io/badge/Mojo%F0%9F%94%A5-1.0.0-orange)
+![Mojo Version](https://img.shields.io/badge/Mojo%F0%9F%94%A5-1.1.0-orange)
 ![Build Status](https://github.com/thatstoasty/mojo-curl/actions/workflows/build.yml/badge.svg)
 ![Test Status](https://github.com/thatstoasty/mojo-curl/actions/workflows/test.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -22,7 +22,7 @@ preview = ["pixi-build"]
 Next, you can add `curl_wrapper` by running:
 
 ```bash
-pixi add curl_wrapper --git "https://github.com/thatstoasty/mojo-curl.git" --subdir shim --tag "v0.4.4"
+pixi add curl_wrapper --git "https://github.com/thatstoasty/mojo-curl.git" --subdir shim --tag "v0.4.5"
 ```
 
 Next, run the following commands in your terminal:
@@ -42,7 +42,7 @@ There's two ways to build `mojo-curl` from source: directly from the Git reposit
 Run the following commands in your terminal:
 
 ```bash
-pixi add mojo-curl --git "https://github.com/thatstoasty/mojo-curl.git" --tag "v0.4.4" && pixi install
+pixi add mojo-curl --git "https://github.com/thatstoasty/mojo-curl.git" --tag "v0.4.5" && pixi install
 ```
 
 #### Building from source: Local
@@ -121,7 +121,7 @@ Define a callback function to handle received data instead of printing to stdout
 
 ```mojo
 from std.ffi import c_char, c_size_t
-from std.ffi.cstring import CStringSlice
+from std.ffi.cstring import CStringSpan
 
 from mojo_curl import Easy
 from mojo_curl.c.types import MutExternalOpaquePointer, MutExternalPointer, Result
@@ -132,7 +132,7 @@ def write_callback(
     nmemb: c_size_t,
     userdata: MutExternalOpaquePointer,
 ) -> c_size_t:
-    print(CStringSlice(unsafe_from_ptr=ptr))
+    print(CStringSpan(unsafe_from_ptr=ptr))
     return size * nmemb
 
 def main() raises:

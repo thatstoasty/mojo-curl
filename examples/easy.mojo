@@ -1,5 +1,5 @@
 from std.ffi import c_char, c_long, c_size_t
-from std.ffi.cstring import CStringSlice
+from std.ffi.cstring import CStringSpan
 
 from mojo_curl.c.types import MutExternalPointer
 from mojo_curl import Easy, Option, Result, CurlList
@@ -7,7 +7,7 @@ from mojo_curl import Easy, Option, Result, CurlList
 
 def write_callback(ptr: MutExternalPointer[c_char], size: c_size_t, nmemb: c_size_t, userdata: MutExternalPointer[NoneType]) abi("C") -> c_size_t:
     print("write callback called with size:", size * nmemb)
-    print(CStringSlice(unsafe_from_ptr=ptr))
+    print(CStringSpan(unsafe_from_ptr=ptr))
     return size * nmemb
 
 

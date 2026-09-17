@@ -12,7 +12,7 @@ def main() raises:
     # Route the HTTP request through a local Unix domain socket instead of TCP.
     # The socket must already be listening at this path.
     var path: String = "/tmp/http-unix-domain"
-    _ = easy.set_option(Option.UNIX_SOCKET_PATH, path.as_c_string_slice())
+    _ = easy.set_option(Option.UNIX_SOCKET_PATH, path.as_c_string_span())
 
     var result = easy.perform()
     if result != Result.OK:
