@@ -208,7 +208,7 @@ __marimo__/
 
 .vscode/
 kgen.*
-*.mojopkg
+*.mojoc
 
 # AI
 .claude/**

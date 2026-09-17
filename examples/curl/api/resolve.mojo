@@ -13,7 +13,7 @@ def main() raises:
     var hosts = CurlList()
     var entry: String = "example.com:443:127.0.0.1"
     try:
-        hosts.append(entry.as_c_string_slice())
+        hosts.append(entry.as_c_string_span())
         _ = easy.resolve(hosts)
     except e:
         hosts^.free()

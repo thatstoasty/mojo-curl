@@ -12,7 +12,7 @@ def main() raises:
 
     # Override the default .netrc file path
     var netrc_path: String = "/home/daniel/s3cr3ts.txt"
-    _ = easy.set_option(Option.NETRC_FILE, netrc_path.as_c_string_slice())
+    _ = easy.set_option(Option.NETRC_FILE, netrc_path.as_c_string_span())
 
     _ = easy.url("https://curl.se/")
 

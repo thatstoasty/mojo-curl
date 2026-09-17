@@ -1,6 +1,6 @@
 from std.pathlib import Path
 from std.ffi import c_long, c_char
-from std.collections.string.string import CStringSlice
+from std.collections.string.string import CStringSpan
 
 from mojo_curl.c import curl_ffi, curl, CURL
 from mojo_curl.list import CurlList
@@ -24,7 +24,7 @@ struct InnerEasy(Deinitable where False, Movable):
     def close(deinit self):
         curl_ffi()[].easy_cleanup(self.easy)
 
-    def set_option(self, option: Option, parameter: CStringSlice) -> Result:
+    def set_option(self, option: Option, parameter: CStringSpan) -> Result:
         return curl_ffi()[].easy_setopt(self.easy, option.value, parameter)
 
     def set_option[origin: Origin, //](self, option: Option, parameter: Span[UInt8, origin]) -> Result:
