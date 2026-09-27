@@ -100,7 +100,9 @@ struct InnerEasy(Deinitable where False, Movable):
         var prev: Optional[MutExternalPointer[curl_header]] = None
 
         while True:
-            var h = curl_ffi()[].easy_nextheader(self.easy, origin.value, 0, prev)
+            # Request -1 selects the last request in the transfer, so redirected
+            # transfers return the final response's headers rather than the first hop's.
+            var h = curl_ffi()[].easy_nextheader(self.easy, origin.value, -1, prev)
             if not h:
                 break
             prev = h

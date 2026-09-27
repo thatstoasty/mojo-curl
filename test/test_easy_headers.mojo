@@ -1,4 +1,4 @@
-from std.testing import TestSuite, assert_equal, assert_true
+from std.testing import TestSuite, assert_equal, assert_false, assert_true
 
 from mojo_curl import Easy, CurlList, Result
 from mojo_curl.header import HeaderOrigin
@@ -64,6 +64,18 @@ def test_follow_location_follows_redirect() raises -> None:
     var result = easy.perform()
     assert_equal(result, Result.OK)
     assert_equal(easy.response_code(), 200)
+
+
+def test_headers_after_redirect_are_from_final_response() raises -> None:
+    var easy = Easy()
+    # /redirect/1 returns a 302 (with a `location` header) to /get.
+    _ = easy.url("https://httpbin.org/redirect/1")
+    _ = easy.follow_location()
+    var result = easy.perform()
+    assert_equal(result, Result.OK)
+    var hdrs = easy.headers()
+    assert_false("location" in hdrs)
+    assert_true("json" in hdrs["content-type"])
 
 
 def test_redirect_count_after_follow() raises -> None:
