@@ -63,7 +63,7 @@ struct CurlList(Boolable, Defaultable, Deinitable where False, Movable):
         out self,
         var headers: List[String],
         var values: List[String],
-        __dict_literal__: (),
+        __dict_literal__: NoneType,
     ) raises:
         """Initialize a CurlList from separate lists of header names and values.
 
